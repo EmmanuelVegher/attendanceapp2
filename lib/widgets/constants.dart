@@ -1,0 +1,13 @@
+String emailAddress = "superuser@ccfng.org";
+String password = "Moderated@2023";
+String role = "Super-Admin";
+String department = "Software Development";
+String designation = "Software Developer";
+String firstName = "Super";
+String lastName = "User";
+String location = "Central Office";
+String mobile = "09020000000";
+String project = "CARITAS Nigeria";
+String staffCategory = "Team Lead";
+String state = "Abuja";
+var firebaseAuthId = null;
