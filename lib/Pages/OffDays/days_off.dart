@@ -73,24 +73,16 @@ class _DaysOffPageState extends State<DaysOffPage> {
 
   // // Start LOcation Service
   Future<void> _startLocationService() async {
-    LocationService().initialize();
 
-    //Here,return the value to User.long
-    LocationService().getLongitude().then((value) {
+    LocationService locationService = LocationService();
+
+    Position? position = await locationService.getCurrentPosition();
+    if (position != null) {
       setState(() {
-        longi = value!;
-        // UserModel.long = value;
-        print("longi======$longi");
+        UserModel.long = position.longitude;
+        UserModel.lat = position.latitude;
       });
-
-      LocationService().getLatitude().then((value) {
-        setState(() {
-          lati = value!;
-          // UserModel.lat = value;
-          print("lati======$lati");
-        });
-      });
-    });
+    }
   }
 
   void _getUserDetail() async {

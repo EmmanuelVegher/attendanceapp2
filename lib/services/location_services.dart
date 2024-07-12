@@ -1,51 +1,59 @@
-// Here we would create functions to get longitude and latitude
-
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
 
 class LocationService {
-  //import Location from Location Class , and not from Geocoding location
-  Location location = Location();
-  late LocationData _locDate;
-  late bool locationServiceEnabled;
-  var locationPermissionGranted;
-
-  Future<void> initialize() async {
+  Future<bool> _handleLocationPermission() async {
     bool serviceEnabled;
-    PermissionStatus permission;
+    LocationPermission permission;
 
-    //Check if location is enabled
-    serviceEnabled = await location.serviceEnabled();
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return;
+      // Location services are not enabled, request user to enable it
+      return false;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions in the background instead.
+        return false;
       }
     }
 
-    permission = await location.hasPermission();
-    if (permission == PermissionStatus.denied) {
-      permission = await location.requestPermission();
-      if (permission == PermissionStatus.granted) {
-        return;
-      }
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return false;
     }
+
+    return true; // Permissions granted
+  }
+
+  Future<Position?> getCurrentPosition() async {
+    if (await _handleLocationPermission()) {
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+      );
+    }
+    return null;
   }
 
   Future<double?> getLatitude() async {
-    _locDate = await location.getLocation();
-    return _locDate.latitude;
+    Position? position = await getCurrentPosition();
+    return position?.latitude;
   }
 
   Future<double?> getLongitude() async {
-    _locDate = await location.getLocation();
-    return _locDate.longitude;
+    Position? position = await getCurrentPosition();
+    return position?.longitude;
   }
 
-  Future<bool?> getLocationStatus() async {
-    return locationServiceEnabled = await location.serviceEnabled();
+  Future<bool> getLocationStatus() async {
+    return await Geolocator.isLocationServiceEnabled();
   }
 
-  Future getPermissionStatus() async {
-    return locationPermissionGranted = await location.hasPermission();
+  Future<LocationPermission> getPermissionStatus() async {
+    return await Geolocator.checkPermission();
   }
 }

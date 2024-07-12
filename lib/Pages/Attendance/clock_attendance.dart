@@ -24,12 +24,13 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
-import 'package:location/location.dart';
+//import 'package:location/location.dart';
 import 'package:ntp/ntp.dart';
 import 'package:refreshable_widget/refreshable_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
+import '../../model/locationmodel.dart';
 import '../../widgets/drawer.dart';
 
 
@@ -114,11 +115,11 @@ class _ClockAttendanceState extends State<ClockAttendance> {
     _loadNTPTime();
 
     _getAttendanceSummary();
-    getConnectivity();
+    //getConnectivity();
     setState(() {
       // _getDateFromUser();
       _startLocationService().then((value) {
-        _startGeofencing();
+        //_startGeofencing();
         _getAttendanceSummary();
         _getUserDetail();
         _getLocation();
@@ -144,20 +145,20 @@ class _ClockAttendanceState extends State<ClockAttendance> {
     });
   }
 
-  getConnectivity() {
-    subscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) async {
-      isDeviceConnected = await InternetConnectionChecker().hasConnection;
-      log("Internet status ====== $isDeviceConnected");
-      // if (!isDeviceConnected && isAlertSet == false) {
-      //   showDialogBox();
-      //   setState(() {
-      //     isAlertSet = true;
-      //   });
-      // }
-    });
-  }
+  // getConnectivity() {
+  //   subscription = Connectivity()
+  //       .onConnectivityChanged
+  //       .listen((ConnectivityResult result) async {
+  //     isDeviceConnected = await InternetConnectionChecker().hasConnection;
+  //     log("Internet status ====== $isDeviceConnected");
+  //     // if (!isDeviceConnected && isAlertSet == false) {
+  //     //   showDialogBox();
+  //     //   setState(() {
+  //     //     isAlertSet = true;
+  //     //   });
+  //     // }
+  //   });
+  // }
 
   void _getUserDetail() async {
     final userDetail = await IsarService().getBioInfoWithFirebaseAuth();
@@ -217,26 +218,94 @@ class _ClockAttendanceState extends State<ClockAttendance> {
 
 // Start LOcation Service
   Future<void> _startLocationService() async {
-    LocationService().initialize();
+    LocationService locationService = LocationService();
 
-    //Here,return the value to User.long
-    LocationService().getLongitude().then((value) {
+    Position? position = await locationService.getCurrentPosition();
+    if (position != null) {
       setState(() {
-        UserModel.long = value!;
+        UserModel.long = position.longitude;
+        lati = position.latitude;
+        longi = position.longitude;
+        UserModel.lat = position.latitude;
       });
 
-      LocationService().getLatitude().then((value) {
+
+
+      String? administrativeArea;
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        administrativeArea = placemarks[0].administrativeArea;
+      }
+      print("Administrative Areaaaa ==== ${administrativeArea}");
+
+      if (administrativeArea != null) {
+        // Query Isar database for locations with the same administrative area
+        List<LocationModel> isarLocations =
+        await widget.service.getLocationsByState(administrativeArea);
+
+       // print("Administrative Areaaaa ==== ${administrativeArea}");
+
+        // Convert Isar locations to GeofenceModel
+        List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+          name: location.locationName!, // Use 'locationName'
+          latitude: location.latitude ?? 0.0,
+          longitude: location.longitude ?? 0.0,
+          radius: location.radius?.toDouble() ?? 0.0,
+        )).toList();
+
+        print("Ofiicessss == ${offices}");
+
+        bool isInsideAnyGeofence = false;
+        for (GeofenceModel office in offices) {
+          double distance = GeoUtils.haversine(
+              position.latitude, position.longitude, office.latitude, office.longitude);
+          if (distance <= office.radius) {
+            print('Entered office: ${office.name}');
+            location = office.name;
+            // setState(() {
+            //   location = office.name;
+            // });
+            isInsideAnyGeofence = true;
+            break;
+          }
+        }
+
+        if (!isInsideAnyGeofence) {
+         // _getLocation();
+          List<Placemark> placemark =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+
+          location =
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+          //
+          // setState(() {
+          //   location =
+          //   "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+          // });
+          print("Location from map === ${location}");
+        }
+      } else {
+       // _getLocation();
+        List<Placemark> placemark =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
+
         setState(() {
-          UserModel.lat = value!;
+          location =
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
         });
-      });
-    });
+        print("Unable to get administrative area. Using default location.");
+      }
+
+    }
   }
 
   //A function to get location using geocoding
   Future<void> _getLocation() async {
     List<Placemark> placemark =
-        await placemarkFromCoordinates(UserModel.lat, UserModel.long);
+        await placemarkFromCoordinates(lati, longi);
 
     setState(() {
       location =
@@ -255,95 +324,195 @@ class _ClockAttendanceState extends State<ClockAttendance> {
 
   //Get the already saved User details that were pulled into the shared preferences during the initial one-time login
 
-  getLocationStatus() async {
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
-      isLocationTurnedOn = (await LocationService().getLocationStatus())!;
-      //log("Location status ====== $isLocationTurnedOn");
+  // getLocationStatus() async {
+  //   Timer.periodic(const Duration(seconds: 1), (timer) async {
+  //     isLocationTurnedOn = (await LocationService().getLocationStatus())!;
+  //     //log("Location status ====== $isLocationTurnedOn");
+  //
+  //     if (!isLocationTurnedOn && isAlertSet == false) {
+  //       showDialogBox();
+  //       setState(() {
+  //         isAlertSet = true;
+  //       });
+  //     }
+  //   });
+  // }
 
-      if (!isLocationTurnedOn && isAlertSet == false) {
+  Future<void> getLocationStatus() async {
+    bool isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+
+    setState(() {
+      isLocationTurnedOn = isLocationEnabled;
+
+      if (!isLocationTurnedOn && !isAlertSet) {
         showDialogBox();
-        setState(() {
-          isAlertSet = true;
-        });
+        isAlertSet = true;
       }
     });
   }
 
-  getPermissionStatus() async {
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
-      isLocationPermissionGranted =
-          await LocationService().getPermissionStatus();
-      //log("Permission status ====== $isLocationPermissionGranted");
+  // getPermissionStatus() async {
+  //   Timer.periodic(const Duration(seconds: 1), (timer) async {
+  //     isLocationPermissionGranted =
+  //         await LocationService().getPermissionStatus();
+  //     //log("Permission status ====== $isLocationPermissionGranted");
+  //
+  //     if ((isLocationPermissionGranted == PermissionStatus.denied ||
+  //             isLocationPermissionGranted == PermissionStatus.deniedForever) &&
+  //         isAlertSet2 == false) {
+  //       showDialogBox2();
+  //       setState(() {
+  //         isAlertSet2 = true;
+  //       });
+  //     }
+  //   });
+  // }
 
-      if ((isLocationPermissionGranted == PermissionStatus.denied ||
-              isLocationPermissionGranted == PermissionStatus.deniedForever) &&
-          isAlertSet2 == false) {
+  Future<void> getPermissionStatus() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    setState(() {
+      isLocationPermissionGranted = (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always);
+
+      if (!isLocationPermissionGranted && !isAlertSet2) {
         showDialogBox2();
-        setState(() {
-          isAlertSet2 = true;
-        });
+        isAlertSet2 = true;
       }
     });
   }
 
 
-  void _startGeofencing() async {
-    // Implement your geofencing logic here
-    // Get the current location periodically and check if it is inside the geofence
+  // void _startGeofencing() async {
+  //   // Implement your geofencing logic here
+  //   // Get the current location periodically and check if it is inside the geofence
+  //
+  //   // Example: Get the current location every 10 seconds
+  //   // const Duration interval = Duration(seconds: 10);
+  //   //Timer.periodic(interval, (Timer timer) async {
+  //   Position position = await Geolocator.getCurrentPosition(
+  //     desiredAccuracy: LocationAccuracy.best,
+  //   );
+  //
+  //
+  //   print(position);
+  //   if(UserModel.lat == 0.0){
+  //     setState(() {
+  //       UserModel.lat = position.latitude;
+  //       lati = position.latitude;
+  //       print("Setlati======$lati");
+  //     });
+  //   }
+  //
+  //   if(UserModel.long == 0.0){
+  //     setState(() {
+  //       UserModel.long = position.longitude;
+  //       longi = position.longitude;
+  //       print("Setlongi======$longi");
+  //     });
+  //   }
+  //
+  //
+  //   // Check if the current position is inside the geofence
+  //   List<GeofenceModel> offices = getGeofenceOffices();
+  //   for (GeofenceModel office in offices) {
+  //     // double distance = Geolocator.distanceBetween(
+  //     //   office.latitude,
+  //     //   office.longitude,
+  //     //   position.latitude,
+  //     //   position.longitude,
+  //     //
+  //     // );
+  //
+  //     double distance = GeoUtils.haversine(UserModel.lat,UserModel.long, office.latitude, office.longitude);
+  //     //double distance = GeoUtils.calculateDistance(position.latitude,position.longitude, office.latitude, office.longitude);
+  //
+  //     if (distance <= office.radius) {
+  //       // Device is inside the geofence, perform geofencing actions for this office
+  //       print('Entered office: ${office.name}');
+  //       setState(() {
+  //         location = office.name;
+  //         print("location data === ${location}");
+  //       });
+  //       break;
+  //     }
+  //     else{
+  //       _getLocation();
+  //     }
+  //   }
+  //   //  });
+  // }
 
-    // Example: Get the current location every 10 seconds
-    // const Duration interval = Duration(seconds: 10);
-    //Timer.periodic(interval, (Timer timer) async {
-    Position position = await Geolocator.getCurrentPosition(
-      //desiredAccuracy: LocationAccuracy.high
-    );
+  // Future<void> _startGeofencing() async {
+  //   // Get current position
+  //   Position position = await Geolocator.getCurrentPosition(
+  //     desiredAccuracy: LocationAccuracy.best,
+  //   );
+  //
+  //   // Update UserModel with current location if it's 0.0
+  //   if (UserModel.lat == 0.0) {
+  //     setState(() {
+  //       UserModel.lat = position.latitude;
+  //       print("Setlati======$lati");
+  //     });
+  //   }
+  //
+  //   if (UserModel.long == 0.0) {
+  //     setState(() {
+  //       UserModel.long = position.longitude;
+  //       print("Setlongi======$longi");
+  //     });
+  //   }
+  //
+  //   // Get administrative area from coordinates
+  //   String? administrativeArea;
+  //   List<Placemark> placemarks = await placemarkFromCoordinates(
+  //     position.latitude,
+  //     position.longitude,
+  //   );
+  //   if (placemarks.isNotEmpty) {
+  //     administrativeArea = placemarks[0].administrativeArea;
+  //   }
+  //
+  //   if (administrativeArea != null) {
+  //     // Query Isar database for locations with the same administrative area
+  //     List<LocationModel> isarLocations =
+  //     await widget.service.getLocationsByState(administrativeArea);
+  //
+  //     // Convert Isar locations to GeofenceModel
+  //     List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+  //       name: location.name,
+  //       latitude: 'location.latitude',
+  //       longitude: 'location.longitude',
+  //       radius: location.radius.toDouble(), // Assuming radius is stored as int in Isar
+  //     )).toList();
+  //
+  //     bool isInsideAnyGeofence = false;
+  //     for (GeofenceModel office in offices) {
+  //       double distance = GeoUtils.haversine(
+  //           UserModel.lat, UserModel.long, office.latitude, office.longitude);
+  //       if (distance <= office.radius) {
+  //         // Inside geofence
+  //         print('Entered office: ${office.name}');
+  //         setState(() {
+  //           location = office.name;
+  //         });
+  //         isInsideAnyGeofence = true;
+  //         break;
+  //       }
+  //     }
+  //
+  //     if (!isInsideAnyGeofence) {
+  //       _getLocation(); // Get location using geocoding if outside all geofences
+  //       print("Location from map === ${location}");
+  //     }
+  //   } else {
+  //     // Handle case where administrative area is not available
+  //     _getLocation(); // Or set a default location
+  //     print("Unable to get administrative area. Using default location.");
+  //   }
+  // }
 
-
-    print(position);
-    if(UserModel.lat == 0.0){
-      setState(() {
-        UserModel.lat = position.latitude;
-        print("Setlati======$lati");
-      });
-    }
-
-    if(UserModel.long == 0.0){
-      setState(() {
-        UserModel.long = position.longitude;
-        print("Setlongi======$longi");
-      });
-    }
-
-
-    // Check if the current position is inside the geofence
-    List<GeofenceModel> offices = getGeofenceOffices();
-    for (GeofenceModel office in offices) {
-      // double distance = Geolocator.distanceBetween(
-      //   office.latitude,
-      //   office.longitude,
-      //   position.latitude,
-      //   position.longitude,
-      //
-      // );
-
-      double distance = GeoUtils.haversine(UserModel.lat,UserModel.long, office.latitude, office.longitude);
-      //double distance = GeoUtils.calculateDistance(position.latitude,position.longitude, office.latitude, office.longitude);
-
-      if (distance <= office.radius) {
-        // Device is inside the geofence, perform geofencing actions for this office
-        print('Entered office: ${office.name}');
-        setState(() {
-          location = office.name;
-          print("location data === ${location}");
-        });
-        break;
-      }
-      else{
-        _getLocation();
-      }
-    }
-    //  });
-  }
 
 
   List<GeofenceModel> getGeofenceOffices() {
@@ -444,15 +613,28 @@ class _ClockAttendanceState extends State<ClockAttendance> {
                   ),
                 ),
               ),
+
               Container(
                 alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.only(top: 32),
                 child: Text(
-                  "Today's Status",
+                  "Today's Status: ",
                   style: TextStyle(
                     // color: Colors.black54,
                     fontFamily: "NexaBold",
                     fontSize: screenWidth / 18,
+                  ),
+                ),
+              ),
+
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Latitude: ${lati.toString()}, Longitude: ${longi.toString()}",
+                  style: TextStyle(
+                    //color: Colors.black54,
+                    fontFamily: "NexaBold",
+                    fontSize: screenWidth / 23,
                   ),
                 ),
               ),
@@ -1321,25 +1503,19 @@ class _ClockAttendanceState extends State<ClockAttendance> {
           content: const Text("Please grant Location Permission"),
           actions: <Widget>[
             TextButton(
-                onPressed: () async {
-                  Navigator.pop(context, "Cancel");
-                  setState(() {
-                    isAlertSet2 = false;
-                  });
-                  isLocationPermissionGranted =
-                      await LocationService().getPermissionStatus();
-                  //     await InternetConnectionChecker().hasConnection;
-                  if ((isLocationPermissionGranted == PermissionStatus.denied ||
-                          isLocationPermissionGranted ==
-                              PermissionStatus.deniedForever) &&
-                      isAlertSet2 == false) {
-                    showDialogBox2();
-                    setState(() {
-                      isAlertSet2 = true;
-                    });
-                  }
-                },
-                child: const Text("OK"))
+              onPressed: () async {
+                Navigator.pop(context, "Cancel");
+
+                // Check and request permission (no need to reset isAlertSet2 here)
+                await getPermissionStatus();
+
+                // If permission is still not granted, show the dialog again
+                if (!isLocationPermissionGranted) {
+                  showDialogBox2();
+                }
+              },
+              child: const Text("OK"),
+            )
           ],
         ),
       );

@@ -34,7 +34,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:geolocator/geolocator.dart'; // Correct import for geolocator
 import '../profile_page.dart';
 
 class AttendanceHomeScreen extends StatefulWidget {
@@ -113,12 +113,12 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     // _updateEmptyClockInAndOutLocation().then((value) {
     //_startTimer(context);
     _getUserDetail();
-    subscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) async {
-      isDeviceConnected = await InternetConnectionChecker().hasConnection;
-      log("Internet status ====== $isDeviceConnected");
-    });
+    // subscription = Connectivity()
+    //     .onConnectivityChanged
+    //     .listen((ConnectivityResult result) async {
+    //   isDeviceConnected = await InternetConnectionChecker().hasConnection;
+    //   log("Internet status ====== $isDeviceConnected");
+    // });
     // });
   }
 
@@ -184,20 +184,20 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     });
   }
 
-  getConnectivity() {
-    subscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) async {
-      isDeviceConnected = await InternetConnectionChecker().hasConnection;
-      log("Internet status ====== $isDeviceConnected");
-      if (!isDeviceConnected && isAlertSet == false) {
-        showDialogBox();
-        setState(() {
-          isAlertSet = true;
-        });
-      }
-    });
-  }
+  // getConnectivity() {
+  //   subscription = Connectivity()
+  //       .onConnectivityChanged
+  //       .listen((ConnectivityResult result) async {
+  //     isDeviceConnected = await InternetConnectionChecker().hasConnection;
+  //     log("Internet status ====== $isDeviceConnected");
+  //     if (!isDeviceConnected && isAlertSet == false) {
+  //       showDialogBox();
+  //       setState(() {
+  //         isAlertSet = true;
+  //       });
+  //     }
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -205,7 +205,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     subscription.cancel();
     // _startTimer(context);
     _getUserDetail();
-    getConnectivity();
+    //getConnectivity();
   }
 
   _displayDialog(BuildContext context) async {
@@ -299,7 +299,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                       //Navigator.of(context).pop();
                     } else {
                       log("isDeviceConnectedElse ==$isDeviceConnected");
-                      getConnectivity();
+                     // getConnectivity();
                       Fluttertoast.showToast(
                           msg: "Connection to Internet Lost..",
                           toastLength: Toast.LENGTH_LONG,
@@ -353,21 +353,16 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
         });
   }
 
-  void _startLocationService() async {
-    LocationService().initialize();
+  Future<void> _startLocationService() async {
+    LocationService locationService = LocationService();
 
-    //Here,return the value to User.long
-    LocationService().getLongitude().then((value) {
+    Position? position = await locationService.getCurrentPosition();
+    if (position != null) {
       setState(() {
-        UserModel.long = value!;
+        UserModel.long = position.longitude;
+        UserModel.lat = position.latitude;
       });
-
-      LocationService().getLatitude().then((value) {
-        setState(() {
-          UserModel.lat = value!;
-        });
-      });
-    });
+    }
   }
 
   @override

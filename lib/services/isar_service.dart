@@ -69,6 +69,11 @@ class IsarService extends DatabaseAdapter {
     return await isar.locationModels.where().findAll();
   }
 
+  Future<List<LocationModel>> getLocationsByState(String? state) async {
+    final isar = await db;
+    return await isar.locationModels.filter().stateEqualTo(state).findAll();
+  }
+
   Future<List<AttendanceModel>> getAttendanceFor1990() async {
     final isar = await db;
     return await isar.attendanceModels

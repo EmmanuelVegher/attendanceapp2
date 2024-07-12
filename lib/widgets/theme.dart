@@ -82,9 +82,7 @@ class Themes{
   static final light = ThemeData(
     fontFamily: "customFont",
     primaryColor: Color(0xffeef444c),
-    primarySwatch: PrimaryMaterialColor,
-    backgroundColor: Colors.white,
-    brightness: Brightness.light,
+    brightness: Brightness.light, colorScheme: ColorScheme.fromSwatch(primarySwatch: PrimaryMaterialColor).copyWith(background: Colors.white),
 
     /*
   elevatedButtonTheme: ElevatedButtonThemeData(
@@ -99,10 +97,8 @@ class Themes{
 
   static final dark = ThemeData(
     fontFamily: "customFont",
-    backgroundColor: darkGreyClr,
     primaryColor: darkGreyClr,
-    brightness: Brightness.dark,
-    primarySwatch: PrimaryMaterialColor,
+    brightness: Brightness.dark, colorScheme: ColorScheme.fromSwatch(primarySwatch: PrimaryMaterialColor).copyWith(background: darkGreyClr),
   );
 }
 

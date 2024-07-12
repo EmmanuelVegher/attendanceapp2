@@ -187,13 +187,13 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
   void initState() {
     _emailAddressControl = TextEditingController();
     _passwordControl = TextEditingController();
-    subscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) async {
-      isDeviceConnected = await InternetConnectionChecker().hasConnection;
-
-      log("Internet status ====== $isDeviceConnected");
-    });
+    // subscription = Connectivity()
+    //     .onConnectivityChanged
+    //     .listen((ConnectivityResult result) async {
+    //   isDeviceConnected = await InternetConnectionChecker().hasConnection;
+    //
+    //   log("Internet status ====== $isDeviceConnected");
+    // });
     super.initState();
   }
 

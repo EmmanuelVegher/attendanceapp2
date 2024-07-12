@@ -2833,7 +2833,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                     state.errorText ?? '',
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
-                                      color: Theme.of(context).errorColor,
+                                      //color: Color.red,
                                       fontSize: 12,
                                     ),
                                   ),

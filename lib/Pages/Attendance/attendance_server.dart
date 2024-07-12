@@ -240,13 +240,13 @@ class _AttendanceServerState extends State<AttendanceServer> {
                                   ),
                                 ),
                                 textTheme: const TextTheme(
-                                  headline4: TextStyle(
+                                  headlineMedium: TextStyle(
                                     fontFamily: "NexaBold",
                                   ),
-                                  overline: TextStyle(
+                                  labelSmall: TextStyle(
                                     fontFamily: "NexaBold",
                                   ),
-                                  button: TextStyle(
+                                  labelLarge: TextStyle(
                                     fontFamily: "NexaBold",
                                   ),
                                 ),
