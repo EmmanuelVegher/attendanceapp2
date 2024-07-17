@@ -9,6 +9,8 @@ import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../model/app_usage_model.dart';
+
 class IsarService extends DatabaseAdapter {
   IsarService._privateConstructor();
   static final IsarService _instance = IsarService._privateConstructor();
@@ -35,7 +37,18 @@ class IsarService extends DatabaseAdapter {
 
   Future<void> saveState(StateModel newstate) async {
     final isar = await db;
-    await isar.writeTxnSync<int>(() => isar.stateModels.putSync(newstate));
+    try {
+      await isar.writeTxnSync<int>(() => isar.stateModels.putSync(newstate));
+    } catch (e) {
+      if (e is IsarError && e.message.contains("Unique index violated")) {
+        // Handle unique index violation
+        print("Error saving state: Unique index violated. State likely already exists.");
+        // You can either update the existing state or handle the error differently
+      } else {
+        // Handle other Isar errors
+        print("Error saving state: $e");
+      }
+    }
   }
 
   Future<void> saveBioData(BioModel newbiodata) async {
@@ -141,7 +154,8 @@ class IsarService extends DatabaseAdapter {
         BioModelSchema,
         UserFaceSchema,
         LocationModelSchema,
-        StateModelSchema
+        StateModelSchema,
+        AppUsageModelSchema
       ], inspector: true, directory: directory.path);
     }
     return Future.value(Isar.getInstance());
@@ -578,6 +592,44 @@ class IsarService extends DatabaseAdapter {
     // TODO: implement getImages
     throw UnimplementedError();
   }
+
+  Future<AppUsageModel?> getLastUsedDate() async {
+    // Retrieve the last used date from Isar (implementation depends on your Isar setup)
+    // Example: using a dedicated Isar object called 'AppUsage'
+    final isar = await db;
+    //return await isar.appUsageModels.where().findFirst();
+     final appUsage = isar.appUsageModels.where().findFirst();
+    return appUsage;
+  }
+
+  Future<void> saveLastUsedDate(AppUsageModel newappusagemodel) async {
+    // Save the current date in Isar (implementation depends on your Isar setup)
+    final isar = await db;
+    await isar.writeTxnSync<int>(() => isar.appUsageModels.putSync(newappusagemodel));
+  }
+
+  // Future<void> saveLastUsedDate() async {
+  //   final isar = await db;
+  //   final appUsage = await isar.appUsageModels.where().findFirst() ??
+  //       AppUsageModel(lastUsedDate: DateTime.now()); // Create a new AppUsageModel if not found
+  //   appUsage.lastUsedDate = DateTime.now(); // Update the lastUsedDate
+  //   await isar.writeTxnSync<int>(() => isar.appUsageModels.putSync(appUsage));
+  // }
+
+  // Future<AppUsageModel?> getLastUsedDate() async {
+  //   final isar = await db;
+  //   final appUsage = await isar.appUsageModels.where().findFirst();
+  //   return appUsage;
+  // }
+  //
+  // Future<void> saveLastUsedDate() async {
+  //   final isar = await db;
+  //   final appUsage = await isar.appUsageModels.where().findFirst() ??
+  //       AppUsageModel(lastUsedDate: DateTime.now());
+  //   appUsage.lastUsedDate = DateTime.now();
+  //   await isar.writeTxnSync<int>(() => isar.appUsageModels.putSync(appUsage));
+  // }
+
 
   Future<List<BioModel>> getBioInfo() async {
     final isar = await db;

@@ -202,7 +202,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
   @override
   void dispose() {
     super.dispose();
-    subscription.cancel();
+   // subscription.cancel();
     // _startTimer(context);
     _getUserDetail();
     //getConnectivity();
@@ -424,7 +424,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
             service: IsarService(),
           ),
           new ClockAttendance(
-            IsarService(),
+            IsarService(), service: IsarService(),
           ),
           new ProfilePage(),
         ],

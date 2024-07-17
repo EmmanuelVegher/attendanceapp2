@@ -1,102 +1,70 @@
-import 'package:attendanceapp/Pages/register_page.dart';
-import 'package:attendanceapp/Pages/routing.dart';
 import 'package:attendanceapp/Pages/login_page.dart';
-import 'package:attendanceapp/model/user_model.dart';
 import 'package:attendanceapp/services/isar_service.dart';
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
 
-class AuthCheck extends StatefulWidget {
+import '../model/app_usage_model.dart';
+import 'Attendance/attendance_home.dart';
+import 'Dashboard/user_dashboard.dart';
+import 'home.dart';
+
+class AuthCheck extends StatelessWidget {
   final IsarService service;
-  const AuthCheck({super.key, required this.service});
 
-  @override
-  State<AuthCheck> createState() => _AuthCheckState();
-}
-
-class _AuthCheckState extends State<AuthCheck> {
-  bool userAvailable = false;
-  late SharedPreferences sharedPreferences;
-
-  @override
-  void initState() {
-    super.initState();
-    //_getCurrentUser();
-    _authCheckUser();
-  }
-
-  // void _getCurrentUser() async {
-  //   sharedPreferences = await SharedPreferences.getInstance();
-
-  //   try {
-  //     if (sharedPreferences.getString("emailAddress") != null) {
-  //       setState(() {
-  //         // Save details from shared preferences into the User Class so as to be used anywhere in the app
-  //         UserModel.emailAddress = sharedPreferences.getString("emailAddress")!;
-  //         UserModel.password = sharedPreferences.getString("password")!;
-  //         UserModel.role = sharedPreferences.getString("role")!;
-  //         UserModel.firstName = sharedPreferences.getString("firstName")!;
-  //         UserModel.lastName = sharedPreferences.getString("lastName")!;
-  //         UserModel.staffCategory =
-  //             sharedPreferences.getString("staffCategory")!;
-  //         UserModel.designation = sharedPreferences.getString("designation")!;
-  //         UserModel.location = sharedPreferences.getString("location")!;
-  //         UserModel.state = sharedPreferences.getString("state")!;
-  //         UserModel.department = sharedPreferences.getString("department")!;
-  //         UserModel.mobile = sharedPreferences.getString("mobile")!;
-  //         UserModel.project = sharedPreferences.getString("project")!;
-  //         userAvailable = true;
-  //       });
-  //     } else {
-  //       setState(() {
-  //         userAvailable = false;
-  //       });
-  //     }
-  //   } catch (e) {}
-  // }
+  const AuthCheck({Key? key, required this.service}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return userAvailable
-        ?
-        // HomePage(
-        //     service: IsarService(),
-        //   )
-        LoginPage(
-            service: IsarService(),
-          )
-        : LoginPage(
-            service: IsarService(),
-          );
-    // LoginPage(
-    //     service: IsarService(),
-    //   );
-  }
-
-  Future<void> _authCheckUser() async {
-    try {
-      final availableUser = await widget.service.getBioInfo();
-      final availableUserForSuperUser =
-          await widget.service.getBioInfoForSuperUser();
-
-      if (availableUser.length == 1) {
-        if (availableUserForSuperUser == 0) {
-          setState(() {
-            userAvailable = true;
-          });
+    return FutureBuilder<bool>(
+      future: _authCheckUser(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Show a loading indicator while checking
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          // Handle errors during the check
+          return const Center(child: Text("Error checking authentication."));
         } else {
-          setState(() {
-            userAvailable = false;
-          });
-        }
-      }
+          // Navigate to LoginPage based on user availability
+          bool userAvailable = snapshot.data ?? false;
+          print("userAvailable===${userAvailable}");
+          return userAvailable ? LoginPage(service: service) : HomePage();
 
-      if (availableUser.length > 1) {
-        setState(() {
-          userAvailable = true;
-        });
-      }
-    } catch (e) {}
+        }
+      },
+    );
   }
+
+  Future<bool> _authCheckUser() async {
+    final availableUser = await service.getBioInfo();
+    final availableUserForSuperUser = await service.getBioInfoForSuperUser();
+
+    print("availableUser===${availableUser}");
+    print("availableUserForSuperUser===${availableUserForSuperUser}");
+
+    // Check if the app has been used within 30 days
+    DateTime currentDate = DateTime.now();
+    DateTime? lastUsedDate = (await service.getLastUsedDate())?.lastUsedDate;
+
+    print("lastUsedDate===${lastUsedDate}");
+
+
+    if(lastUsedDate == null){
+      print("lastUsedDate != null");
+      return true;
+    }
+
+   else if(lastUsedDate != null && currentDate.difference(lastUsedDate).inDays > 30){
+      print("lastUsedDate != null && currentDate.difference(lastUsedDate).inDays > 30");
+      return true;
+    }
+    else if(lastUsedDate != null && currentDate.difference(lastUsedDate).inDays < 30)  {
+      print("lastUsedDate != null && currentDate.difference(lastUsedDate).inDays < 30");
+      return false;
+    }else{
+      return false;
+    }
+
+  }
+
 }

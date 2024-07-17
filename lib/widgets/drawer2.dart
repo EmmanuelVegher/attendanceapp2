@@ -26,9 +26,9 @@ import 'package:refreshable_widget/refreshable_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Widget drawer2(
-  BuildContext context,
-  IsarService service,
-) {
+    BuildContext context,
+    IsarService service,
+    ) {
   final IsarService service = IsarService();
 
   //final DataBaseService _dataBaseService = DataBaseService();
@@ -43,13 +43,13 @@ Widget drawer2(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               stops: [
-            0.0,
-            1.0
-          ],
+                0.0,
+                1.0
+              ],
               colors: [
-            Colors.white,
-            Colors.white,
-          ])),
+                Colors.white,
+                Colors.white,
+              ])),
       child: ListView(
         children: [
           // Row(children: [
@@ -138,8 +138,8 @@ Widget drawer2(
                   context,
                   MaterialPageRoute(
                       builder: (context) => UserDashBoard(
-                            service: IsarService(),
-                          )),
+                        service: IsarService(),
+                      )),
                 );
               }),
           Divider(
@@ -148,7 +148,7 @@ Widget drawer2(
           ),
           ListTile(
             leading:
-                Icon(Icons.work, size: _drawerIconSize, color: Colors.orange),
+            Icon(Icons.work, size: _drawerIconSize, color: Colors.orange),
             title: Text(
               'Attendance',
               style: TextStyle(fontSize: _drawerFontSize, color: Colors.brown),
@@ -159,8 +159,8 @@ Widget drawer2(
                 context,
                 MaterialPageRoute(
                     builder: (context) => AttendanceHomeScreen(
-                          service: IsarService(),
-                        )),
+                      service: IsarService(),
+                    )),
               );
             },
           ),
@@ -203,8 +203,8 @@ Widget drawer2(
                 context,
                 MaterialPageRoute(
                     builder: (context) => DaysOffPage(
-                          service: IsarService(),
-                        )),
+                      service: IsarService(),
+                    )),
               );
             },
           ),
@@ -291,9 +291,9 @@ _displayDialog(BuildContext context) async {
         return AlertDialog(
           title: Text('Do you want to Log-Out?'),
           content: Text("Kindly Choose your Log-Out Option"
-              //controller: _textFieldController,
-              //decoration: InputDecoration(hintText: "TextField in Dialog"),
-              ),
+            //controller: _textFieldController,
+            //decoration: InputDecoration(hintText: "TextField in Dialog"),
+          ),
           actions: <Widget>[
             MyButton(
                 label: "Exit",
@@ -320,9 +320,9 @@ _displayDialogForDiffAcount(BuildContext context) async {
         return AlertDialog(
           title: Text('Have you synced all attendance?'),
           content: Text("Kindly Sync all data before switching account"
-              //controller: _textFieldController,
-              //decoration: InputDecoration(hintText: "TextField in Dialog"),
-              ),
+            //controller: _textFieldController,
+            //decoration: InputDecoration(hintText: "TextField in Dialog"),
+          ),
           actions: <Widget>[
             MyButton(
                 label: "Yes",
@@ -339,8 +339,8 @@ _displayDialogForDiffAcount(BuildContext context) async {
                       context,
                       MaterialPageRoute(
                           builder: (context) => AttendanceHomeScreen(
-                                service: IsarService(),
-                              )));
+                            service: IsarService(),
+                          )));
                   Fluttertoast.showToast(
                       msg: "Sync data before switching account",
                       toastLength: Toast.LENGTH_LONG,
@@ -380,8 +380,8 @@ void _switchAccountValidation(BuildContext context) async {
         context,
         MaterialPageRoute(
             builder: (context) => AttendanceHomeScreen(
-                  service: IsarService(),
-                )));
+              service: IsarService(),
+            )));
     Fluttertoast.showToast(
         msg: "Sync data before switching account",
         toastLength: Toast.LENGTH_LONG,
@@ -464,10 +464,10 @@ _showBottomSheet2(BuildContext context) {
 
 _bottomSheetButton(
     {required String label,
-    required Function()? onTap,
-    required Color clr,
-    bool isClose = false,
-    required BuildContext context}) {
+      required Function()? onTap,
+      required Color clr,
+      bool isClose = false,
+      required BuildContext context}) {
   return GestureDetector(
     onTap: onTap,
     child: Container(
@@ -491,3 +491,4 @@ _bottomSheetButton(
     ),
   );
 }
+
