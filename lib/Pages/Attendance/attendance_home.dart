@@ -35,7 +35,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart'; // Correct import for geolocator
+import '../../services/notification_services.dart';
 import '../profile_page.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class AttendanceHomeScreen extends StatefulWidget {
   final IsarService service;
@@ -80,6 +83,8 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
   bool _localOnly = false;
   bool _copyFileToCacheDir = true;
   String? _pickedFilePath;
+  var notifyHelper;
+  var _timer;
 
   DirectoryLocation? _pickedDirecotry;
   Future<bool> _isPickDirectorySupported =
@@ -104,6 +109,14 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     super.initState();
     //getCurrentDateRecordCount();
     //_pickImage();
+   // _checkTimeAndTriggerNotification();
+    tz.initializeTimeZones();
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      _checkTimeAndTriggerNotification();
+    });
+    notifyHelper = NotifyHelper();
+    notifyHelper.initializeNotification();
+    notifyHelper.requestIOSPermissions();
     _startLocationService();
     //checkClockInandOutLocation();
     _updateEmptyClockInLocation().then((value) async {
@@ -165,6 +178,19 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
 //     }
 //   }
 
+
+  void _checkTimeAndTriggerNotification() {
+    final now = DateTime.now();
+    print("Current Time === ${now}");
+    if (now.hour == 8 && now.minute == 0) {
+      notifyHelper.displayNotification(
+          title: "Clock In Notification", body: "It's 8 AM, don't forget to clock in!");
+    } else if (now.hour == 17 && now.minute == 0) {
+      notifyHelper.displayNotification(
+          title: "Clock Out Notification", body: "It's 5 PM, don't forget to clock out!");
+    }
+  }
+
   void _getUserDetail() async {
     final userDetail = await IsarService().getBioInfoWithFirebaseAuth();
     setState(() {
@@ -205,8 +231,11 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
    // subscription.cancel();
     // _startTimer(context);
     _getUserDetail();
+    _timer.cancel();
     //getConnectivity();
   }
+
+
 
   _displayDialog(BuildContext context) async {
     return showDialog(

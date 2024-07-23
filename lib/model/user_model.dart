@@ -25,7 +25,7 @@ class UserModel {
   String? uid;
 
 // // receiving data
-//   UserModel({this.uid, this.email, this.wrole});
+//   UserModel({this.uid, this.email, this.wr ole});
 //   factory UserModel.fromMap(map) {
 //     return UserModel(
 //       uid: map['id'],

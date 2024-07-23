@@ -1,35 +1,47 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:typed_data';
+
+import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart' as locationPkg;
 import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
-import 'package:attendanceapp/Pages/Attendance/button.dart';
-import 'package:attendanceapp/Pages/Dashboard/admin_dashboard.dart';
-import 'package:attendanceapp/Pages/Dashboard/user_dashboard.dart';
-// import 'package:attendanceapp/controllers/clock_attendance_controller.dart';
-import 'package:attendanceapp/model/attendance.dart';
+import 'package:attendanceapp/Pages/auth_exceptions.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
 import 'package:attendanceapp/model/bio_model.dart';
-import 'package:attendanceapp/model/user_model.dart';
+import 'package:attendanceapp/model/locationmodel.dart';
+import 'package:attendanceapp/model/statemodel.dart';
+import 'package:attendanceapp/services/database_adapter.dart';
+import 'package:attendanceapp/services/hive_service.dart';
 import 'package:attendanceapp/services/isar_service.dart';
-import 'package:attendanceapp/services/location_services.dart';
-import 'package:attendanceapp/widgets/drawer2.dart';
-import 'package:attendanceapp/widgets/geo_utils.dart';
-import 'package:attendanceapp/widgets/header_widget.dart';
-import 'package:attendanceapp/widgets/input_field.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:location/location.dart'; // Use location package for location updates
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
 import 'package:path/path.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
-import '../../model/locationmodel.dart';
+import '../../Pages/Dashboard/admin_dashboard.dart';
+import '../../Pages/Dashboard/user_dashboard.dart';
+import '../../model/attendance.dart';
+import '../../model/user_model.dart';
+import '../../services/location_services.dart';
 import '../../widgets/drawer.dart';
+import '../../widgets/drawer2.dart';
+import '../../widgets/geo_utils.dart';
+import '../../widgets/header_widget.dart';
+import '../../widgets/input_field.dart';
+import '../../widgets/show_error_dialog.dart';
+import 'button.dart';
 
 class GeofenceModel {
   final String name;
@@ -48,9 +60,8 @@ class GeofenceModel {
 class ClockAttendance extends StatelessWidget {
   final IsarService service;
 
-  ClockAttendance(IsarService isarService, {Key? key, required this.service}) : super(key: key);
-
-
+  ClockAttendance(IsarService isarService, {Key? key, required this.service})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +70,6 @@ class ClockAttendance extends StatelessWidget {
 
     final ClockAttendanceController controller =
     Get.put(ClockAttendanceController(service));
-
 
     return Scaffold(
       drawer: Obx(
@@ -116,120 +126,122 @@ class ClockAttendance extends StatelessWidget {
                   ),
                 ),
               ),
-             // Obx(
+              // Obx(
               //      () =>
-                        Container(
-                  alignment: Alignment.centerLeft,
-                  margin: const EdgeInsets.only(top: 32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Today's Status:",
-                        style: TextStyle(
-                          fontFamily: "NexaBold",
-                          fontSize: screenWidth / 18,
-                        ),
+              Container(
+                alignment: Alignment.centerLeft,
+                margin: const EdgeInsets.only(top: 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Today's Status:",
+                      style: TextStyle(
+                        fontFamily: "NexaBold",
+                        fontSize: screenWidth / 18,
                       ),
-                      SizedBox(height: 10), // Spacing between status and coordinates
-                      Obx(() => Text(
-                        "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
-                        style: TextStyle(
-                          fontFamily: "NexaBold",
-                          fontSize: screenWidth / 23,
-                        ),
-                      )),
-                      SizedBox(height: 10),
-                      Obx(() => Text(
-                        "Current State: ${controller.administrativeArea.value}",
-                        style: TextStyle(
-                          fontFamily: "NexaBold",
-                          fontSize: screenWidth / 23,
-                        ),
-                      )),
-                      SizedBox(height: 10),
-                      Obx(() => Text(
-                        "Current Location: ${controller.location.value}",
-                        style: TextStyle(
-                          fontFamily: "NexaBold",
-                          fontSize: screenWidth / 23,
-                        ),
-                      )),
-                      // You can add your location name widget here, using Obx to make it reactive
-                    ],
-                  ),
-                ),
-              //),
-              //Card View for ClockIn and ClockOut
-              Obx(
-                    () => Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 32),
-                  height: screenHeight * 0.15, // 15% of screen height
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: Offset(2, 2),
+                    ),
+                    SizedBox(height: 10), // Spacing between status and coordinates
+                    Obx(() => Text(
+                      "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
+                      style: TextStyle(
+                        fontFamily: "NexaBold",
+                        fontSize: screenWidth / 23,
                       ),
-                    ],
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Clock In",
-                              style: TextStyle(
-                                fontFamily: "NexaLight",
-                                fontSize: screenWidth / 20,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            Text(
-                              controller.clockIn.value,
-                              style: TextStyle(
-                                fontFamily: "NexaBold",
-                                fontSize: screenWidth / 18,
-                              ),
-                            ),
-                          ],
-                        ),
+                    )),
+                    SizedBox(height: 10),
+                    Obx(() => Text(
+                      "Current State: ${controller.administrativeArea.value}",
+                      style: TextStyle(
+                        fontFamily: "NexaBold",
+                        fontSize: screenWidth / 23,
                       ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Clock Out",
-                              style: TextStyle(
-                                fontFamily: "NexaLight",
-                                fontSize: screenWidth / 20,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            Text(
-                              controller.clockOut.value,
-                              style: TextStyle(
-                                fontFamily: "NexaBold",
-                                fontSize: screenWidth / 18,
-                              ),
-                            ),
-                          ],
-                        ),
+                    )),
+                    SizedBox(height: 10),
+                    Obx(() => Text(
+                      "Current Location: ${controller.location.value}",
+                      style: TextStyle(
+                        fontFamily: "NexaBold",
+                        fontSize: screenWidth / 23,
                       ),
-                    ],
-                  ),
+                    )),
+                    // You can add your location name widget here, using Obx to make it reactive
+                  ],
                 ),
               ),
+              //),
+              //Card View for ClockIn and ClockOut
+              //   Obx(
+              //        () =>
+
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 32),
+                height: screenHeight * 0.15, // 15% of screen height
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Clock In",
+                            style: TextStyle(
+                              fontFamily: "NexaLight",
+                              fontSize: screenWidth / 20,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          Obx(() => Text(
+                            controller.clockIn.value,
+                            style: TextStyle(
+                              fontFamily: "NexaBold",
+                              fontSize: screenWidth / 18,
+                            ),
+                          )), // Wrap clockIn in Obx
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Clock Out",
+                            style: TextStyle(
+                              fontFamily: "NexaLight",
+                              fontSize: screenWidth / 20,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          Obx(() => Text(
+                            controller.clockOut.value,
+                            style: TextStyle(
+                              fontFamily: "NexaBold",
+                              fontSize: screenWidth / 18,
+                            ),
+                          )), // Wrap clockOut in Obx
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // ),
               Container(
                 alignment: Alignment.centerLeft,
                 child: RichText(
@@ -292,7 +304,8 @@ class ClockAttendance extends StatelessWidget {
                             innerColor: Colors.red,
                             key: key,
                             onSubmit: () async {
-                              await controller.handleClockInOut(context, key);
+                              await controller
+                                  .handleClockInOut(context, key);
                             },
                           );
                         },
@@ -479,7 +492,7 @@ class ClockAttendance extends StatelessWidget {
                                             "Clock-In Location",
                                             style: TextStyle(
                                               fontFamily: "NexaLight",
-                                              fontSize: screenWidth / 25,
+                                              fontSize: screenWidth / 27,
                                               color: Colors.white,
                                             ),
                                           ),
@@ -507,7 +520,7 @@ class ClockAttendance extends StatelessWidget {
                                             "Clock-Out Location",
                                             style: TextStyle(
                                               fontFamily: "NexaLight",
-                                              fontSize: screenWidth / 25,
+                                              fontSize: screenWidth / 27,
                                               color: Colors.white,
                                             ),
                                           ),
@@ -567,16 +580,19 @@ class ClockAttendanceController extends GetxController {
   RxDouble longi = 0.0.obs;
   RxString administrativeArea = "".obs; // Added for state name
   RxBool isLocationTurnedOn = false.obs;
-  Rx<LocationPermission> isLocationPermissionGranted = LocationPermission.denied.obs;
+  Rx<LocationPermission> isLocationPermissionGranted =
+      LocationPermission.denied.obs;
   RxBool isAlertSet = false.obs;
   RxBool isAlertSet2 = false.obs;
   RxBool isInsideAnyGeofence = false.obs;
+  RxBool isInternetConnected = false.obs;
 
   String currentDate = DateFormat('dd-MMMM-yyyy').format(DateTime.now());
   DateTime ntpTime = DateTime.now();
   DateTime _selectedDate = DateTime.now();
   String _endTime = "11:59 PM";
-  String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
+  String _startTime =
+  DateFormat("hh:mm a").format(DateTime.now()).toString();
   String _reasons = "";
   int _selectedColor = 0;
   var isDeviceConnected = false;
@@ -591,6 +607,8 @@ class ClockAttendanceController extends GetxController {
   ];
 
   Timer? _locationTimer;
+  locationPkg.Location locationService = locationPkg.Location();
+  // LocationService locationService = LocationService();
 
   @override
   void onInit() {
@@ -612,15 +630,23 @@ class ClockAttendanceController extends GetxController {
     await _startLocationService();
     await getLocationStatus();
     await getPermissionStatus();
+    await checkInternetConnection();
 
     // Start the periodic location updates
     _locationTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
       _startLocationService();
+      // _init();
     });
   }
 
   Future<void> _loadNTPTime() async {
-    ntpTime = await NTP.now();
+    try {
+      ntpTime = await NTP.now(lookUpAddress: "pool.ntp.org");
+    } catch (e) {
+      log("Error getting NTP time: ${e.toString()}");
+      // Handle the error - you might want to use the local time as a fallback
+      ntpTime = DateTime.now();
+    }
   }
 
   Future<void> _getUserDetail() async {
@@ -635,123 +661,158 @@ class ClockAttendanceController extends GetxController {
   Future<void> _getAttendanceSummary() async {
     try {
       final attendanceLast =
-      await service.getLastAttendance(DateFormat('MMMM yyyy').format(DateTime.now()));
-      final attendanceResult =
-      await service.getAttendanceForDate(DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
+      await service.getLastAttendance(
+          DateFormat('MMMM yyyy').format(DateTime.now()));
+      final attendanceResult = await service.getAttendanceForDate(
+          DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
 
       if (attendanceLast?.date == currentDate) {
         clockIn.value = attendanceLast?.clockIn ?? "--/--";
         clockOut.value = attendanceLast?.clockOut ?? "--/--";
-        clockInLocation.value = attendanceLast?.clockInLocation ?? "Outside Office Premises";
-        clockOutLocation.value = attendanceLast?.clockOutLocation ?? "Outside Office Premises";
+        clockInLocation.value =
+            attendanceLast?.clockInLocation ?? "";
+        clockOutLocation.value =
+            attendanceLast?.clockOutLocation ?? "";
         durationWorked.value = attendanceLast?.durationWorked ?? "";
       } else {
         clockIn.value = attendanceResult[0].clockIn ?? "--/--";
         clockOut.value = attendanceResult[0].clockOut ?? "--/--";
-        clockInLocation.value = attendanceResult[0].clockInLocation ?? "Outside Office Premises";
-        clockOutLocation.value = attendanceResult[0].clockOutLocation ?? "Outside Office Premises";
+        clockInLocation.value =
+            attendanceResult[0].clockInLocation ?? "";
+        clockOutLocation.value =
+            attendanceResult[0].clockOutLocation ?? "";
         durationWorked.value = attendanceResult[0].durationWorked ?? "";
       }
     } catch (e) {
       if (e.toString() ==
           "RangeError (index): Invalid value: Valid value range is empty: 0") {
-        log("getAttendance Summary method error ====== Staff Yet to clock in as Last saved date != Current Date");
+        log(
+            "getAttendance Summary method error ====== Staff Yet to clock in as Last saved date != Current Date");
       } else {
         log(e.toString());
       }
     }
   }
 
-
-
-
-  // Start Location Service
+  // Start Location Service (Using location package)
   Future<void> _startLocationService() async {
-    LocationService locationService = LocationService();
-    Position? position = await locationService.getCurrentPosition();
+    bool serviceEnabled = await locationService.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await locationService.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
 
-    if (position != null) {
-      UserModel.long = position.longitude;
-      lati.value = position.latitude;
-      longi.value = position.longitude;
-      UserModel.lat = position.latitude;
+    PermissionStatus permission = await locationService.hasPermission();
+    if (permission == PermissionStatus.denied) {
+      permission = await locationService.requestPermission();
+      if (permission != PermissionStatus.granted) {
+        return;
+      }
+    }
 
-      // Get placemark (address details)
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+    // Check for internet connection
+    isInternetConnected.value = await InternetConnectionChecker().hasConnection;
 
-      if (placemarks.isNotEmpty) {
-        Placemark placemark = placemarks[0];
-        location.value =
-        "${placemark.street}, ${placemark.subLocality}, ${placemark.subAdministrativeArea}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}";
-        administrativeArea.value = placemark.administrativeArea ?? ""; // Update state name
-      } else {
-        location.value = "Location not found";
-        administrativeArea.value = "";
+    if (!isInternetConnected.value) {
+      // Use Geolocator and request location updates using GPS
+      try {
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: geolocator.LocationAccuracy.best,
+        );
+        lati.value = position.latitude;
+        longi.value = position.longitude;
+        _updateLocation();
+        _getAttendanceSummary();
+      } catch (e) {
+        log("Error getting GPS location: ${e.toString()}");
+        Fluttertoast.showToast(
+          msg:
+          "Error getting GPS location.",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+    } else {
+      // Continue using location package for updates
+      locationService.onLocationChanged.listen((LocationData locationData) {
+        lati.value = locationData.latitude!;
+        longi.value = locationData.longitude!;
+        _updateLocation();
+        _getAttendanceSummary();
+      });
+    }
+  }
+
+  Future<void> _updateLocation() async {
+    // Update location based on new latitude and longitude
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      lati.value,
+      longi.value,
+    );
+
+    if (placemarks.isNotEmpty) {
+      Placemark placemark = placemarks[0];
+      location.value =
+      "${placemark.street}, ${placemark.subLocality}, ${placemark.subAdministrativeArea}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}";
+      administrativeArea.value = placemark.administrativeArea ?? ""; // Update state name
+    } else {
+      location.value = "Location not found";
+      administrativeArea.value = "";
+    }
+
+    // Geofencing logic
+    if (administrativeArea.value != '' && administrativeArea.value != null) {
+      // Query Isar database for locations with the same administrative area
+      List<LocationModel> isarLocations =
+      await service.getLocationsByState(administrativeArea.value);
+
+      // Convert Isar locations to GeofenceModel
+      List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+        name: location.locationName!, // Use 'locationName'
+        latitude: location.latitude ?? 0.0,
+        longitude: location.longitude ?? 0.0,
+        radius: location.radius?.toDouble() ?? 0.0,
+      )).toList();
+
+      print("Officessss == ${offices}");
+
+      isInsideAnyGeofence.value = false;
+      for (GeofenceModel office in offices) {
+        double distance = GeoUtils.haversine(
+            lati.value, longi.value, office.latitude, office.longitude);
+        if (distance <= office.radius) {
+          print('Entered office: ${office.name}');
+          location.value = office.name;
+          isInsideAnyGeofence.value = true;
+          break;
+        }
       }
 
-
-      if (administrativeArea.value != '' && administrativeArea.value != null) {
-        // Query Isar database for locations with the same administrative area
-        List<LocationModel> isarLocations =
-        await service.getLocationsByState(administrativeArea.value);
-
-
-        // Convert Isar locations to GeofenceModel
-        List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
-          name: location.locationName!, // Use 'locationName'
-          latitude: location.latitude ?? 0.0,
-          longitude: location.longitude ?? 0.0,
-          radius: location.radius?.toDouble() ?? 0.0,
-        )).toList();
-
-        print("Ofiicessss == ${offices}");
-
-        isInsideAnyGeofence.value = false;
-        for (GeofenceModel office in offices) {
-          double distance = GeoUtils.haversine(
-              position.latitude, position.longitude, office.latitude, office.longitude);
-          if (distance <= office.radius) {
-            print('Entered office: ${office.name}');
-            location.value = office.name;
-            isInsideAnyGeofence.value = true;
-            break;
-          }
-        }
-
-        if (!isInsideAnyGeofence.value) {
-          List<Placemark> placemark =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
-
-          location.value =
-          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
-
-          print("Location from map === ${location.value}");
-        }
-
-
-
-
-
-      }
-      else {
-
-        List<Placemark> placemark =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
-
+      if (!isInsideAnyGeofence.value) {
+        List<Placemark> placemark = await placemarkFromCoordinates(
+            lati.value, longi.value);
 
         location.value =
         "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-        print("Unable to get administrative area. Using default location.");
+        print("Location from map === ${location.value}");
       }
+    } else {
+      List<Placemark> placemark = await placemarkFromCoordinates(
+          lati.value, longi.value);
 
+      location.value =
+      "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+      print("Unable to get administrative area. Using default location.");
     }
   }
-
-
 
   Future<void> getLocationStatus() async {
     bool isLocationEnabled = await Geolocator.isLocationServiceEnabled();
@@ -775,11 +836,12 @@ class ClockAttendanceController extends GetxController {
     }
   }
 
-  Future<void> handleClockInOut(BuildContext context, GlobalKey<SlideActionState> key) async {
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    if (!isDeviceConnected) {
+  Future<void> checkInternetConnection() async {
+    isInternetConnected.value = await InternetConnectionChecker().hasConnection;
+    if (!isInternetConnected.value) {
       Fluttertoast.showToast(
-        msg: "No Internet Connectivity Detected. Please try again later!!",
+        msg:
+        "No Internet Connectivity Detected.",
         toastLength: Toast.LENGTH_LONG,
         backgroundColor: Colors.black54,
         gravity: ToastGravity.BOTTOM,
@@ -787,28 +849,49 @@ class ClockAttendanceController extends GetxController {
         textColor: Colors.white,
         fontSize: 16.0,
       );
-      key.currentState!.reset();
-      return;
     }
+  }
+
+  Future<void> handleClockInOut(
+      BuildContext context, GlobalKey<SlideActionState> key) async {
+    // isDeviceConnected = await InternetConnectionChecker().hasConnection;
+    // if (!isDeviceConnected) {
+    //   Fluttertoast.showToast(
+    //     msg:
+    //     "No Internet Connectivity Detected.",
+    //     toastLength: Toast.LENGTH_LONG,
+    //     backgroundColor: Colors.black54,
+    //     gravity: ToastGravity.BOTTOM,
+    //     timeInSecForIosWeb: 1,
+    //     textColor: Colors.white,
+    //     fontSize: 16.0,
+    //   );
+    //   //  key.currentState!.reset();
+    //   // return;
+    // }
 
     try {
-      final lastAttend = await service.getLastAttendance(DateFormat("MMMM yyyy").format(DateTime.now()).toString());
+      final lastAttend = await service.getLastAttendance(
+          DateFormat("MMMM yyyy").format(DateTime.now()).toString());
 
       if (lastAttend?.date != currentDate) {
         // Clock In
-        await _clockIn(isDeviceConnected);
+        await _clockIn(isInternetConnected.value);
       } else if (lastAttend?.date == currentDate) {
         // Clock Out
-        List<AttendanceModel> attendanceResult = await service.getAttendanceForDate(DateFormat('dd-MMMM-yyyy').format(ntpTime));
+        List<AttendanceModel> attendanceResult = await service
+            .getAttendanceForDate(
+            DateFormat('dd-MMMM-yyyy').format(ntpTime));
         final bioInfoForUser = await service.getBioInfoWithFirebaseAuth();
-        await _clockOut(attendanceResult[0].id, bioInfoForUser, attendanceResult);
+        await _clockOut(
+            attendanceResult[0].id, bioInfoForUser, attendanceResult);
       } else if (lastAttend?.date == null) {
         // No previous record, clock in
-        await _clockIn(isDeviceConnected);
+        await _clockIn(isInternetConnected.value);
       }
     } catch (e) {
       log("Attendance clockInandOut Error ====== ${e.toString()}");
-      await _clockIn(isDeviceConnected);
+      await _clockIn(isInternetConnected.value);
     }
 
     key.currentState!.reset();
@@ -816,7 +899,9 @@ class ClockAttendanceController extends GetxController {
 
   Future<void> _clockIn(bool isDeviceConnected) async {
     final time = isDeviceConnected
-        ? DateTime.now().add(Duration(milliseconds: await NTP.getNtpOffset(localTime: DateTime.now(), lookUpAddress: "time.google.com")))
+        ? DateTime.now().add(Duration(
+        milliseconds: await NTP.getNtpOffset(
+            localTime: DateTime.now(), lookUpAddress: "time.google.com")))
         : ntpTime;
 
     final attendance = AttendanceModel()
@@ -850,7 +935,10 @@ class ClockAttendanceController extends GetxController {
     Get.off(() => AttendanceHomeScreen(service: IsarService()));
   }
 
-  Future<void> _clockOut(int attendanceId, BioModel? bioInfoForUser, List<AttendanceModel> attendanceResult) async {
+  Future<void> _clockOut(
+      int attendanceId,
+      BioModel? bioInfoForUser,
+      List<AttendanceModel> attendanceResult) async {
     await service.updateAttendance(
       attendanceId,
       AttendanceModel(),
@@ -860,8 +948,12 @@ class ClockAttendanceController extends GetxController {
       location.value,
       false,
       true,
-      _diffClockInOut(attendanceResult[0].clockIn.toString(), DateFormat('h:mm a').format(ntpTime)),
-      _diffHoursWorked(attendanceResult[0].clockIn.toString(), DateFormat('h:mm a').format(ntpTime)),
+      _diffClockInOut(
+          attendanceResult[0].clockIn.toString(),
+          DateFormat('h:mm a').format(ntpTime)),
+      _diffHoursWorked(
+          attendanceResult[0].clockIn.toString(),
+          DateFormat('h:mm a').format(ntpTime)),
     );
     Fluttertoast.showToast(
       msg: "Clocking-Out..",
@@ -921,28 +1013,28 @@ class ClockAttendanceController extends GetxController {
   // );
 
   showDialogBox2() => showCupertinoDialog<String>(
-    context: Get.context!, // Retrieve BuildContext from Get
-    builder: (BuildContext builderContext) => CupertinoAlertDialog(
-      // ... your AlertDialog content
-      actions: <Widget>[
-        TextButton(
-          onPressed: () async {
-            Get.back(); // You can use Get.back() here
-            isAlertSet2.value = false;
-            isLocationPermissionGranted.value =
-            await LocationService().getPermissionStatus();
-            if (isLocationPermissionGranted.value == LocationPermission.denied ||
-                isLocationPermissionGranted.value ==
-                    LocationPermission.deniedForever) {
-              showDialogBox2(); // Use builderContext for the recursive call
-            }
-          },
-          child: const Text("OK"),
-        ),
-      ],
-    ),
+  context: Get.context!, // Retrieve BuildContext from Get
+  builder: (BuildContext builderContext) => CupertinoAlertDialog(
+  // ... your AlertDialog content
+  actions: <Widget>[
+  TextButton(
+  onPressed: () async {
+  Get.back(); // You can use Get.back() here
+  isAlertSet2.value = false;
+  isLocationPermissionGranted.value =
+  await LocationService().getPermissionStatus();
+  if (isLocationPermissionGranted.value ==
+  LocationPermission.denied ||
+  isLocationPermissionGranted.value ==
+  LocationPermission.deniedForever) {
+    showDialogBox2(); // Use builderContext for the recursive call
+  }
+  },
+    child: const Text("OK"),
+  ),
+  ],
+  ),
   );
-
 
   String _diffClockInOut(String clockInTime, String clockOutTime) {
     var format = DateFormat("h:mm a");
@@ -985,198 +1077,201 @@ class ClockAttendanceController extends GetxController {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     Get.bottomSheet(
-        StatefulBuilder(
+      StatefulBuilder(
         builder: (context, setState) {
-      return Container(
-          padding: const EdgeInsets.only(left: 20, right: 20),
-          width: 300,
-          height: MediaQuery.of(context).size.height * 0.65,
-          color: Colors.white54,
-          alignment: Alignment.center,
-          child: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 20.0),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text(
-    "Out Of Office?",
-    style: TextStyle(
-    color: Colors.black87,
-    fontWeight: FontWeight.bold,
-    fontSize: screenWidth / 15,
-    ),
-    ),
-    MyInputField(
-    title: "Date",
-    hint: DateFormat("dd/MM/yyyy").format(_selectedDate),
-    widget: IconButton(
-    onPressed: () {
-    _getDateFromUser(setState);
-    },
-    icon: const Icon(
-    Icons.calendar_today_outlined,
-    color: Colors.grey,
-    ),
-    ),
-    ),
-    MyInputField(
-    title: "Reasons For Day off",
-    hint: _reasons,
-    widget: DropdownButton<String>(
-    icon: const Icon(
-    Icons.keyboard_arrow_down,
-    color: Colors.grey,
-    ),
-    iconSize: 32,
-    elevation: 4,
-    style: TextStyle(
-    color: Get.isDarkMode ? Colors.white : Colors.black,
-    fontSize: screenWidth / 25,
-    fontFamily: "NexaBold",
-    ),
-    underline: Container(height: 0),
-    items: reasonsForDayOff.map((String value) {
-    return DropdownMenuItem<String>(
-    value: value,
-    child: Text(
-    value,
-    style: TextStyle(
-    color: Get.isDarkMode ? Colors.white : Colors.black,
-    fontSize: screenWidth / 25,
-    fontFamily: "NexaBold",
-    ),
-    ),
-    );
-    }).toList(),
-    onChanged: (String? newValue) {
-    setState(() {
-    _reasons = newValue!;
-    });
-    },
-    ),
-    ),
-    Row(
-    children: [
-    Expanded(
-    child: MyInputField(
-    title: "Start Time",
-    hint: _startTime,
-    widget: IconButton(
-    onPressed: () {
-    _getTimeFromUser(isStartTime: true, setState: setState);
-    },
-    icon: const Icon(
-    Icons.access_time_rounded,
-    color: Colors.grey,
-    ),
-    ),
-    ),
-    ),
-    const SizedBox(width: 12),
-    Expanded(
-    child: MyInputField(
-    title: "End Time",
-    hint: _endTime,
-    widget: IconButton(
-    onPressed: () {
-    _getTimeFromUser(isStartTime: false, setState: setState);
-    },
-    icon: const Icon(
-    Icons.access_time_rounded,
-    color: Colors.grey,
-    ),
-    ),
-    ),
-    ),
-    ],
-    ),
-    const SizedBox(height: 18),
-    Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-    Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text(
-    "Color",
-    style: TextStyle(
-    color: Get.isDarkMode ? Colors.white : Colors.black,
-    fontSize: screenWidth / 21,
-    fontFamily: "NexaBold",
-    ),
-    ),
-    const SizedBox(height: 8.0),
-    Wrap(
-    crossAxisAlignment: WrapCrossAlignment.start,
-    children: List<Widget>.generate(3, (int index) {
-    return GestureDetector(
-    onTap: () {
-    setState(() {
-    _selectedColor = index;
-    });
-    },
-    child: Padding(
-    padding:const EdgeInsets.all(8.0),
-      child: CircleAvatar(
-        radius: 14,
-        backgroundColor: index == 0
-            ? Colors.red
-            : index == 1
-            ? Colors.blueAccent
-            : Colors.yellow,
-        child: _selectedColor == index
-            ? const Icon(
-          Icons.done,
-          color: Colors.white,
-          size: 16,
-        )
-            : Container(),
-      ),
-    ),
-    );
-    }),
-    ),
-    ],
-    ),
-      GestureDetector(
-        onTap: () => _validateData(context),
-        child: Container(
-          width: 120,
-          height: 60,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.red,
-                Colors.black,
-              ],
+          return Container(
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            width: 300,
+            height: MediaQuery.of(context).size.height * 0.65,
+            color: Colors.white54,
+            alignment: Alignment.center,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Out Of Office?",
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: screenWidth / 15,
+                    ),
+                  ),
+                  MyInputField(
+                    title: "Date",
+                    hint: DateFormat("dd/MM/yyyy").format(_selectedDate),
+                    widget: IconButton(
+                      onPressed: () {
+                        _getDateFromUser(setState);
+                      },
+                      icon: const Icon(
+                        Icons.calendar_today_outlined,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  MyInputField(
+                    title: "Reasons For Day off",
+                    hint: _reasons,
+                    widget: DropdownButton<String>(
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.grey,
+                      ),
+                      iconSize: 32,
+                      elevation: 4,
+                      style: TextStyle(
+                        color: Get.isDarkMode ? Colors.white : Colors.black,
+                        fontSize: screenWidth / 25,
+                        fontFamily: "NexaBold",
+                      ),
+                      underline: Container(height: 0),
+                      items: reasonsForDayOff.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            style: TextStyle(
+                              color: Get.isDarkMode ? Colors.white : Colors.black,
+                              fontSize: screenWidth / 25,
+                              fontFamily: "NexaBold",
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _reasons = newValue!;
+                        });
+                      },
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: MyInputField(
+                          title: "Start Time",
+                          hint: _startTime,
+                          widget: IconButton(
+                            onPressed: () {
+                              _getTimeFromUser(
+                                  isStartTime: true, setState: setState);
+                            },
+                            icon: const Icon(
+                              Icons.access_time_rounded,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: MyInputField(
+                          title: "End Time",
+                          hint: _endTime,
+                          widget: IconButton(
+                            onPressed: () {
+                              _getTimeFromUser(
+                                  isStartTime: false, setState: setState);
+                            },
+                            icon: const Icon(
+                              Icons.access_time_rounded,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Color",
+                            style: TextStyle(
+                              color: Get.isDarkMode ? Colors.white : Colors.black,
+                              fontSize: screenWidth / 21,
+                              fontFamily: "NexaBold",
+                            ),
+                          ),
+                          const SizedBox(height: 8.0),
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.start,
+                            children: List<Widget>.generate(3, (int index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedColor = index;
+                                  });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: CircleAvatar(
+                                    radius: 14,
+                                    backgroundColor: index == 0
+                                        ? Colors.red
+                                        : index == 1
+                                        ? Colors.blueAccent
+                                        : Colors.yellow,
+                                    child: _selectedColor == index
+                                        ? const Icon(
+                                      Icons.done,
+                                      color: Colors.white,
+                                      size: 16,
+                                    )
+                                        : Container(),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () => _validateData(context),
+                        child: Container(
+                          width: 120,
+                          height: 60,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.red,
+                                Colors.black,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(20),
+                            ),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              "Submit",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 40,
+                  ),
+                ],
+              ),
             ),
-            borderRadius: BorderRadius.all(
-              Radius.circular(20),
-            ),
-          ),
-          child: const Center(
-            child: Text(
-              "Submit",
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      ),
-    ],
-    ),
-      const SizedBox(
-        height: 40,
-      ),
-    ],
-    ),
-          ),
-      );
+          );
         },
-        ),
+      ),
       isScrollControlled: true,
     );
   }
+
   void _validateData(BuildContext context) {
     if (_reasons.isNotEmpty) {
       _addDaysOffToDb();
@@ -1195,6 +1290,7 @@ class ClockAttendanceController extends GetxController {
       );
     }
   }
+
   _addDaysOffToDb() async {
     await _getLocation();
     final attendance = AttendanceModel()
@@ -1217,6 +1313,7 @@ class ClockAttendanceController extends GetxController {
 
     await service.saveAttendance(attendance);
   }
+
   void _getDateFromUser(StateSetter setState) async {
     DateTime? _pickerDate = await showDatePicker(
       context: Get.context!,
@@ -1232,7 +1329,9 @@ class ClockAttendanceController extends GetxController {
       print("It's null or something is wrong");
     }
   }
-  void _getTimeFromUser({required bool isStartTime, required StateSetter setState}) async {
+
+  void _getTimeFromUser(
+      {required bool isStartTime, required StateSetter setState}) async {
     var pickedTime = await _showTimePicker();
     String _formattedTime = pickedTime.format(Get.context!);
     print(pickedTime);
@@ -1248,6 +1347,7 @@ class ClockAttendanceController extends GetxController {
       });
     }
   }
+
   Future<TimeOfDay> _showTimePicker() async {
     TimeOfDay? pickedTime = await showTimePicker(
       initialEntryMode: TimePickerEntryMode.input,
@@ -1267,7 +1367,7 @@ class ClockAttendanceController extends GetxController {
     // If the user cancels the picker, return the current time
     return pickedTime ?? TimeOfDay.now();
   }
-  
+
   Future _getLocation() async {
     List placemark =
     await placemarkFromCoordinates(lati.value, longi.value);

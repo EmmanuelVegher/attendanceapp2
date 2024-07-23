@@ -11,8 +11,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http; // Import http package for network requests
 
 class SplashScreen extends StatefulWidget {
   final IsarService service;
@@ -43,17 +45,40 @@ class _SplashScreenState extends State<SplashScreen> {
       _init();
     } else {
       // No internet, proceed to insert the super user (it doesn't require internet)
-      _insertSuperUser();
+      _insertSuperUser().then((_){
+        progress.value = 1.0;
+        Timer(const Duration(seconds: 1), () => Get.off(() => AuthCheck(service: widget.service)));
+        Fluttertoast.showToast(
+          msg:
+          "Inserted Super User..",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+
+      });
+
+
     }
   }
 
   Future<void> _init() async {
     _insertSuperUser().then((_) {
       progress.value = 0.5;
-      _syncCompleteData().then((_) {
-        progress.value = 1.0;
-        Timer(const Duration(seconds: 1), () => Get.off(() => AuthCheck(service: widget.service)));
-      });
+      try {
+        _syncCompleteData().then((_) {
+          progress.value = 1.0;
+          Timer(const Duration(seconds: 1), () => Get.off(() => AuthCheck(service: widget.service)));
+        });
+      } catch (e) {
+        // Error handling for Firebase Authentication
+        log("Firebase Authentication Error: ${e.toString()}");
+        // You can display a user-friendly error message here
+        // ...
+      }
     });
   }
 
@@ -62,7 +87,8 @@ class _SplashScreenState extends State<SplashScreen> {
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: _hasInternet
+      body:
+      _hasInternet
           ? SizedBox(
         width: screenWidth,
         height: screenHeight,
@@ -125,7 +151,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   // This Method updates all attendance that has a clock-out made. This is necessary for data validation and to ensure that folks sign-out appropriately
-  _syncCompleteData() async {
+  Future<void> _syncCompleteData() async {
     try {
       // The try block first of all saves the data in the google sheet for the visualization and then on the firebase database as an extra backup database  before changing the sync status on Mobile App to "Synced"
       //Query the firebase and get the records having updated records
@@ -370,24 +396,6 @@ class _SplashScreenState extends State<SplashScreen> {
     await AttendanceGSheetsApi.insert([newUser.toJson()]);
     log("newUser ID ===== $newUser");
   }
-
-  // void _getUserDetail() async {
-  //   final userDetail = await IsarService().getBioInfoWithFirebaseAuth();
-  //   setState(() {
-  //     firebaseAuthId = userDetail?.firebaseAuthId;
-  //     state = userDetail?.state;
-  //     project = userDetail?.project;
-  //     firstName = userDetail?.firstName;
-  //     lastName = userDetail?.lastName;
-  //     designation = userDetail?.designation;
-  //     department = userDetail?.department;
-  //     location = userDetail?.location;
-  //     staffCategory = userDetail?.staffCategory;
-  //     mobile = userDetail?.mobile;
-  //     emailAddress = userDetail?.emailAddress;
-  //     id = userDetail?.id;
-  //   });
-  // }
 
 
 

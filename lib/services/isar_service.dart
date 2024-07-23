@@ -10,6 +10,7 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../model/app_usage_model.dart';
+import '../model/track_location_model.dart';
 
 class IsarService extends DatabaseAdapter {
   IsarService._privateConstructor();
@@ -49,6 +50,13 @@ class IsarService extends DatabaseAdapter {
         print("Error saving state: $e");
       }
     }
+  }
+
+  Future<void> saveLocationData(TrackLocationModel locationData) async {
+    final isar = await db; // Assuming you have a method to open Isar instance
+    await isar.writeTxn(() async {
+      await isar.trackLocationModels.putSync(locationData);
+    });
   }
 
   Future<void> saveBioData(BioModel newbiodata) async {
