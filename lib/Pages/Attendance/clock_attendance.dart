@@ -41,6 +41,7 @@ import '../../widgets/geo_utils.dart';
 import '../../widgets/header_widget.dart';
 import '../../widgets/input_field.dart';
 import '../../widgets/show_error_dialog.dart';
+import '../OffDays/days_off.dart';
 import 'button.dart';
 
 class GeofenceModel {
@@ -60,7 +61,7 @@ class GeofenceModel {
 class ClockAttendance extends StatelessWidget {
   final IsarService service;
 
-  ClockAttendance(IsarService isarService, {Key? key, required this.service})
+  ClockAttendance(IsarService isarService, {Key? key, required this.service, required controller})
       : super(key: key);
 
   @override
@@ -128,6 +129,7 @@ class ClockAttendance extends StatelessWidget {
               ),
               // Obx(
               //      () =>
+
               Container(
                 alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.only(top: 32),
@@ -142,29 +144,35 @@ class ClockAttendance extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 10), // Spacing between status and coordinates
-                    Obx(() => Text(
+                    Obx(() => controller.lati.value != 0.0?
+                        Text(
                       "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
                       style: TextStyle(
                         fontFamily: "NexaBold",
                         fontSize: screenWidth / 23,
                       ),
-                    )),
+                    ):CircularProgressIndicator()
+                    ),
                     SizedBox(height: 10),
-                    Obx(() => Text(
+                    Obx(() => controller.administrativeArea.value != ""?
+                        Text(
                       "Current State: ${controller.administrativeArea.value}",
                       style: TextStyle(
                         fontFamily: "NexaBold",
                         fontSize: screenWidth / 23,
                       ),
-                    )),
+                    ):CircularProgressIndicator()
+                    ),
                     SizedBox(height: 10),
-                    Obx(() => Text(
+                    Obx(() => controller.isCircularProgressBarOn.value ?CircularProgressIndicator():
+                        Text(
                       "Current Location: ${controller.location.value}",
                       style: TextStyle(
                         fontFamily: "NexaBold",
                         fontSize: screenWidth / 23,
                       ),
-                    )),
+                    )
+                    ),
                     // You can add your location name widget here, using Obx to make it reactive
                   ],
                 ),
@@ -316,7 +324,8 @@ class ClockAttendance extends StatelessWidget {
                         ? MyButton(
                       label: "Out Of Office? CLICK HERE",
                       onTap: () {
-                        controller.showBottomSheet(context);
+                        //controller.showBottomSheet(context);
+                        Get.off(() => DaysOffPage(service: service));
                       },
                     )
                         : const SizedBox.shrink(),
@@ -564,13 +573,13 @@ class ClockAttendanceController extends GetxController {
   ClockAttendanceController(this.service) {
     _init();
   }
-
+  var isCircularProgressBarOn = true.obs; // Observable boolean
   RxString clockIn = "--/--".obs;
   RxString clockOut = "--/--".obs;
   RxString durationWorked = "".obs;
-  RxString location = "Outside Office Premises".obs;
-  RxString clockInLocation = "Outside Office Premises".obs;
-  RxString clockOutLocation = "Outside Office Premises".obs;
+  RxString location = "".obs;
+  RxString clockInLocation = "".obs;
+  RxString clockOutLocation = "".obs;
   RxString role = "".obs;
   RxString firstName = "".obs;
   RxString lastName = "".obs;
@@ -620,6 +629,7 @@ class ClockAttendanceController extends GetxController {
   void onClose() {
     // Cancel the timer when the controller is closed
     _locationTimer?.cancel();
+   // _startLocationService().cancel();
     super.onClose();
   }
 
@@ -634,7 +644,7 @@ class ClockAttendanceController extends GetxController {
 
     // Start the periodic location updates
     _locationTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
-      _startLocationService();
+     // _startLocationService();
       // _init();
     });
   }
@@ -651,11 +661,13 @@ class ClockAttendanceController extends GetxController {
 
   Future<void> _getUserDetail() async {
     final userDetail = await IsarService().getBioInfoWithFirebaseAuth();
-    firebaseAuthId.value = userDetail?.firebaseAuthId ?? "";
-    firstName.value = userDetail?.firstName ?? "";
-    lastName.value = userDetail?.lastName ?? "";
-    emailAddress.value = userDetail?.emailAddress ?? "";
-    role.value = userDetail?.role ?? "";
+    if (!isClosed) {  // Check if the controller is still active
+      firebaseAuthId.value = userDetail?.firebaseAuthId ?? "";
+      firstName.value = userDetail?.firstName ?? "";
+      lastName.value = userDetail?.lastName ?? "";
+      emailAddress.value = userDetail?.emailAddress ?? "";
+      role.value = userDetail?.role ?? "";
+    }
   }
 
   Future<void> _getAttendanceSummary() async {
@@ -712,19 +724,44 @@ class ClockAttendanceController extends GetxController {
       }
     }
 
+    // Use a FutureBuilder to manage the asynchronous location fetching
+    _getLocation2().then((_) { // Call _getLocation and wait for it to complete
+      // Now that the location is obtained, update the UI using Obx
+      lati.refresh(); // Force a refresh of the Obx variable
+      longi.refresh();
+      administrativeArea.refresh();
+      location.refresh();
+    });
+
+  }
+
+
+  Future<void> _getLocation2() async {
+
     // Check for internet connection
     isInternetConnected.value = await InternetConnectionChecker().hasConnection;
 
     if (!isInternetConnected.value) {
       // Use Geolocator and request location updates using GPS
       try {
+        print("There is nooooooo internet to get location data");
         Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: geolocator.LocationAccuracy.best,
+          forceAndroidLocationManager: true, // Important for Android
         );
         lati.value = position.latitude;
         longi.value = position.longitude;
+        print("locationData.latitude == ${position.latitude}");
         _updateLocation();
-        _getAttendanceSummary();
+
+
+        // locationService.onLocationChanged.listen((LocationData locationData) {
+        //   lati.value = locationData.latitude!;
+        //   longi.value = locationData.longitude!;
+        //   print("locationData.latitude == ${locationData.latitude}");
+        //   _updateLocation();
+        //   _getAttendanceSummary();
+        // });
       } catch (e) {
         log("Error getting GPS location: ${e.toString()}");
         Fluttertoast.showToast(
@@ -740,6 +777,7 @@ class ClockAttendanceController extends GetxController {
       }
     } else {
       // Continue using location package for updates
+      print("Ther is internet to get location data");
       locationService.onLocationChanged.listen((LocationData locationData) {
         lati.value = locationData.latitude!;
         longi.value = locationData.longitude!;
@@ -788,8 +826,10 @@ class ClockAttendanceController extends GetxController {
             lati.value, longi.value, office.latitude, office.longitude);
         if (distance <= office.radius) {
           print('Entered office: ${office.name}');
+
           location.value = office.name;
           isInsideAnyGeofence.value = true;
+          isCircularProgressBarOn.value = false; // Update observable value
           break;
         }
       }
@@ -802,6 +842,7 @@ class ClockAttendanceController extends GetxController {
         "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
         print("Location from map === ${location.value}");
+        isCircularProgressBarOn.value = false; // Update observable value
       }
     } else {
       List<Placemark> placemark = await placemarkFromCoordinates(
@@ -811,6 +852,7 @@ class ClockAttendanceController extends GetxController {
       "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
       print("Unable to get administrative area. Using default location.");
+      isCircularProgressBarOn.value = false; // Update observable value
     }
   }
 
@@ -881,7 +923,7 @@ class ClockAttendanceController extends GetxController {
         // Clock Out
         List<AttendanceModel> attendanceResult = await service
             .getAttendanceForDate(
-            DateFormat('dd-MMMM-yyyy').format(ntpTime));
+            DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
         final bioInfoForUser = await service.getBioInfoWithFirebaseAuth();
         await _clockOut(
             attendanceResult[0].id, bioInfoForUser, attendanceResult);
@@ -902,72 +944,106 @@ class ClockAttendanceController extends GetxController {
         ? DateTime.now().add(Duration(
         milliseconds: await NTP.getNtpOffset(
             localTime: DateTime.now(), lookUpAddress: "time.google.com")))
-        : ntpTime;
+        : DateTime.now();
 
-    final attendance = AttendanceModel()
-      ..clockIn = DateFormat('hh:mm a').format(time)
-      ..date = DateFormat('dd-MMMM-yyyy').format(time)
-      ..clockInLatitude = UserModel.lat
-      ..clockInLocation = location.value
-      ..clockInLongitude = UserModel.long
-      ..clockOut = "--/--"
-      ..clockOutLatitude = 0.0
-      ..clockOutLocation = null
-      ..clockOutLongitude = 0.0
-      ..isSynced = false
-      ..voided = false
-      ..isUpdated = false
-      ..durationWorked = "0 hours 0 minutes"
-      ..noOfHours = 0.0
-      ..offDay = false
-      ..month = DateFormat('MMMM yyyy').format(time);
+    if(UserModel.lat != 0.0) {
+      final attendance = AttendanceModel()
+        ..clockIn = DateFormat('hh:mm a').format(time)
+        ..date = DateFormat('dd-MMMM-yyyy').format(time)
+        ..clockInLatitude = UserModel.lat
+        ..clockInLocation = location.value
+        ..clockInLongitude = UserModel.long
+        ..clockOut = "--/--"
+        ..clockOutLatitude = 0.0
+        ..clockOutLocation = null
+        ..clockOutLongitude = 0.0
+        ..isSynced = false
+        ..voided = false
+        ..isUpdated = false
+        ..durationWorked = "0 hours 0 minutes"
+        ..noOfHours = 0.0
+        ..offDay = false
+        ..month = DateFormat('MMMM yyyy').format(time);
 
-    await service.saveAttendance(attendance);
-    Fluttertoast.showToast(
-      msg: "Clocking-In..",
-      toastLength: Toast.LENGTH_LONG,
-      backgroundColor: Colors.black54,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-    Get.off(() => AttendanceHomeScreen(service: IsarService()));
+      await service.saveAttendance(attendance);
+      Fluttertoast.showToast(
+        msg: "Clocking-In..",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      Get.off(() => AttendanceHomeScreen(service: IsarService()));
+    }else{
+      Fluttertoast.showToast(
+        msg: "Latitude and Longitude cannot be 0.0..",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 
   Future<void> _clockOut(
       int attendanceId,
       BioModel? bioInfoForUser,
       List<AttendanceModel> attendanceResult) async {
-    await service.updateAttendance(
-      attendanceId,
-      AttendanceModel(),
-      DateFormat('hh:mm a').format(ntpTime),
-      UserModel.lat,
-      UserModel.long,
-      location.value,
-      false,
-      true,
-      _diffClockInOut(
-          attendanceResult[0].clockIn.toString(),
-          DateFormat('h:mm a').format(ntpTime)),
-      _diffHoursWorked(
-          attendanceResult[0].clockIn.toString(),
-          DateFormat('h:mm a').format(ntpTime)),
-    );
-    Fluttertoast.showToast(
-      msg: "Clocking-Out..",
-      toastLength: Toast.LENGTH_LONG,
-      backgroundColor: Colors.black54,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-    Get.off(() => bioInfoForUser!.role == "User"
-        ? UserDashBoard(service: service)
-        : AdminDashBoard(service: service));
+
+    final time = isDeviceConnected
+        ? DateTime.now().add(Duration(
+        milliseconds: await NTP.getNtpOffset(
+            localTime: DateTime.now(), lookUpAddress: "time.google.com")))
+        : DateTime.now();
+
+    if(UserModel.lat != 0.0) {
+      await service.updateAttendance(
+        attendanceId,
+        AttendanceModel(),
+        DateFormat('hh:mm a').format(time),
+        UserModel.lat,
+        UserModel.long,
+        location.value,
+        false,
+        true,
+        _diffClockInOut(
+            attendanceResult[0].clockIn.toString(),
+            DateFormat('h:mm a').format(time)),
+        _diffHoursWorked(
+            attendanceResult[0].clockIn.toString(),
+            DateFormat('h:mm a').format(time)),
+      );
+      Fluttertoast.showToast(
+        msg: "Clocking-Out..",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      Get.off(() =>
+      bioInfoForUser!.role == "User"
+          ? UserDashBoard(service: service)
+          : AdminDashBoard(service: service));
+    } else{
+      Fluttertoast.showToast(
+        msg: "Latitude and Longitude cannot be 0.0..",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
+
+
 
   showDialogBox() => showCupertinoDialog<String>(
     context: Get.context!, // Retrieve BuildContext from Get
@@ -1076,14 +1152,16 @@ class ClockAttendanceController extends GetxController {
   void showBottomSheet(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
+    final ClockAttendanceController controller =
+    Get.put(ClockAttendanceController(IsarService()));
     Get.bottomSheet(
       StatefulBuilder(
         builder: (context, setState) {
           return Container(
             padding: const EdgeInsets.only(left: 20, right: 20),
-            width: 300,
+            width: screenWidth,
             height: MediaQuery.of(context).size.height * 0.65,
-            color: Colors.white54,
+            color: Colors.white,
             alignment: Alignment.center,
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(top: 20.0),
@@ -1098,6 +1176,43 @@ class ClockAttendanceController extends GetxController {
                       fontSize: screenWidth / 15,
                     ),
                   ),
+                  // Obx(
+                  //       () => Container(
+                  //     alignment: Alignment.centerLeft,
+                  //     child: Text(
+                  //       "${controller.firstName.value.toString().toUpperCase()} ${controller.lastName.value.toString().toUpperCase()}",
+                  //       style: TextStyle(
+                  //         color: Colors.black54,
+                  //         fontFamily: "NexaBold",
+                  //         fontSize: screenWidth / 18,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  SizedBox(height: 10), // Spacing between status and coordinates
+                  Obx(() => Text(
+                    "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
+                    style: TextStyle(
+                      fontFamily: "NexaBold",
+                      fontSize: screenWidth / 23,
+                    ),
+                  )),
+                  SizedBox(height: 10),
+                  Obx(() => Text(
+                    "Current State: ${controller.administrativeArea.value}",
+                    style: TextStyle(
+                      fontFamily: "NexaBold",
+                      fontSize: screenWidth / 23,
+                    ),
+                  )),
+                  SizedBox(height: 10),
+                  Obx(() => Text(
+                    "Current Location: ${controller.location.value}",
+                    style: TextStyle(
+                      fontFamily: "NexaBold",
+                      fontSize: screenWidth / 23,
+                    ),
+                  )),
                   MyInputField(
                     title: "Date",
                     hint: DateFormat("dd/MM/yyyy").format(_selectedDate),
@@ -1292,26 +1407,49 @@ class ClockAttendanceController extends GetxController {
   }
 
   _addDaysOffToDb() async {
-    await _getLocation();
-    final attendance = AttendanceModel()
-      ..clockIn = _startTime
-      ..date = DateFormat('dd-MMMM-yyyy').format(_selectedDate)
-      ..clockInLatitude = UserModel.lat
-      ..clockInLocation = location.value
-      ..clockInLongitude = UserModel.long
-      ..clockOut = _endTime
-      ..clockOutLatitude = UserModel.lat
-      ..clockOutLocation = location.value
-      ..clockOutLongitude = UserModel.long
-      ..isSynced = false
-      ..voided = false
-      ..isUpdated = true
-      ..offDay = true
-      ..durationWorked = _reasons
-      ..noOfHours = _diffHoursWorked(_startTime, _endTime)
-      ..month = DateFormat('MMMM yyyy').format(_selectedDate);
+    // _getLocation();
+    final attendanceLast = await service.getAttendanceForSpecificDate(
+        DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
 
-    await service.saveAttendance(attendance);
+    if (lati.value == 0.0 && longi.value == 0.0) {
+      Fluttertoast.showToast(
+          msg: "Error: Latitude and Longitude Not gotten...Kindly wait",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    } else if (attendanceLast.length == 0) {
+      final attendnce = AttendanceModel()
+        ..clockIn = _startTime
+        ..date = DateFormat('dd-MMMM-yyyy').format(_selectedDate)
+        ..clockInLatitude = lati.value
+        ..clockInLocation = location.value
+        ..clockInLongitude = longi.value
+        ..clockOut = _endTime
+        ..clockOutLatitude = lati.value
+        ..clockOutLocation = location.value
+        ..clockOutLongitude = longi.value
+        ..isSynced = false
+        ..voided = false
+        ..isUpdated = true
+        ..offDay = true
+        ..durationWorked = _reasons
+        ..noOfHours = _diffHoursWorked(_startTime, _endTime)
+        ..month = DateFormat('MMMM yyyy').format(_selectedDate);
+
+      await service.saveAttendance(attendnce);
+    } else {
+      Fluttertoast.showToast(
+          msg: "Error: Attendance with same date already exist",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
   }
 
   void _getDateFromUser(StateSetter setState) async {
@@ -1376,4 +1514,6 @@ class ClockAttendanceController extends GetxController {
       "${placemark[0].street}, ${placemark[0].subLocality}, ${placemark[0].subAdministrativeArea}, ${placemark[0].locality}, ${placemark[0].administrativeArea}, ${placemark[0].postalCode}, ${placemark[0].country}";
     }
   }
+
+
 }

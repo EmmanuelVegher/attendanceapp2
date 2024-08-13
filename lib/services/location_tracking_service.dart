@@ -1,20 +1,19 @@
 
-import 'package:workmanager/workmanager.dart';
 import 'package:geolocator/geolocator.dart';
 import '../model/track_location_model.dart';
 import 'isar_service.dart';
 
 class LocationTrackingService {
-  static Future<void> initializeLocationTracking() async {
-    Workmanager().registerOneOffTask(
-      'locationTrackingTask',
-      'trackLocation',
-      initialDelay: _calculateDelayUntil12PM(),
-      constraints: Constraints(
-        networkType: NetworkType.not_required,
-      ),
-    );
-  }
+  // static Future<void> initializeLocationTracking() async {
+  //   Workmanager().registerOneOffTask(
+  //     'locationTrackingTask',
+  //     'trackLocation',
+  //     initialDelay: _calculateDelayUntil12PM(),
+  //     constraints: Constraints(
+  //       networkType: NetworkType.not_required,
+  //     ),
+  //   );
+  // }
 
   static Duration _calculateDelayUntil12PM() {
     // ... (your implementation)
@@ -46,6 +45,8 @@ class LocationTrackingService {
     // Get current position
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
+
+    print("New Position LocationTrackingService ==== ${position}");
 
     // Store in Isar Database
     // Assuming you have a model for location data and a method to save it in Isar

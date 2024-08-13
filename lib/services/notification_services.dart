@@ -1,128 +1,112 @@
-//import 'package:attendanceapp/to-do/notified_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
-import 'package:get/get.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-
-import '../Pages/auth_check.dart';
+import 'package:get/get.dart'; // If you are using GetX for navigation
+import '../Pages/auth_check.dart'; // Replace with your actual navigation target
 import '../main.dart';
-import 'isar_service.dart';
+import 'isar_service.dart'; // Replace with your actual service
 
-//import '../model/task.dart';
+// Function for Handling background notification taps
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  // Print details about the tapped notification for debugging.
+  print('notification(${notificationResponse.id}) action tapped: '
+      '${notificationResponse.actionId} with '
+      'payload: ${notificationResponse.payload}');
 
+  // Check if the notification tap included user input.
+  if (notificationResponse.input?.isNotEmpty ?? false) {
+    print(
+        'notification action tapped with input: ${notificationResponse.input}');
+  }
+}
 
 class NotifyHelper {
-
-  final FlutterLocalNotificationsPlugin
-  flutterLocalNotificationsPlugin =
+  // Create an instance of the notification plugin. This is a singleton
+  // object, meaning you'll use this same instance throughout your app.
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
 
-  // Function for Handling background notification taps (Now top-level)
-  @pragma('vm:entry-point')
-  void notificationTapBackground(NotificationResponse notificationResponse) {
-    // ignore: avoid_print
-    print('notification(${notificationResponse.id}) action tapped: '
-        '${notificationResponse.actionId} with'
-        ' payload: ${notificationResponse.payload}');
-    if (notificationResponse.input?.isNotEmpty ?? false) {
-      // ignore: avoid_print
-      print(
-          'notification action tapped with input: ${notificationResponse.input}');
-    }
-  }
+  // Flag to ensure timezone initialization happens only once.
+  static bool _isTimeZoneInitialized = false;
 
-  // Define onDidReceiveLocalNotification function
-  // Future<void> onDidReceiveLocalNotification(
-  //     int id, String? title, String? body, String? payload) async {
-  //   // Handle the notification tap
-  //   // For example, navigate to the AttendancePage
-  //   Get.to(AuthCheck(service: IsarService()));
-  //   _scheduleClockOutReminders(); // Reschedule the notification
-  // }
-
+  // Initializes the notification plugin and configures settings.
   Future<void> initializeNotification() async {
-    _configureLocalTimezone();
+    // Initialize timezones only once.
+    if (!_isTimeZoneInitialized) {
+      _configureLocalTimezone();
+      _isTimeZoneInitialized = true;
+    }
+
+    // Android-specific initialization settings.
     final AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('appicon');
+    AndroidInitializationSettings('notification_icon'); // Replace 'notification_icon' with your app's notification icon name from the 'android' folder in your project.
 
-    // final IOSInitializationSettings initializationSettingsIOS =
-    // IOSInitializationSettings(
-    //   requestSoundPermission: false,
-    //   requestBadgePermission: false,
-    //   requestAlertPermission: false,
-    //   onDidReceiveLocalNotification: onDidReceiveLocalNotification,
-    // );
-
-    // Import DarwinInitializationSettings from flutter_local_notifications
+    // iOS-specific initialization settings.
     const DarwinInitializationSettings initializationSettingsDarwin =
     DarwinInitializationSettings(
       requestSoundPermission: false,
       requestBadgePermission: false,
       requestAlertPermission: false,
-      onDidReceiveLocalNotification: onDidReceiveLocalNotification,
     );
 
+    // Combine platform-specific settings.
     final InitializationSettings initializationSettings =
     InitializationSettings(
-        android: initializationSettingsAndroid,
-       // iOS: initializationSettingsIOS,
-        macOS: null);
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin, // Use Darwin for both iOS and macOS
+    );
 
-    // await flutterLocalNotificationsPlugin.initialize(
-    //     initializationSettings,
-    //     selectedNotification:selectNotification);
-
-
+    // Initialize the notification plugin with settings and callbacks.
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) {
+      // Handle notification tap actions when the app is in the foreground.
+      onDidReceiveNotificationResponse:
+          (NotificationResponse notificationResponse) {
+        // Determine the type of notification response.
         switch (notificationResponse.notificationResponseType) {
           case NotificationResponseType.selectedNotification:
-            Get.to(AuthCheck(service: IsarService())); // Navigate to AuthCheck
-            _scheduleClockOutReminders(); // Re-schedule the notification
+          // Navigate to a specific page when the notification is tapped.
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => AuthCheck(
+                  service: IsarService(),
+                ),
+              ),
+            );
+            _scheduleClockOutReminders(); // Re-schedule the notification if needed.
             break;
           case NotificationResponseType.selectedNotificationAction:
-          // Handle specific action ID
-
+          // Handle actions associated with specific action IDs.
             break;
         }
       },
+      // Handle notification taps when the app is in the background.
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
-
-
   }
 
+  // Schedule daily notifications for clock-out reminders (example).
   Future<void> _scheduleClockOutReminders() async {
-    tz.initializeTimeZones(); // Initialize timezones (might already be initialized in main() above)
-
-    // Get the Nigeria timezone
+    tz.initializeTimeZones();
     tz.Location nigeriaTimeZone = tz.getLocation('Africa/Lagos');
 
-    // Set the initial time to 5 PM in Nigeria
     DateTime now = DateTime.now();
     DateTime fivePM = DateTime(now.year, now.month, now.day, 17, 0, 0);
 
-    // Check if fivePM is in the past
     if (fivePM.isBefore(now)) {
-      // If fivePM is in the past, schedule for tomorrow
       fivePM = DateTime(now.year, now.month, now.day + 1, 17, 0, 0);
     }
 
-    // Convert to TZDateTime for the Nigeria timezone
-    tz.TZDateTime scheduledDate = tz.TZDateTime.from(fivePM, nigeriaTimeZone);
+    tz.TZDateTime scheduledDate =
+    tz.TZDateTime.from(fivePM, nigeriaTimeZone);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      0, // id
-      'Clock Out Reminder', // title
-      'Don\'t forget to clock out for the day!', // body
+      0, // Unique notification ID
+      'Clock Out Reminder',
+      'Don\'t forget to clock out for the day!',
       scheduledDate,
-      //const Duration(minutes: 30), // repeatInterval
-      //notificationDetails:
-
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'high_importance_channel',
@@ -138,70 +122,94 @@ class NotifyHelper {
       androidAllowWhileIdle: true,
       uiLocalNotificationDateInterpretation:
       UILocalNotificationDateInterpretation.absoluteTime,
-    matchDateTimeComponents: DateTimeComponents.time,
-    payload: "Clock-Out Reminder|+ Kindly remember to clock-out|"
+      matchDateTimeComponents: DateTimeComponents.time,
+      payload: "Clock-Out Reminder|+ Kindly remember to clock-out|",
     );
   }
 
+  // Schedules a daily notification for a specific time.
+  Future<void> scheduleDailyNotifications(
+      int id, String title, String body, int hour, int minute) async {
+    tz.initializeTimeZones();
+    tz.Location nigeriaTimeZone = tz.getLocation('Africa/Lagos');
 
-  // scheduledNotification(int hour,int minutes,Task task) async {
-  //   await flutterLocalNotificationsPlugin.zonedSchedule(
-  //       task.id!.toInt(),
-  //       task.title,
-  //       task.note,
-  //       _convertTime(hour,minutes),
-  //       //tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
-  //       const NotificationDetails(
-  //           android: AndroidNotificationDetails('your channel id',
-  //               'your channel name', /*'your channel description'*/)),
-  //       androidAllowWhileIdle: true,
-  //       uiLocalNotificationDateInterpretation:
-  //       UILocalNotificationDateInterpretation.absoluteTime,
-  //       matchDateTimeComponents: DateTimeComponents.time,
-  //       payload: "${task.title}|+${task.note}|"
-  //   );
-  //
-  // }
+    final now = DateTime.now();
+    var scheduledTime = DateTime(now.year, now.month, now.day, hour, minute);
 
-  tz.TZDateTime _convertTime(int hour, int minutes){
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local); //Return the Current(local) time
-    tz.TZDateTime scheduleDate = tz.TZDateTime(tz.local,now.year,now.month,now.day,hour,minutes);
-    if(scheduleDate.isBefore(now)){
-      scheduleDate = scheduleDate.add(const Duration(days: 1));
+    // Debugging: Print the initially calculated scheduled time
+    print("Initial Scheduled Time: $scheduledTime");
+
+    // If scheduled time has already passed, schedule for tomorrow.
+    if (scheduledTime.isBefore(now)) {
+      scheduledTime = scheduledTime.add(const Duration(days: 1));
+      print("Scheduling for Tomorrow: $scheduledTime"); // Debugging
     }
 
-    return scheduleDate;
+    tz.TZDateTime scheduledDate =
+    tz.TZDateTime.from(scheduledTime, nigeriaTimeZone);
+
+    // Debugging: Print the final scheduled date and time
+    print("Final Scheduled Date: $scheduledDate");
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'your_channel_id',
+          'your_channel_name',
+          importance: Importance.high,
+          playSound: true,
+        ),
+        iOS: DarwinNotificationDetails(
+          sound: 'default.wav',
+          presentSound: true,
+        ),
+      ),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+      payload: '$title|+${body ?? ''}',
+    );
   }
 
-  Future<void>_configureLocalTimezone()async{
+  // Configures the local timezone to 'Africa/Lagos'.
+  Future<void> _configureLocalTimezone() async {
     tz.initializeTimeZones();
-    final String timeZone = await FlutterNativeTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(timeZone));
+    // You can directly set the timezone to 'Africa/Lagos' here.
+    // No need to use 'FlutterNativeTimezone' if you have a fixed timezone.
+    print("tz.initializeTimeZonesBeforeChange()======${tz.Location}");
+    tz.Location nigeriaTimeZone = tz.getLocation('Africa/Lagos');
 
+    print("tz.initializeTimeZonesAfterChange()======${nigeriaTimeZone}");
   }
 
+  // Displays a notification immediately.
   displayNotification({required String title, required String body}) async {
     print("doing test");
-    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-        'high_importance_channel', 'Clock Out Reminder',/* 'your channel description',*/
-        importance: Importance.max, priority: Priority.high,
-      playSound: true,);
-    var iOSPlatformChannelSpecifics = new DarwinNotificationDetails(
-      sound: 'default.wav',
-      presentSound: true,
-    );
-    var platformChannelSpecifics = new NotificationDetails(
+    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+        'high_importance_channel', 'Clock Out Reminder',
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true);
+    var iOSPlatformChannelSpecifics =
+    const DarwinNotificationDetails(sound: 'default.wav');
+    var platformChannelSpecifics = NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      body,
-      platformChannelSpecifics,
-      payload: title,
+      0, // Notification ID
+      title, // Notification title
+      body, // Notification body
+      platformChannelSpecifics, // Platform-specific notification details
+      payload: title, // Optional payload
     );
   }
 
+  // Requests notification permissions for iOS.
   void requestIOSPermissions() {
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -213,49 +221,20 @@ class NotifyHelper {
     );
   }
 
-
-
+  // Handles notification taps when the app is in the foreground.
   Future selectNotification(String? payload) async {
+    // Check if a payload was included with the notification.
     if (payload != null) {
       print('notification payload: $payload');
     } else {
       print("Notification Done");
     }
-    
-    if(payload=="Theme Changed"){
+
+    // Example: Handle navigation based on the payload.
+    if (payload == "Theme Changed") {
       print("Nothing to Navigate to");
-    } else{
-      //Get.to(()=>NotifiedPage(label:payload),);
+    } else {
+      // Get.to(()=>NotifiedPage(label:payload),);
     }
-    
   }
-
-  /*Future onDidReceiveLocalNotification(
-      int id, String? title, String? body, String? payload) async {
-    // display a dialog with the notification details, tap ok to go to another page
-    /*showDialog(
-      //context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: Text('Ok'),
-            onPressed: () async {
-              Navigator.of(context, rootNavigator: true).pop();
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SecondScreen(payload),
-                ),
-              );
-            },
-          )
-        ],
-      ),
-    );*/
-    Get.dialog(Text("Welcome to flutter"));
-
-  }*/
 }

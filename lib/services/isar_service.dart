@@ -163,7 +163,8 @@ class IsarService extends DatabaseAdapter {
         UserFaceSchema,
         LocationModelSchema,
         StateModelSchema,
-        AppUsageModelSchema
+        AppUsageModelSchema,
+        TrackLocationModelSchema
       ], inspector: true, directory: directory.path);
     }
     return Future.value(Isar.getInstance());

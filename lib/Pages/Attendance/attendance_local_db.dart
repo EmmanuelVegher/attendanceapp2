@@ -315,7 +315,7 @@ class _AttendanceLocalDBState extends State<AttendanceLocalDB> {
                                       top: index > 0 ? 12 : 0,
                                       left: 6,
                                       right: 6),
-                                  height: 150,
+                                  height: 180,
                                   decoration: const BoxDecoration(
                                     color: Colors.white,
                                     boxShadow: [

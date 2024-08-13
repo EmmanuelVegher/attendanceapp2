@@ -84,8 +84,8 @@ Widget drawer3(
                           top: 20,
                           bottom: 24,
                         ),
-                        height: 120,
-                        width: 120,
+                        height: 100,
+                        width: 100,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),

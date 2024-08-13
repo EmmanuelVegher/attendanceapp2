@@ -132,7 +132,14 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     //   isDeviceConnected = await InternetConnectionChecker().hasConnection;
     //   log("Internet status ====== $isDeviceConnected");
     // });
-    // });
+
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> result) async {
+      isDeviceConnected = await InternetConnectionChecker().hasConnection;
+      log("Internet status ====== $isDeviceConnected");
+    });
+
   }
 
   // Future<int> getCurrentDateRecordCount() async {
@@ -210,25 +217,25 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     });
   }
 
-  // getConnectivity() {
-  //   subscription = Connectivity()
-  //       .onConnectivityChanged
-  //       .listen((ConnectivityResult result) async {
-  //     isDeviceConnected = await InternetConnectionChecker().hasConnection;
-  //     log("Internet status ====== $isDeviceConnected");
-  //     if (!isDeviceConnected && isAlertSet == false) {
-  //       showDialogBox();
-  //       setState(() {
-  //         isAlertSet = true;
-  //       });
-  //     }
-  //   });
-  // }
+  getConnectivity() {
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> result) async {
+      isDeviceConnected = await InternetConnectionChecker().hasConnection;
+      log("Internet status ====== $isDeviceConnected");
+      if (!isDeviceConnected && isAlertSet == false) {
+        showDialogBox();
+        setState(() {
+          isAlertSet = true;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
     super.dispose();
-   // subscription.cancel();
+    subscription.cancel();
     // _startTimer(context);
     _getUserDetail();
     _timer.cancel();
@@ -244,7 +251,13 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           return AlertDialog(
             title: Text('Kindly choose your restore preference'),
             content: Text(
-                "Kindly Note that this overides all data stored locally and restores all data from the chosen restore preference"
+                '''Kindly Note that this overides all data stored locally and restores all data from the chosen restore preference.
+                
+Warning!!!
+
+1) Any Record not synced would be cleared off if you decide to "Restore from server".
+2) Only Choose the "Local DB Restore" if the Local Database is up-to-date.               
+                '''
                 //controller: _textFieldController,
                 //decoration: InputDecoration(hintText: "TextField in Dialog"),
                 ),
@@ -453,8 +466,14 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
             service: IsarService(),
           ),
           new ClockAttendance(
-            IsarService(), service: IsarService(),
+            IsarService(), service: IsarService(), controller: null,
           ),
+          // Inside the IndexedStack children:
+          // new ClockAttendance(
+          //   IsarService(),
+          //   service: IsarService(),
+          //   controller: Get.put(ClockAttendanceController(IsarService()), permanent: true), // Make the controller permanent
+          // ),
           new ProfilePage(),
         ],
       ),

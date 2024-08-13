@@ -5,9 +5,9 @@ part 'track_location_model.g.dart';
 class TrackLocationModel {
   Id id = Isar.autoIncrement;
 
-  final double latitude;
-  final double longitude;
-  final DateTime timestamp;
+  late final double latitude;
+  late final double longitude;
+  late final DateTime timestamp;
 
   TrackLocationModel({
     required this.latitude,

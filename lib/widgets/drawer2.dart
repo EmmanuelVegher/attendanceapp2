@@ -25,6 +25,9 @@ import 'package:intl/intl.dart';
 import 'package:refreshable_widget/refreshable_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Pages/Dashboard/admin_dashboard.dart';
+import 'my_app.dart';
+
 Widget drawer2(
     BuildContext context,
     IsarService service,
@@ -82,8 +85,8 @@ Widget drawer2(
                           top: 20,
                           bottom: 24,
                         ),
-                        height: 120,
-                        width: 120,
+                        height: 100,
+                        width: 100,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
@@ -137,7 +140,7 @@ Widget drawer2(
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => UserDashBoard(
+                      builder: (context) => AdminDashBoard(
                         service: IsarService(),
                       )),
                 );
@@ -227,6 +230,7 @@ Widget drawer2(
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                //MaterialPageRoute(builder: (context) => MyFlutterApp()),
               );
             },
           ),

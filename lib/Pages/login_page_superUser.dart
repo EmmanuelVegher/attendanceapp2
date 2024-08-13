@@ -388,6 +388,15 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
                                         return SuperAdminUserDashBoard();
                                       }),
                                     );
+                                  }else{
+                                    Fluttertoast.showToast(
+                                        msg: "This is Not a Super-user Account.Kindly Log in as a super-user..",
+                                        toastLength: Toast.LENGTH_LONG,
+                                        backgroundColor: Colors.black54,
+                                        gravity: ToastGravity.BOTTOM,
+                                        timeInSecForIosWeb: 1,
+                                        textColor: Colors.white,
+                                        fontSize: 16.0);
                                   }
                                   // else {
                                   //   try {

@@ -359,6 +359,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(
                     height: 20,
                   ),
+
                   Text(
                     '${designation.toString().toUpperCase()}',
                     style: TextStyle(

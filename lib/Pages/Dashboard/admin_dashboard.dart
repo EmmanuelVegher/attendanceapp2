@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:attendanceapp/Pages/Attendance/button.dart';
@@ -9,9 +10,16 @@ import 'package:attendanceapp/widgets/drawer2.dart';
 import 'package:attendanceapp/widgets/drawer3.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest.dart' as tz;
+
+import '../../model/user_model.dart';
+import '../../services/location_services.dart';
+import '../../services/notification_services.dart';
+import '../../widgets/my_app.dart';
 
 class AdminDashBoard extends StatefulWidget {
   final IsarService service;
@@ -36,6 +44,8 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
   double totalHoursWorked = 0;
   String _month = DateFormat("MMMM yyyy").format(DateTime.now());
   AttendanceModel attendanceModel = AttendanceModel();
+  var notifyHelper;
+  var _timer;
 
   @override
   void initState() {
@@ -43,6 +53,38 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
     super.initState();
     _getUserDetail();
     // getCurrentDateRecordCount();
+    tz.initializeTimeZones();
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      _checkTimeAndTriggerNotification();
+    });
+    notifyHelper = NotifyHelper();
+    notifyHelper.initializeNotification();
+    notifyHelper.requestIOSPermissions();
+    _startLocationService();
+  }
+
+  Future<void> _startLocationService() async {
+    LocationService locationService = LocationService();
+
+    Position? position = await locationService.getCurrentPosition();
+    if (position != null) {
+      setState(() {
+        UserModel.long = position.longitude;
+        UserModel.lat = position.latitude;
+      });
+    }
+  }
+
+  void _checkTimeAndTriggerNotification() {
+    final now = DateTime.now();
+    print("Current Time === ${now}");
+    if (now.hour == 8 && now.minute == 0) {
+      notifyHelper.displayNotification(
+          title: "Clock In Notification", body: "It's 8 AM, don't forget to clock in!");
+    } else if (now.hour == 16 && now.minute == 45) {
+      notifyHelper.displayNotification(
+          title: "Clock Out Notification", body: "It's 5 PM, don't forget to clock out!");
+    }
   }
 
   List<FlSpot> getPlotPoints(List entireData) {
@@ -133,21 +175,65 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            "Staff DashBoard",
+            "Admin DashBoard",
             style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
           ),
           elevation: 0.5,
           iconTheme: const IconThemeData(color: Colors.red),
           flexibleSpace: Container(
             decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: <Color>[
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
                   Colors.white,
                   Colors.white,
-                ])),
+                ],
+              ),
+            ),
           ),
+          actions: [
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                // Handle button press here based on the value
+                if (value == 'option1') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MyFlutterApp()),
+                  );
+                } else if (value == 'option2') {
+                  // Do something for option 2
+                }
+                // ... add cases for other options
+              },
+              itemBuilder: (BuildContext context) {
+                return [
+                  PopupMenuItem<String>(
+                    value: 'option1',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.access_alarm, color: Colors.red,),
+                        SizedBox(width: 8),
+                        Text('Background Service'),
+                      ],
+                    ),
+                  ),
+                  // PopupMenuItem<String>(
+                  //   value: 'option2',
+                  //   child: Row(
+                  //     children: const [
+                  //       Icon(Icons.person, color: Colors.red,),
+                  //       SizedBox(width: 8),
+                  //       Text('Profile'),
+                  //     ],
+                  //   ),
+                  // ),
+                  // ... add more PopupMenuItems for other buttons
+                ];
+              },
+            ),
+          ],
         ),
         drawer: role == "User"
             ? drawer(this.context, IsarService())
