@@ -615,7 +615,7 @@ class ClockAttendanceController extends GetxController {
     "Remote Working"
   ];
 
-  Timer? _locationTimer;
+ // Timer? _locationTimer;
   locationPkg.Location locationService = locationPkg.Location();
   // LocationService locationService = LocationService();
 
@@ -628,7 +628,7 @@ class ClockAttendanceController extends GetxController {
   @override
   void onClose() {
     // Cancel the timer when the controller is closed
-    _locationTimer?.cancel();
+    //_locationTimer?.cancel();
    // _startLocationService().cancel();
     super.onClose();
   }
@@ -642,11 +642,11 @@ class ClockAttendanceController extends GetxController {
     await getPermissionStatus();
     await checkInternetConnection();
 
-    // Start the periodic location updates
-    _locationTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
-     // _startLocationService();
-      // _init();
-    });
+    // // Start the periodic location updates
+    // _locationTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
+    //  // _startLocationService();
+    //   // _init();
+    // });
   }
 
   Future<void> _loadNTPTime() async {

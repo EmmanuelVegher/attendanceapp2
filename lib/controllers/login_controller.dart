@@ -77,6 +77,14 @@ class LoginController extends GetxController {
           });
         });
 
+        try{
+          _pickImageFromFirebase(snap.docs[0]['photoUrl']);
+        }catch(e){
+          print("_pickImageFromFirebase error: ${e}");
+        }
+
+
+
         final bioData = BioModel()
           ..emailAddress = email
           ..password = password
@@ -93,7 +101,6 @@ class LoginController extends GetxController {
           ..firebaseAuthId = snap.docs[0]['id'];
 
         await service.saveBioData(bioData)
-            .then((value) => _pickImageFromFirebase(snap.docs[0]['photoUrl']))
             .then((value) async {
           // Save the current date after successful login
           final appUsage = AppUsageModel()
@@ -101,7 +108,7 @@ class LoginController extends GetxController {
           await service.saveLastUsedDate(appUsage); // Call the method
         });
 
-        if (context.mounted) {
+       if (context.mounted) {
           Get.off(() => HomePage(
             //  service: service
           ));

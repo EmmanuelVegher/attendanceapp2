@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -9,10 +10,67 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 import '../model/attendancemodel.dart';
+import '../model/track_location_model.dart';
 import 'isar_service.dart';
 import 'location_tracking_service.dart';
 import 'notification_services.dart';
 import 'package:isar/isar.dart';
+
+Future<void> trackLocation() async {
+// Request location permission if needed
+bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+if (!serviceEnabled) {
+return Future.error('Location services are disabled.');
+}
+
+LocationPermission permission = await Geolocator.checkPermission();
+if (permission == LocationPermission.denied) {
+permission = await Geolocator.requestPermission();
+if (permission == LocationPermission.denied) {
+return Future.error('Location permissions are denied');
+}
+}
+
+if (permission == LocationPermission.deniedForever) {
+return Future.error(
+'Location permissions are permanently denied, we cannot request permissions.');
+}
+
+// Get current position
+Position position = await Geolocator.getCurrentPosition(
+desiredAccuracy: LocationAccuracy.high);
+
+print("New Position LocationTrackingService ==== ${position}");
+
+  try {
+    final lastTimeStampBy12 = await IsarService().getLastLocationFor12();
+    //DateTime lastTimeStamp = lastTimeStampBy12 as DateTime;
+
+    print("Printed lastTimeStampBy12 == ${DateFormat('dd-MMMM-yyyy').format(lastTimeStampBy12!.timestamp!)}");
+
+    if (DateFormat('dd-MMMM-yyyy').format(lastTimeStampBy12!.timestamp!) != DateFormat('dd-MMMM-yyyy').format(DateTime.now())) {
+
+// Store in Isar Database
+// Assuming you have a model for location data and a method to save it in Isar
+      final locationData = TrackLocationModel()
+        ..latitude= position.latitude
+        ..longitude= position.longitude
+        ..timestamp= DateTime.now()
+        ..isSynched = false
+        ..locationName = "";
+
+
+
+      await IsarService().saveLocationData(locationData);
+    }  else {
+      print("Already Captured location by 12PM");
+    }
+  } catch (e) {
+    log("Attendance clockInandOut Error ====== ${e.toString()}");
+
+  }
+
+}
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -356,8 +414,8 @@ void onStart(ServiceInstance service) async {
         }
 
 
-        if (now.hour == 12 && now.minute == 35) {
-          LocationTrackingService.trackLocation();
+        if (now.hour == 12 && now.minute == 0) {
+         await trackLocation();
         }
 
         //

@@ -46,7 +46,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_core: ^2.4.1
   firebase_auth: ^4.2.5
-  cloud_firestore: ^4.3.1
+  cloud_firestore:
   firebase_storage:
   flutter_spinkit: ^5.1.0
   hexcolor: ^2.0.7
@@ -60,7 +60,7 @@ dependencies:
   slide_to_act:
   geocoding:
   timezone:
-  awesome_notifications: ^0.9.3+1
+  #awesome_notifications: ^0.9.3+1
   #flutter_barcode_scanner:
   intl:
   path:
@@ -75,7 +75,7 @@ dependencies:
   isar: ^3.0.5
   isar_flutter_libs: ^3.0.5
   json_annotation:
-  camera: ^0.10.0+1
+  #camera: ^0.10.0+1
   fl_chart:
   gsheets:
   flutter_local_notifications: ^17.2.1+2

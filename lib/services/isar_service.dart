@@ -52,10 +52,68 @@ class IsarService extends DatabaseAdapter {
     }
   }
 
-  Future<void> saveLocationData(TrackLocationModel locationData) async {
-    final isar = await db; // Assuming you have a method to open Isar instance
+  Future<void> saveLocationData(TrackLocationModel newtracklocationdata) async {
+    final isar = await db;
+    await isar.writeTxnSync<int>(() => isar.trackLocationModels.putSync(newtracklocationdata));
+  }
+
+  Future<List<TrackLocationModel>> getAttendanceForEmptyLocationFor12() async {
+    final isar = await db;
+    return await isar.trackLocationModels
+        .filter()
+        .locationNameIsNull()
+        .or()
+        .locationNameEqualTo("")
+        .findAll();
+  }
+
+  Future<TrackLocationModel?> getLastLocationFor12() async {
+    await Future.delayed(const Duration(seconds: 1));
+    final isar = await db;
+    return await isar.trackLocationModels
+        .where()
+        .sortByTimestampDesc()
+        .findFirst();
+    //where().sortByDateDesc().findFirst();
+    // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
+  }
+
+  Future<List<TrackLocationModel>> getTracklocationForPartialUnSynced() async {
+    final isar = await db;
+    return await isar.trackLocationModels
+        .filter()
+        .isSynchedEqualTo(false)
+        .findAll();
+  }
+
+  Future<void> updateSyncStatusForTrackLocationBy12(
+      int id,
+      TrackLocationModel trackLocationModels,
+      bool isSynched,
+      ) async {
+    final isar = await db;
+    final updateSyncStatus = await isar.trackLocationModels.get(id);
+
+    updateSyncStatus!..isSynched = isSynched;
+
     await isar.writeTxn(() async {
-      await isar.trackLocationModels.putSync(locationData);
+      await isar.trackLocationModels.put(updateSyncStatus);
+    });
+  }
+
+  Future<void> updateEmptyLocationFor12(
+      int id,
+      TrackLocationModel trackLocationModels,
+      String locationName,
+      ) async {
+    final isar = await db;
+    final emptyLocationUpdate = await isar.trackLocationModels.get(id);
+
+    emptyLocationUpdate!
+      ..locationName = locationName;
+
+    await isar.writeTxn(() async {
+      await isar.trackLocationModels.put(emptyLocationUpdate);
     });
   }
 

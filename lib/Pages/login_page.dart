@@ -190,9 +190,9 @@ class LoginPage extends StatelessWidget {
                                 children: [
                                   const TextSpan(text: "Don't have an account? "),
                                   TextSpan(
-                                    text: "Register",
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () => Get.to(() => RegistrationPage()),
+                                    text: "Contact Admin",
+                                    // recognizer: TapGestureRecognizer()
+                                    //   ..onTap = () => Get.to(() => RegistrationPage()),
                                     style: TextStyle(
                                       fontFamily: "NexaBold",
                                       color: Colors.red,

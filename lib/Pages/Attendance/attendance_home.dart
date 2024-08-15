@@ -35,7 +35,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart'; // Correct import for geolocator
+import '../../model/locationmodel.dart';
+import '../../model/track_location_model.dart';
 import '../../services/notification_services.dart';
+import '../../widgets/geo_utils.dart';
 import '../profile_page.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -374,8 +377,13 @@ Warning!!!
                   label: "Sync Attendance",
                   onTap: () async {
                     _isSynching = true;
+                    try{
+                      await _uploadImageToFirebaseServer();
+                    }catch(e){
+                      log("_uploadImageToFirebaseServer Error: ${e}");
+                    }
 
-                    await _uploadImageToFirebaseServer();
+
 
                     await _startSynching()
                         .then((value) => {_isSynching = false});
@@ -1266,18 +1274,6 @@ Warning!!!
     //Iterate through each queried loop
   }
 
-  // Future<void> checkClockInandOutLocation() async {
-  //   List<AttendanceModel> attendanceForEmptyLocation =
-  //       await widget.service.getAttendanceForEmptyClockInLocation();
-
-  //   List<AttendanceModel> attendanceForEmptyLocation2 =
-  //       await widget.service.getAttendanceForEmptyClockOutLocation();
-
-  //   print("attendanceForEmptyLocation === $attendanceForEmptyLocation");
-  //   print("attendanceForEmptyLocation2 === $attendanceForEmptyLocation2");
-  // }
-
-//This method updates all empty Clock-Out Location Using the Latitude and Longitude during clock-out
   Future<void> _updateEmptyClockOutLocation() async {
     //First, query the list of all records with empty Clock-In Location
     List<AttendanceModel> attendanceForEmptyLocation =
@@ -1316,6 +1312,85 @@ Warning!!!
       _updateEmptyClockOutLocation();
     });
   }
+
+  Future<void> _updateEmptyLocationForTwelve() async {
+
+    //First, query the list of all records with empty Clock-In Location
+    List<TrackLocationModel> attendanceForEmptyLocationFor12 =
+    await widget.service.getAttendanceForEmptyLocationFor12();
+
+    try {
+      for (var attend in attendanceForEmptyLocationFor12) {
+        // Create a variable
+        var location2 = "";
+        bool isInsideAnyGeofence = false;
+        List<Placemark> placemark = await placemarkFromCoordinates(
+            attend.latitude!, attend.longitude!);
+
+        // setState(() {
+        //   location2 =
+        //   "${placemark[0].street},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+        //
+        //   administrativeArea1 = "${placemark[0].administrativeArea}";
+        // });
+
+
+        List<LocationModel> isarLocations =
+        await widget.service.getLocationsByState(placemark[0].administrativeArea);
+
+        // Convert Isar locations to GeofenceModel
+        List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+          name: location.locationName!, // Use 'locationName'
+          latitude: location.latitude ?? 0.0,
+          longitude: location.longitude ?? 0.0,
+          radius: location.radius?.toDouble() ?? 0.0,
+        )).toList();
+
+        print("Officessss == ${offices}");
+
+        isInsideAnyGeofence = false;
+        for (GeofenceModel office in offices) {
+          double distance = GeoUtils.haversine(
+              attend.latitude!, attend.longitude!, office.latitude, office.longitude);
+          if (distance <= office.radius) {
+            print('Entered office: ${office.name}');
+
+            location2 = office.name;
+            isInsideAnyGeofence = true;
+            break;
+          }
+        }
+
+        if (!isInsideAnyGeofence) {
+          List<Placemark> placemark = await placemarkFromCoordinates(
+              attend.latitude!, attend.longitude!);
+
+          location2 =
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+          print("Location from map === ${location2}");
+        }
+
+        //Input the queried latitude and Lngitude, but also assign 0.0 to any null Latitude and Longitude
+
+
+        //log("ClockOutPlacemarker = $location");
+
+        //Update all missing Clock In location
+        await widget.service.updateEmptyLocationFor12(
+            attend.id, TrackLocationModel(), location2);
+        //print(attend.clockInLatitude);
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+
+    //Iterate through each queried loop
+  }
+
+
+
+
 
 //This Method updates the Googlesheet that is connected to the Dashboard
   Future _updateGoogleSheet(
@@ -1382,6 +1457,27 @@ Warning!!!
       List<AttendanceModel> getAttendanceForPartialUnSynced =
           await widget.service.getAttendanceForPartialUnSynced();
 
+      List<TrackLocationModel> getTracklocationForPartialUnSynced =
+      await widget.service.getTracklocationForPartialUnSynced();
+
+      for (var unSyncedTrackLocation in getTracklocationForPartialUnSynced){
+        log("Synching Tracked location by 12pm");
+        await FirebaseFirestore.instance
+            .collection("Staff")
+            .doc(snap.docs[0].id)
+            .collection("LocationBy12PM")
+            .doc(DateFormat('dd-MMMM-yyyy').format(unSyncedTrackLocation.timestamp!))
+            .set({
+          "latitudeBy12": unSyncedTrackLocation.latitude,
+          'longitudeBy12': unSyncedTrackLocation.longitude,
+          'Date': unSyncedTrackLocation.timestamp,
+          'locationName': unSyncedTrackLocation.locationName,
+        }).then((value){
+          widget.service.updateSyncStatusForTrackLocationBy12(
+              unSyncedTrackLocation.id, TrackLocationModel(), true);
+        });
+      }
+
       await _updateEmptyClockInAndOutLocation().then((value) async => {
             //Iterate through each queried loop
             for (var unSyncedAttend in getAttendanceForPartialUnSynced)
@@ -1437,11 +1533,16 @@ Warning!!!
                 })
               }
           });
+
+
+
+
     } catch (e) {
       // The catch block executes incase firebase database encounters an error thereby only saving the data in the google sheet for the analytics before chahing the sync status on Mobile App to "Synced"
       log("Sync Error Skipping firebase DB = ${e.toString()}");
       List<AttendanceModel> getAttendanceForPartialUnSynced =
           await widget.service.getAttendanceForPartialUnSynced();
+
 
       //await _updateEmptyClockInAndOutLocation().then((value) async => {
       //Iterate through each queried loop
@@ -1503,19 +1604,21 @@ Warning!!!
           timeInSecForIosWeb: 1,
           textColor: Colors.white,
           fontSize: 16.0);
-      await _updateEmptyClockInAndOutLocation().then((value) async {
+      await _updateEmptyClockInAndOutLocation().then((value)async{
+       await  _updateEmptyLocationForTwelve();
+      }).then((value) async {
         await syncCompleteData();
+      })
+      .then((value) {
+        Fluttertoast.showToast(
+            msg: "Synching Completed",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0);
       });
-      // .then((value) {
-      //   Fluttertoast.showToast(
-      //       msg: "Data Synching....",
-      //       toastLength: Toast.LENGTH_LONG,
-      //       backgroundColor: Colors.black54,
-      //       gravity: ToastGravity.BOTTOM,
-      //       timeInSecForIosWeb: 1,
-      //       textColor: Colors.white,
-      //       fontSize: 16.0);
-      // });
       //updateFullSyncedData();
     } else {
       Fluttertoast.showToast(
