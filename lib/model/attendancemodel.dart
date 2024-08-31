@@ -23,6 +23,7 @@ class AttendanceModel {
   double? noOfHours;
   String? durationWorked;
   String? month;
+  String? comments;
 
   AttendanceModel(
       {this.clockIn,
@@ -40,7 +41,9 @@ class AttendanceModel {
       this.offDay,
       this.noOfHours,
       this.durationWorked,
-      this.month});
+      this.month,
+        this.comments
+      });
 
   factory AttendanceModel.fromJson(json) {
     return AttendanceModel(
@@ -60,6 +63,7 @@ class AttendanceModel {
       noOfHours: json['noOfHours'],
       durationWorked: json['durationWorked'],
       month: json['month'],
+        comments:json['comments']
     );
   }
 
@@ -82,6 +86,7 @@ class AttendanceModel {
       'noOfHours': noOfHours,
       'durationWorked': durationWorked,
       'month': month,
+      'comments':comments
     };
   }
 

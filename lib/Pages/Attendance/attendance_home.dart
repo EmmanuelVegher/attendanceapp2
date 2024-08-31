@@ -29,6 +29,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -54,6 +56,10 @@ class AttendanceHomeScreen extends StatefulWidget {
 }
 
 class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
+  // final _calendarKey = GlobalKey<CalendarScreenState>();
+  // final _clockAttendanceKey = GlobalKey<ClockAttendanceState>();
+  // final _profileKey = GlobalKey<ProfilePageState>();
+
   DatabaseAdapter adapter = HiveService();
   double screenHeight = 0;
   double screenWidth = 0;
@@ -471,6 +477,7 @@ Warning!!!
         index: currentIndex,
         children: [
           new CalendarScreen(
+
             service: IsarService(),
           ),
           new ClockAttendance(
@@ -482,7 +489,9 @@ Warning!!!
           //   service: IsarService(),
           //   controller: Get.put(ClockAttendanceController(IsarService()), permanent: true), // Make the controller permanent
           // ),
-          new ProfilePage(),
+          new ProfilePage(
+
+          ),
         ],
       ),
       bottomNavigationBar: Container(
@@ -510,7 +519,23 @@ Warning!!!
                     onTap: () {
                       setState(() {
                         currentIndex = i;
+                        // Refresh CalendarScreen if it's the newly selected tab
+                        if (i == 0){
+                          print("currentIndex == 0");
+                        }
+                        else if (i == 1) {
+                         // Get.find<CalendarController>().refreshAttendance();
+                          print("currentIndex == 1");
+                          Get.find<ClockAttendanceController>().refreshClockAttendance();
+                        }else if (i == 2) {
+                          print("currentIndex == 2");
+                        }
+
                       });
+                      // Close the previous page (if not the first route)
+                      // if (Navigator.canPop(context)) {
+                      //   Navigator.pop(context);
+                      // }
                     },
                     child: Container(
                       height: screenHeight,
@@ -602,7 +627,7 @@ Warning!!!
   //                   // Navigator.of(context).pop();
   //                 },
   //                 clr: Colors.orange,
-  //                 context: context,
+   //                 context: context,
   //               ),
   //               SizedBox(
   //                 height: 20,
@@ -666,6 +691,8 @@ Warning!!!
 // final file = File(filePath);
     final file2 = await _readImagesFromDatabase();
 
+
+
 // // Create the file metadata
 // //final metadata = SettableMetadata(contentType: "image/jpeg");
 
@@ -684,7 +711,7 @@ Warning!!!
 
     try {
       Reference ref = FirebaseStorage.instance.ref().child(
-          "${firstName.toLowerCase()}_${lastName.toLowerCase()}_profilepic.jpg");
+          "attendanceapp-a6853.appspot.com/profile_pics/${firstName.toLowerCase()}_${lastName.toLowerCase()}_${firebaseAuthId}_profilepic.jpg");
 
       //await ref.putFile(File(image!.path));
       // Upload raw data.
@@ -701,11 +728,20 @@ Warning!!!
             .collection("Staff")
             .doc(firebaseAuthId)
             .update({
-          "profilePic": value,
+          "photoUrl": value,
         });
       });
     } on FirebaseException catch (e) {
       // ...
+      Fluttertoast.showToast(
+        msg: "Error: $e!",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
 
 // // Upload file and metadata to the path 'images/mountains.jpg'
@@ -1252,15 +1288,45 @@ Warning!!!
       for (var attend in attendanceForEmptyLocation) {
         // Create a variable
         var location1 = "";
+        bool isInsideAnyGeofence = false;
         //Input the queried latitude and Lngitude, but also assign 0.0 to any null Latitude and Longitude
         List<Placemark> placemark = await placemarkFromCoordinates(
             attend.clockInLatitude!, attend.clockInLongitude!);
+        List<LocationModel> isarLocations =
+        await  widget.service.getLocationsByState(placemark[0].administrativeArea);
+        // Convert Isar locations to GeofenceModel
+        List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+          name: location.locationName!, // Use 'locationName'
+          latitude: location.latitude ?? 0.0,
+          longitude: location.longitude ?? 0.0,
+          radius: location.radius?.toDouble() ?? 0.0,
+        )).toList();
 
-        setState(() {
+        print("Officessss == ${offices}");
+
+        isInsideAnyGeofence = false;
+        for (GeofenceModel office in offices) {
+          double distance = GeoUtils.haversine(
+              attend.clockInLatitude!, attend.clockInLongitude!, office.latitude, office.longitude);
+          if (distance <= office.radius) {
+            print('Entered office: ${office.name}');
+
+            location1 = office.name;
+            isInsideAnyGeofence = true;
+            break;
+          }
+        }
+
+        if (!isInsideAnyGeofence) {
+          List<Placemark> placemark = await placemarkFromCoordinates(
+              attend.clockInLatitude!, attend.clockInLongitude!);
+
           location1 =
-              "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
-        });
-        //log("ClockInPlacemarker = $location");
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+          print("Location from map === ${location1}");
+        }
+
 
         //Update all missing Clock In location
         await widget.service.updateEmptyClockInLocation(
@@ -1274,6 +1340,8 @@ Warning!!!
     //Iterate through each queried loop
   }
 
+
+
   Future<void> _updateEmptyClockOutLocation() async {
     //First, query the list of all records with empty Clock-In Location
     List<AttendanceModel> attendanceForEmptyLocation =
@@ -1283,16 +1351,45 @@ Warning!!!
       for (var attend in attendanceForEmptyLocation) {
         // Create a variable
         var location2 = "";
+        bool isInsideAnyGeofence = false;
         //Input the queried latitude and Lngitude, but also assign 0.0 to any null Latitude and Longitude
         List<Placemark> placemark = await placemarkFromCoordinates(
             attend.clockOutLatitude!, attend.clockOutLongitude!);
+        List<LocationModel> isarLocations =
+        await widget.service.getLocationsByState(placemark[0].administrativeArea);
 
-        setState(() {
+// Convert Isar locations to GeofenceModel
+        List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+          name: location.locationName!, // Use 'locationName'
+          latitude: location.latitude ?? 0.0,
+          longitude: location.longitude ?? 0.0,
+          radius: location.radius?.toDouble() ?? 0.0,
+        )).toList();
+
+        print("Officessss == ${offices}");
+
+        isInsideAnyGeofence = false;
+        for (GeofenceModel office in offices) {
+          double distance = GeoUtils.haversine(
+              attend.clockOutLatitude!, attend.clockOutLongitude!, office.latitude, office.longitude);
+          if (distance <= office.radius) {
+            print('Entered office: ${office.name}');
+
+            location2 = office.name;
+            isInsideAnyGeofence = true;
+            break;
+          }
+        }
+
+        if (!isInsideAnyGeofence) {
+          List<Placemark> placemark = await placemarkFromCoordinates(
+              attend.clockOutLatitude!, attend.clockOutLongitude!);
+
           location2 =
-              "${placemark[0].street},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
-        });
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-        //log("ClockOutPlacemarker = $location");
+          print("Location from map === ${location2}");
+        }
 
         //Update all missing Clock In location
         await widget.service.updateEmptyClockOutLocation(
@@ -1415,6 +1512,7 @@ Warning!!!
     String clockOutLocation1,
     String durationWorked1,
     String noOfHours1,
+    String comments1,
   ) async {
     final user = await User(
         state: state1,
@@ -1437,7 +1535,9 @@ Warning!!!
         clockOutLongitude: clockOutLongitude1,
         clockOutLocation: clockOutLocation1,
         durationWorked: durationWorked1,
-        noOfHours: noOfHours1);
+        noOfHours: noOfHours1,
+        comments :comments1
+    );
     final id = await AttendanceGSheetsApi.getRowCount() + 1;
     final newUser = user.copy(id: id);
     await AttendanceGSheetsApi.insert([newUser.toJson()]);
@@ -1503,7 +1603,9 @@ Warning!!!
                         unSyncedAttend.clockOutLongitude.toString(),
                         unSyncedAttend.clockOutLocation.toString(),
                         unSyncedAttend.durationWorked.toString(),
-                        unSyncedAttend.noOfHours.toString())
+                        unSyncedAttend.noOfHours.toString(),
+                    unSyncedAttend.comments.toString()
+                )
                     .then((value) async {
                   await FirebaseFirestore.instance
                       .collection("Staff")
@@ -1528,6 +1630,7 @@ Warning!!!
                     'month': unSyncedAttend.month,
                     'durationWorked': unSyncedAttend.durationWorked,
                     'offDay': unSyncedAttend.offDay,
+                    'comments':unSyncedAttend.comments
                   }).then((value) => widget.service.updateSyncStatus(
                           unSyncedAttend.id, AttendanceModel(), true));
                 })
@@ -1568,7 +1671,9 @@ Warning!!!
                 unSyncedAttend.clockOutLongitude.toString(),
                 unSyncedAttend.clockOutLocation.toString(),
                 unSyncedAttend.durationWorked.toString(),
-                unSyncedAttend.noOfHours.toString())
+                unSyncedAttend.noOfHours.toString(),
+                unSyncedAttend.comments.toString(),
+        )
             .then((value) async {
           widget.service
               .updateSyncStatus(unSyncedAttend.id, AttendanceModel(), true);

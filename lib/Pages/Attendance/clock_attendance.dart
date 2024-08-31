@@ -42,6 +42,7 @@ import '../../widgets/header_widget.dart';
 import '../../widgets/input_field.dart';
 import '../../widgets/show_error_dialog.dart';
 import '../OffDays/days_off.dart';
+import '../OffDays/update_attendance.dart';
 import 'button.dart';
 
 class GeofenceModel {
@@ -68,9 +69,10 @@ class ClockAttendance extends StatelessWidget {
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
+    final TextEditingController commentsController = TextEditingController();
 
     final ClockAttendanceController controller =
-    Get.put(ClockAttendanceController(service));
+    Get.put(ClockAttendanceController(service)); // Initialize the controller here
 
     return Scaffold(
       drawer: Obx(
@@ -114,23 +116,87 @@ class ClockAttendance extends StatelessWidget {
                   ],
                 ),
               ),
-              Obx(
-                    () => Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "${controller.firstName.value.toString().toUpperCase()} ${controller.lastName.value.toString().toUpperCase()}",
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontFamily: "NexaBold",
-                      fontSize: screenWidth / 18,
-                    ),
-                  ),
-                ),
-              ),
-              // Obx(
-              //      () =>
 
-              Container(
+              StreamBuilder<List<BioModel>>(
+                stream: IsarService().watchBioInfoWithFirebaseAuth(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final bioModelList = snapshot.data!;
+                    if (bioModelList.isNotEmpty) {
+                      final bioInfo = bioModelList.first;
+                      return
+                        //Text('${bioInfo.firstName} ${bioInfo.lastName}');
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "${bioInfo.firstName.toString().toUpperCase()} ${bioInfo.lastName.toString().toUpperCase()}",
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontFamily: "NexaBold",
+                            fontSize: screenWidth / 18,
+                          ),
+                        ),
+                      );
+                    } else {
+                      return const Text('No BioModel found');
+                    }
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                },
+              )
+        //       Obx(
+        //             () =>
+        // Container(
+        //           alignment: Alignment.centerLeft,
+        //           child: Text(
+        //             "${controller.firstName.value.toString().toUpperCase()} ${controller.lastName.value.toString().toUpperCase()}",
+        //             style: TextStyle(
+        //               color: Colors.black54,
+        //               fontFamily: "NexaBold",
+        //               fontSize: screenWidth / 18,
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+
+              // StreamBuilder<String>(
+              //   stream: controller.fullNameStream,
+              //  // stream: IsarService().getBioInfoWithFirebaseAuth();
+              //   builder: (context, snapshot) {
+              //     if (snapshot.hasData) {
+              //       return Container(
+              //         alignment: Alignment.centerLeft,
+              //         child: Text(
+              //           snapshot.data!.toUpperCase(),
+              //           style: TextStyle(
+              //             color: Colors.black54,
+              //             fontFamily: "NexaBold",
+              //             fontSize: screenWidth / 18,
+              //           ),
+              //         ),
+              //       );
+              //     } else {
+              //       return Container(
+              //         alignment: Alignment.centerLeft,
+              //         child: const Text(
+              //           "No Name", // Default value while waiting for data
+              //           style: TextStyle(
+              //             color: Colors.black54,
+              //             fontFamily: "NexaBold",
+              //             fontSize: 20,
+              //           ),
+              //         ),
+              //       );
+              //     }
+              //   },
+              // ),
+              // Obx(
+              //    ,  () =>
+
+              ,Container(
                 alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.only(top: 32),
                 child: Column(
@@ -164,14 +230,14 @@ class ClockAttendance extends StatelessWidget {
                     ):CircularProgressIndicator()
                     ),
                     SizedBox(height: 10),
-                    Obx(() => controller.isCircularProgressBarOn.value ?CircularProgressIndicator():
+                    Obx(() => controller.location.value != ""?
                         Text(
                       "Current Location: ${controller.location.value}",
                       style: TextStyle(
                         fontFamily: "NexaBold",
                         fontSize: screenWidth / 23,
                       ),
-                    )
+                    ):CircularProgressIndicator()
                     ),
                     // You can add your location name widget here, using Obx to make it reactive
                   ],
@@ -213,13 +279,32 @@ class ClockAttendance extends StatelessWidget {
                               color: Colors.black54,
                             ),
                           ),
-                          Obx(() => Text(
-                            controller.clockIn.value,
-                            style: TextStyle(
-                              fontFamily: "NexaBold",
-                              fontSize: screenWidth / 18,
-                            ),
-                          )), // Wrap clockIn in Obx
+
+                          // Obx(() => Text(
+                          //   controller.clockIn.value,
+                          //   style: TextStyle(
+                          //     fontFamily: "NexaBold",
+                          //     fontSize: screenWidth / 18,
+                          //   ),
+                          // )),
+                          StreamBuilder<String>(
+                            stream: controller.clockInStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Text(
+                                  snapshot.data!,
+                                  style: TextStyle(
+                                    fontFamily: "NexaBold",
+                                    fontSize: screenWidth / 18,
+                                  ),
+                                );
+                              } else {
+                                return const Text("--/--"); // Default value while waiting for data
+                              }
+                            },
+                          ),
+
+                          // Wrap clockIn in Obx
                         ],
                       ),
                     ),
@@ -236,13 +321,31 @@ class ClockAttendance extends StatelessWidget {
                               color: Colors.black54,
                             ),
                           ),
-                          Obx(() => Text(
-                            controller.clockOut.value,
-                            style: TextStyle(
-                              fontFamily: "NexaBold",
-                              fontSize: screenWidth / 18,
-                            ),
-                          )), // Wrap clockOut in Obx
+
+                          // Obx(() => Text(
+                          //   controller.clockOut.value,
+                          //   style: TextStyle(
+                          //     fontFamily: "NexaBold",
+                          //     fontSize: screenWidth / 18,
+                          //   ),
+                          // )),
+                          StreamBuilder<String>(
+                            stream: controller.clockOutStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Text(
+                                  snapshot.data!,
+                                  style: TextStyle(
+                                    fontFamily: "NexaBold",
+                                    fontSize: screenWidth / 18,
+                                  ),
+                                );
+                              } else {
+                                return const Text("--/--"); // Default value while waiting for data
+                              }
+                            },
+                          ),
+                          // Wrap clockOut in Obx
                         ],
                       ),
                     ),
@@ -289,173 +392,662 @@ class ClockAttendance extends StatelessWidget {
                   );
                 },
               ),
-              Obx(
-                    () => controller.clockOut.value == "--/--"
-                    ? Column(
-                  children: [
-                    // Slider for Clocking In/Out
-                    Container(
+              StreamBuilder<AttendanceModel?>(
+                stream: IsarService().watchLastAttendance(DateFormat('MMMM yyyy').format(DateTime.now())),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator(); // Show a loading indicator while waiting
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}'); // Show an error message if there's an error
+                  } else if (snapshot.hasData) {
+                    final lastAttendance = snapshot.data;
+                    print("lastAttendance?.dateeeeee===${lastAttendance?.date}");
+                    if (lastAttendance?.date == DateFormat('dd-MMMM-yyyy').format(DateTime.now()) && lastAttendance?.clockIn == "--/--" && lastAttendance?.clockOut == "--/--") {
+                      return Container(child:
+                        Column(
+                        children:[
+
+                      Container(
                       margin: const EdgeInsets.only(top: 24, bottom: 12),
-                      child: Builder(
-                        builder: (context) {
-                          final GlobalKey<SlideActionState> key = GlobalKey();
-                          return SlideAction(
-                            text: controller.clockIn.value == "--/--"
-                                ? "Slide to Clock In"
-                                : "Slide to Clock Out",
-                            textStyle: TextStyle(
-                              color: Colors.black54,
-                              fontSize: screenWidth / 20,
-                              fontFamily: "NexaLight",
-                            ),
-                            outerColor: Colors.white,
-                            innerColor: Colors.red,
-                            key: key,
-                            onSubmit: () async {
-                              await controller
-                                  .handleClockInOut(context, key);
-                            },
-                          );
-                        },
+                  child: Builder(
+                  builder: (context) {
+                  final GlobalKey<SlideActionState> key = GlobalKey();
+                  return SlideAction(
+                  text: "Slide to Clock In",
+                  textStyle: TextStyle(
+                  color: Colors.black54,
+                  fontSize: screenWidth / 20,
+                  fontFamily: "NexaLight",
+                  ),
+                  outerColor: Colors.white,
+                  innerColor: Colors.red,
+                  key: key,
+                  onSubmit: () async {
+                  await controller.handleClockInOut(context, key);
+                  },
+                  );
+                  },
+                  ),
+                  ),
+                          const SizedBox(height: 10.0),
+
+                          StreamBuilder<String>(
+                                                                stream: controller.clockInStream,
+                                                                builder: (context, snapshot) {
+                                                                  if (snapshot.hasData) {
+                                                                    return SizedBox.shrink();
+                                                                  } else {
+                                                                    return MyButton(
+                                                                      label: "Out Of Office? CLICK HERE",
+                                                                      onTap: () {
+                                                                        //controller.showBottomSheet3(context);
+                                                                        Get.off(() => DaysOffPage(service: service));
+                                                                      },
+                                                                    ); // Default value while waiting for data
+                                                                  }
+                                                                },
+                                                              ),
+
+                                    const SizedBox(height: 10.0),
+                                    // Location Status Container
+                                    Container(
+                                      width: MediaQuery.of(context).size.width * 0.9,
+                                      margin: const EdgeInsets.all(12.0),
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [Colors.red, Colors.black],
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(24),
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12.0, horizontal: 8.0),
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              "Location Status",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: screenWidth / 20,
+                                                fontFamily: "NexaBold",
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10.0),
+                                            Container(
+                                              width:
+                                              MediaQuery.of(context).size.width * 0.7,
+                                              height:
+                                              MediaQuery.of(context).size.height / 10,
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                children: [
+                                                  Expanded(
+                                                    child: Column(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                                      children: [
+                                                        Text(
+                                                          "Clock-In Location",
+                                                          style: TextStyle(
+                                                            fontFamily: "NexaLight",
+                                                            fontSize: screenWidth / 25,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(height: 5),
+                                                        StreamBuilder<AttendanceModel?>(
+                                                          stream: IsarService().watchLastAttendance(DateFormat('MMMM').format(DateTime.now())),
+                                                          builder: (context, snapshot) {
+                                                            if (snapshot.hasData && snapshot.data != null) {
+                                                              final attendance = snapshot.data!;
+                                                              return Text(
+                                                                attendance.toString(), // Assuming you have overridden the 'toString' method in AttendanceModel
+                                                                style: TextStyle(
+                                                                  fontFamily: "NexaBold",
+                                                                  fontSize: screenWidth / 35,
+                                                                  color: Colors.white,
+                                                                ),
+                                                              );
+                                                            } else {
+                                                              return const Text(""); // Default value while waiting for data
+                                                            }
+                                                          },
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 5),
+                                                  Expanded(
+                                                    child: Column(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                                      children: [
+                                                        Text(
+                                                          "Clock-Out Location",
+                                                          style: TextStyle(
+                                                            fontFamily: "NexaLight",
+                                                            fontSize: screenWidth / 35,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(height: 5),
+                                                        StreamBuilder<String>(
+                                                          stream: controller.clockOutLocationStream,
+                                                          builder: (context, snapshot) {
+                                                            if (snapshot.hasData) {
+                                                              return Text(
+                                                                snapshot.data!,
+                                                                style: TextStyle(
+                                                                  fontFamily: "NexaBold",
+                                                                  fontSize: screenWidth / 35,
+                                                                  color: Colors.white,
+                                                                ),
+                                                              );
+                                                            } else {
+                                                              return const Text("--/--"); // Default value while waiting for data
+                                                            }
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ));// Default value while waiting for data
+
+                    }
+                    else if (lastAttendance?.date == DateFormat('dd-MMMM-yyyy').format(DateTime.now()) && lastAttendance?.clockIn != "--/--" && lastAttendance?.clockOut == "--/--"){
+                      return Column(children:[
+                        Container(
+                        margin: const EdgeInsets.only(top: 24, bottom: 12),
+                        child: Builder(
+                          builder: (context) {
+                            final GlobalKey<SlideActionState> key = GlobalKey();
+                            return SlideAction(
+                              text: "Slide to Clock Out",
+                              textStyle: TextStyle(
+                                color: Colors.black54,
+                                fontSize: screenWidth / 20,
+                                fontFamily: "NexaLight",
+                              ),
+                              outerColor: Colors.white,
+                              innerColor: Colors.red,
+                              key: key,
+                              onSubmit: () async {
+                                await controller.handleClockInOut(context, key);
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10.0),
-                    controller.clockIn.value == "--/--"
-                        ? MyButton(
-                      label: "Out Of Office? CLICK HERE",
-                      onTap: () {
-                        //controller.showBottomSheet(context);
-                        Get.off(() => DaysOffPage(service: service));
-                      },
-                    )
-                        : const SizedBox.shrink(),
-                    const SizedBox(height: 10.0),
-                    // Location Status Container
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      margin: const EdgeInsets.all(12.0),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.red, Colors.black],
-                          ),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(24),
+                        const SizedBox(height: 10.0),
+
+                        // Location Status Container
+
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          margin: const EdgeInsets.all(12.0),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.red, Colors.black],
+                              ),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(24),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12.0, horizontal: 8.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Location Status",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: screenWidth / 20,
+                                    fontFamily: "NexaBold",
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 10.0),
+                                Container(
+                                  width:
+                                  MediaQuery.of(context).size.width * 0.7,
+                                  height:
+                                  MediaQuery.of(context).size.height / 10,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              "Clock-In Location",
+                                              style: TextStyle(
+                                                fontFamily: "NexaLight",
+                                                fontSize: screenWidth / 25,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                                        Obx(
+                                                              () => Text(
+                                                            "${controller.clockInLocation.value}",
+                                                            style: TextStyle(
+                                                              fontFamily: "NexaLight",
+                                                              fontSize: screenWidth / 35,
+                                                              color: Colors.white,
+                                                            ),
+                                                          ),)
+
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              "Clock-Out Location",
+                                              style: TextStyle(
+                                                fontFamily: "NexaLight",
+                                                fontSize: screenWidth / 35,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                            const SizedBox(height: 5),
+                                            Obx(
+                                                  () => Text(
+                                                "${controller.clockOutLocation.value}",
+                                                style: TextStyle(
+                                                  fontFamily: "NexaLight",
+                                                  fontSize: screenWidth / 35,
+                                                  color: Colors.white,
+                                                ),
+                                              ),)
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12.0, horizontal: 8.0),
+                      ]);
+                  }
+                    else if (lastAttendance?.date == DateFormat('dd-MMMM-yyyy').format(DateTime.now()) && lastAttendance?.clockIn != "--/--" && lastAttendance?.clockOut != "--/--"){
+                      return
+                        Container(
+                        margin: const EdgeInsets.only(top: 10),
                         child: Column(
                           children: [
                             Text(
-                              "Location Status",
-                              textAlign: TextAlign.center,
+                              "You have completed this day!!!",
                               style: TextStyle(
+                                fontFamily: "NexaLight",
                                 fontSize: screenWidth / 20,
-                                fontFamily: "NexaBold",
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                                color: Colors.black54,
                               ),
                             ),
-                            const SizedBox(height: 10.0),
+                            const SizedBox(height: 10),
+                            Obx(
+                                  () => Text(
+                                "Duration Worked: ${controller.durationWorked.value}",
+                                style: TextStyle(
+                                  fontFamily: "NexaLight",
+                                  fontSize: screenWidth / 20,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 12,
+                            ),
+                            Obx(
+                                  () => Text(
+                                    "Comment(s): ${controller.comments.value}",
+                                    style: TextStyle(
+                                      fontFamily: "NexaLight",
+                                      fontSize: screenWidth / 21,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                            ),
+
+                            const SizedBox(height: 8.0),
+                            // Location Status Container (For completed day)
                             Container(
-                              width:
-                              MediaQuery.of(context).size.width * 0.7,
-                              height:
-                              MediaQuery.of(context).size.height / 10,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "Clock-In Location",
-                                          style: TextStyle(
-                                            fontFamily: "NexaLight",
-                                            fontSize: screenWidth / 25,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Obx(
-                                              () => Text(
-                                            controller.clockInLocation.value,
-                                            style: TextStyle(
-                                              fontFamily: "NexaBold",
-                                              fontSize: screenWidth / 35,
-                                              color: Colors.white,
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              margin: const EdgeInsets.all(12.0),
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.red, Colors.black],
+                                  ),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(24),
+                                  ),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12.0, horizontal: 8.0),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "Location Status",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: screenWidth / 20,
+                                        fontFamily: "NexaBold",
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10.0),
+                                    Container(
+                                      width:
+                                      MediaQuery.of(context).size.width * 0.7,
+                                      height:
+                                      MediaQuery.of(context).size.height / 10,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  "Clock-In Location",
+                                                  style: TextStyle(
+                                                    fontFamily: "NexaLight",
+                                                    fontSize: screenWidth / 27,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 5),
+                                                Obx(
+                                                      () => Text(
+                                                    controller.clockInLocation.value,
+                                                    style: TextStyle(
+                                                      fontFamily: "NexaBold",
+                                                      fontSize: screenWidth / 35,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "Clock-Out Location",
-                                          style: TextStyle(
-                                            fontFamily: "NexaLight",
-                                            fontSize: screenWidth / 25,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Obx(
-                                              () => Text(
-                                            controller.clockOutLocation.value,
-                                            style: TextStyle(
-                                              fontFamily: "NexaBold",
-                                              fontSize: screenWidth / 35,
-                                              color: Colors.white,
+                                          const SizedBox(width: 5),
+                                          Expanded(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  "Clock-Out Location",
+                                                  style: TextStyle(
+                                                    fontFamily: "NexaLight",
+                                                    fontSize: screenWidth / 27,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 5),
+                                                Obx(
+                                                      () => Text(
+                                                    controller.clockOutLocation.value,
+                                                    style: TextStyle(
+                                                      fontFamily: "NexaBold",
+                                                      fontSize: screenWidth / 35,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ],
-                )
-                    : Container(
-                  margin: const EdgeInsets.only(top: 10),
-                  child: Column(
-                    children: [
-                      Text(
-                        "You have completed this day!!!",
-                        style: TextStyle(
-                          fontFamily: "NexaLight",
-                          fontSize: screenWidth / 20,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Obx(
-                            () => Text(
-                          "Duration Worked: ${controller.durationWorked.value}",
-                          style: TextStyle(
-                            fontFamily: "NexaLight",
-                            fontSize: screenWidth / 20,
-                            color: Colors.black54,
+                      );
+                    }
+                    else if (lastAttendance?.date != DateFormat('dd-MMMM-yyyy').format(DateTime.now()) ){
+                      return Column( children:[
+                        Container(
+                          margin: const EdgeInsets.only(top: 24, bottom: 12),
+                          child: Builder(
+                            builder: (context) {
+                              final GlobalKey<SlideActionState> key = GlobalKey();
+                              return SlideAction(
+                                text:"Slide to Clock In",
+                                textStyle: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: screenWidth / 20,
+                                  fontFamily: "NexaLight",
+                                ),
+                                outerColor: Colors.white,
+                                innerColor: Colors.red,
+                                key: key,
+                                onSubmit: () async {
+                                  await controller.handleClockInOut(context, key);
+                                },
+                              );
+                            },
                           ),
                         ),
+                        const SizedBox(height: 10.0),
+
+                        StreamBuilder<String>(
+                          stream: controller.clockInStream,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return SizedBox.shrink();
+                            } else {
+                              return MyButton(
+                                label: "Out Of Office? CLICK HERE",
+                                onTap: () {
+                                  //controller.showBottomSheet3(context);
+                                  Get.off(() => DaysOffPage(service: service));
+                                },
+                              ); // Default value while waiting for data
+                            }
+                          },
+                        ),
+
+                        const SizedBox(height: 10.0),
+                        // Location Status Container
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          margin: const EdgeInsets.all(12.0),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.red, Colors.black],
+                              ),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(24),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12.0, horizontal: 8.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Location Status",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: screenWidth / 20,
+                                    fontFamily: "NexaBold",
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 10.0),
+                                Container(
+                                  width:
+                                  MediaQuery.of(context).size.width * 0.7,
+                                  height:
+                                  MediaQuery.of(context).size.height / 10,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              "Clock-In Location",
+                                              style: TextStyle(
+                                                fontFamily: "NexaLight",
+                                                fontSize: screenWidth / 25,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                            StreamBuilder<AttendanceModel?>(
+                                              stream: IsarService().watchLastAttendance(DateFormat('MMMM').format(DateTime.now())),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.hasData && snapshot.data != null) {
+                                                  final attendance = snapshot.data!;
+                                                  return Text(
+                                                    attendance.clockInLocation!, // Assuming you have overridden the 'toString' method in AttendanceModel
+                                                    style: TextStyle(
+                                                      fontFamily: "NexaBold",
+                                                      fontSize: screenWidth / 35,
+                                                      color: Colors.white,
+                                                    ),
+                                                  );
+                                                } else {
+                                                  return const Text(""); // Default value while waiting for data
+                                                }
+                                              },
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              "Clock-Out Location",
+                                              style: TextStyle(
+                                                fontFamily: "NexaLight",
+                                                fontSize: screenWidth / 35,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                            StreamBuilder<String>(
+                                              stream: controller.clockOutLocationStream,
+                                              builder: (context, snapshot) {
+                                                if (snapshot.hasData) {
+                                                  return Text(
+                                                    snapshot.data!,
+                                                    style: TextStyle(
+                                                      fontFamily: "NexaBold",
+                                                      fontSize: screenWidth / 35,
+                                                      color: Colors.white,
+                                                    ),
+                                                  );
+                                                } else {
+                                                  return const Text("--/--"); // Default value while waiting for data
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ]);
+                    }
+                    else {
+                      return SizedBox.shrink();
+
+                    }
+
+                  } else {
+                    return Column( children:[
+                      Container(
+                        margin: const EdgeInsets.only(top: 24, bottom: 12),
+                        child: Builder(
+                          builder: (context) {
+                            final GlobalKey<SlideActionState> key = GlobalKey();
+                            return SlideAction(
+                              text:"Slide to Clock In",
+                              textStyle: TextStyle(
+                                color: Colors.black54,
+                                fontSize: screenWidth / 20,
+                                fontFamily: "NexaLight",
+                              ),
+                              outerColor: Colors.white,
+                              innerColor: Colors.red,
+                              key: key,
+                              onSubmit: () async {
+                                await controller.handleClockInOut(context, key);
+                              },
+                            );
+                          },
+                        ),
                       ),
-                      const SizedBox(height: 20.0),
-                      // Location Status Container (For completed day)
+                      const SizedBox(height: 10.0),
+
+                      StreamBuilder<String>(
+                        stream: controller.clockInStream,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return SizedBox.shrink();
+                          } else {
+                            return MyButton(
+                              label: "Out Of Office? CLICK HERE",
+                              onTap: () {
+                                //controller.showBottomSheet3(context);
+                                Get.off(() => DaysOffPage(service: service));
+                              },
+                            ); // Default value while waiting for data
+                          }
+                        },
+                      ),
+
+                      const SizedBox(height: 10.0),
+                      // Location Status Container
                       Container(
                         width: MediaQuery.of(context).size.width * 0.9,
                         margin: const EdgeInsets.all(12.0),
@@ -501,21 +1093,29 @@ class ClockAttendance extends StatelessWidget {
                                             "Clock-In Location",
                                             style: TextStyle(
                                               fontFamily: "NexaLight",
-                                              fontSize: screenWidth / 27,
+                                              fontSize: screenWidth / 25,
                                               color: Colors.white,
                                             ),
                                           ),
                                           const SizedBox(height: 5),
-                                          Obx(
-                                                () => Text(
-                                              controller.clockInLocation.value,
-                                              style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 35,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
+                                          StreamBuilder<AttendanceModel?>(
+                                            stream: IsarService().watchLastAttendance(DateFormat('MMMM').format(DateTime.now())),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.hasData && snapshot.data != null) {
+                                                final attendance = snapshot.data!;
+                                                return Text(
+                                                  attendance.clockInLocation!, // Assuming you have overridden the 'toString' method in AttendanceModel
+                                                  style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 35,
+                                                    color: Colors.white,
+                                                  ),
+                                                );
+                                              } else {
+                                                return const Text(""); // Default value while waiting for data
+                                              }
+                                            },
+                                          )
                                         ],
                                       ),
                                     ),
@@ -529,20 +1129,27 @@ class ClockAttendance extends StatelessWidget {
                                             "Clock-Out Location",
                                             style: TextStyle(
                                               fontFamily: "NexaLight",
-                                              fontSize: screenWidth / 27,
+                                              fontSize: screenWidth / 35,
                                               color: Colors.white,
                                             ),
                                           ),
                                           const SizedBox(height: 5),
-                                          Obx(
-                                                () => Text(
-                                              controller.clockOutLocation.value,
-                                              style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 35,
-                                                color: Colors.white,
-                                              ),
-                                            ),
+                                          StreamBuilder<String>(
+                                            stream: controller.clockOutLocationStream,
+                                            builder: (context, snapshot) {
+                                              if (snapshot.hasData) {
+                                                return Text(
+                                                  snapshot.data!,
+                                                  style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 35,
+                                                    color: Colors.white,
+                                                  ),
+                                                );
+                                              } else {
+                                                return const Text("--/--"); // Default value while waiting for data
+                                              }
+                                            },
                                           ),
                                         ],
                                       ),
@@ -554,16 +1161,133 @@ class ClockAttendance extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ]);// Show a message if no data is found
+                  }
+                },
               ),
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            child: Column(
+              children: [
+                controller.clockOut.value  != "--/--"?TextField(
+                  controller: commentsController,
+                  maxLines: 3, // Allow multiple lines
+                  decoration: InputDecoration(
+                    hintText: "Comments (If Any)",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15.0), // More pronounced curve
+                      borderSide: BorderSide(color: Colors.grey), // Customize border color
+                    ), // Add a border
+                  ),): SizedBox.shrink(),
+                controller.comments.value == "No Comment"?const SizedBox(height:10):const SizedBox(height:0),
+                controller.clockOut.value  != "--/--"?
+                GestureDetector(
+                  onTap: () => handleAddComments(context,commentsController.text),
+                  child: Container(
+                    width: screenWidth * 0.40,
+                    height: screenHeight * 0.05,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.red,
+                          Colors.black,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(20),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Add Comment",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ):const SizedBox(height:0),
+              ],
+            ),
+          ),
+
+
             ],
           ),
         ),
       ),
     );
   }
+
+  Future<void> handleAddComments(
+      BuildContext context,String? commentsForAttendance) async {
+
+
+    try {
+      final lastAttend = await service.getLastAttendance(
+          DateFormat("MMMM yyyy").format(DateTime.now()).toString());
+
+        if (lastAttend?.date == DateFormat('dd-MMMM-yyyy').format(DateTime.now())) {
+        // Clock Out
+        List<AttendanceModel> attendanceResult = await service
+            .getAttendanceForDate(
+            DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
+        final bioInfoForUser = await service.getBioInfoWithFirebaseAuth();
+
+        await addComments(attendanceResult[0].id, bioInfoForUser,attendanceResult,commentsForAttendance!);
+      }
+    } catch (e) {
+      log("Attendance Comment Error ====== ${e.toString()}");
+
+    }
+
+  }
+
+
+  Future<void> addComments(
+      int attendanceId,
+      BioModel? bioInfoForUser,
+      List<AttendanceModel> attendanceResult,
+      String commentsForAttendance
+      ) async {
+
+
+
+    if(commentsForAttendance != null) {
+
+      await service.updateAttendanceWithComment(
+          attendanceId,
+          AttendanceModel(),
+          commentsForAttendance
+      );
+      Fluttertoast.showToast(
+        msg: "Adding Comments..",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      Get.off(() =>
+      bioInfoForUser!.role == "User"
+          ? UserDashBoard(service: service)
+          : AdminDashBoard(service: service));
+    } else{
+      Fluttertoast.showToast(
+        msg: "Comments Box Cannot be empty..",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
+
 }
 
 // ClockAttendanceController (clock_attendance_controller.dart)
@@ -573,11 +1297,39 @@ class ClockAttendanceController extends GetxController {
   ClockAttendanceController(this.service) {
     _init();
   }
+
+  // Method to refresh the ClockAttendance data
+  Future<void> refreshClockAttendance() async {
+
+    await _getAttendanceSummary();
+    await _getUserDetail();
+    await _startLocationService();
+
+  }
+
   var isCircularProgressBarOn = true.obs; // Observable boolean
+
+  var _clockInStreamController = StreamController<String>.broadcast();
+  Stream<String> get clockInStream => _clockInStreamController.stream;
+
+  var _clockOutStreamController = StreamController<String>.broadcast();
+  Stream<String> get clockOutStream => _clockOutStreamController.stream;
+
+  var _clockInLocationStreamController = StreamController<String>.broadcast();
+  Stream<String> get clockInLocationStream => _clockInLocationStreamController.stream;
+
+  var _clockOutLocationStreamController = StreamController<String>.broadcast();
+  Stream<String> get clockOutLocationStream => _clockOutLocationStreamController.stream;
+
+  // Create a stream for full name
+  var _fullNameStreamController = StreamController<String>.broadcast();
+  Stream<String> get fullNameStream => _fullNameStreamController.stream;
+
   RxString clockIn = "--/--".obs;
   RxString clockOut = "--/--".obs;
   RxString durationWorked = "".obs;
   RxString location = "".obs;
+  RxString comments = "No Comment".obs;
   RxString clockInLocation = "".obs;
   RxString clockOutLocation = "".obs;
   RxString role = "".obs;
@@ -612,7 +1364,8 @@ class ClockAttendanceController extends GetxController {
     "Other Leaves",
     "Absent",
     "Travel",
-    "Remote Working"
+    "Remote Working",
+    "Security Crisis"
   ];
 
  // Timer? _locationTimer;
@@ -629,17 +1382,27 @@ class ClockAttendanceController extends GetxController {
   void onClose() {
     // Cancel the timer when the controller is closed
     //_locationTimer?.cancel();
-   // _startLocationService().cancel();
+   //_startLocationService().cancel();
+    _clockInStreamController.close();
+    _clockOutStreamController.close();
+    _clockInLocationStreamController.close();
+    _clockOutLocationStreamController.close();
+    _fullNameStreamController.close();
     super.onClose();
   }
 
   void _init() async {
+    //await checkGeofence();
     await _loadNTPTime();
     await _getAttendanceSummary();
     await _getUserDetail();
-    await _startLocationService();
-    await getLocationStatus();
-    await getPermissionStatus();
+
+    await getLocationStatus().then((_) async {
+      await getPermissionStatus().then((_) async {
+        await _startLocationService();
+      });
+    });
+
     await checkInternetConnection();
 
     // // Start the periodic location updates
@@ -667,6 +1430,8 @@ class ClockAttendanceController extends GetxController {
       lastName.value = userDetail?.lastName ?? "";
       emailAddress.value = userDetail?.emailAddress ?? "";
       role.value = userDetail?.role ?? "";
+      // Update the full name stream
+      _fullNameStreamController.add("${userDetail?.firstName ?? ""} ${userDetail?.lastName ?? ""}");
     }
   }
 
@@ -686,6 +1451,11 @@ class ClockAttendanceController extends GetxController {
         clockOutLocation.value =
             attendanceLast?.clockOutLocation ?? "";
         durationWorked.value = attendanceLast?.durationWorked ?? "";
+        comments.value = attendanceLast?.comments ?? "No Comment";
+        _clockInStreamController.add(clockIn.value);
+        _clockOutStreamController.add(clockOut.value);
+        _clockInLocationStreamController.add(clockInLocation.value);
+        _clockOutLocationStreamController.add(clockOutLocation.value);
       } else {
         clockIn.value = attendanceResult[0].clockIn ?? "--/--";
         clockOut.value = attendanceResult[0].clockOut ?? "--/--";
@@ -694,6 +1464,11 @@ class ClockAttendanceController extends GetxController {
         clockOutLocation.value =
             attendanceResult[0].clockOutLocation ?? "";
         durationWorked.value = attendanceResult[0].durationWorked ?? "";
+        comments.value = attendanceResult[0].comments ?? "No Comment";
+        _clockInStreamController.add(clockIn.value);
+        _clockOutStreamController.add(clockOut.value);
+        _clockInLocationStreamController.add(clockInLocation.value);
+        _clockOutLocationStreamController.add(clockOutLocation.value);
       }
     } catch (e) {
       if (e.toString() ==
@@ -736,8 +1511,9 @@ class ClockAttendanceController extends GetxController {
   }
 
 
-  Future<void> _getLocation2() async {
 
+  Future<void> _getLocation2() async {
+print("_getLocation2 hereeeee");
     // Check for internet connection
     isInternetConnected.value = await InternetConnectionChecker().hasConnection;
 
@@ -749,10 +1525,28 @@ class ClockAttendanceController extends GetxController {
           desiredAccuracy: geolocator.LocationAccuracy.best,
           forceAndroidLocationManager: true, // Important for Android
         );
-        lati.value = position.latitude;
-        longi.value = position.longitude;
-        print("locationData.latitude == ${position.latitude}");
-        _updateLocation();
+
+        Position? position1 = await Geolocator.getLastKnownPosition();
+
+        if (position != null) {
+
+          lati.value = position.latitude;
+          longi.value = position.longitude;
+          print("locationData.latitude == ${position.latitude}");
+          _updateLocation();
+        } else if (position1 != null){
+          // Store the latitude and longitude (e.g., in shared preferences, database, etc.)
+          print('Cached Latitude: ${position.latitude}');
+          print('Cached Longitude: ${position.longitude}');
+          lati.value = position1.latitude;
+          longi.value = position1.longitude;
+          _updateLocation();
+        }
+        else {
+          print('No last known location available.');
+        }
+
+
 
 
         // locationService.onLocationChanged.listen((LocationData locationData) {
@@ -777,10 +1571,12 @@ class ClockAttendanceController extends GetxController {
       }
     } else {
       // Continue using location package for updates
-      print("Ther is internet to get location data");
+      print("There is internet to get location data");
       locationService.onLocationChanged.listen((LocationData locationData) {
         lati.value = locationData.latitude!;
         longi.value = locationData.longitude!;
+       // print("locationData.latitude! == ${locationData.latitude!}");
+        //print("locationData.longitude! == ${locationData.longitude!}");
         _updateLocation();
         _getAttendanceSummary();
       });
@@ -794,11 +1590,18 @@ class ClockAttendanceController extends GetxController {
       longi.value,
     );
 
+   // print("placemarksssssss==$placemarks");
+
     if (placemarks.isNotEmpty) {
       Placemark placemark = placemarks[0];
       location.value =
-      "${placemark.street}, ${placemark.subLocality}, ${placemark.subAdministrativeArea}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}";
-      administrativeArea.value = placemark.administrativeArea ?? ""; // Update state name
+      "${placemark.street},${placemark.subLocality},${placemark.subAdministrativeArea},${placemark.locality},${placemark.administrativeArea},${placemark.postalCode},${placemark.country}";
+      administrativeArea.value = placemark.administrativeArea!; // Update state name
+
+      print("location.valuesssss==${location.value}");
+      print("placemark.administrativeArea==${placemark.administrativeArea}");
+      print("administrativeArea.value ==${administrativeArea.value}");
+
     } else {
       location.value = "Location not found";
       administrativeArea.value = "";
@@ -808,7 +1611,8 @@ class ClockAttendanceController extends GetxController {
     if (administrativeArea.value != '' && administrativeArea.value != null) {
       // Query Isar database for locations with the same administrative area
       List<LocationModel> isarLocations =
-      await service.getLocationsByState(administrativeArea.value);
+     await service.getLocationsByState(administrativeArea.value);
+
 
       // Convert Isar locations to GeofenceModel
       List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
@@ -823,7 +1627,8 @@ class ClockAttendanceController extends GetxController {
       isInsideAnyGeofence.value = false;
       for (GeofenceModel office in offices) {
         double distance = GeoUtils.haversine(
-            lati.value, longi.value, office.latitude, office.longitude);
+          lati.value, longi.value,office.latitude, office.longitude);
+
         if (distance <= office.radius) {
           print('Entered office: ${office.name}');
 
@@ -855,6 +1660,58 @@ class ClockAttendanceController extends GetxController {
       isCircularProgressBarOn.value = false; // Update observable value
     }
   }
+
+  //
+  // Future<void> checkGeofence() async {
+  //   List<LocationModel> isarLocations = await service.getAllLocations();
+  //   print("All Isar Locations: ${isarLocations.map((loc) => loc.locationName)}");
+  //
+  //   try{}catch(e){};
+  //
+  //   List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+  //     name: location.locationName!,
+  //     latitude: location.latitude ?? 0.0,
+  //     longitude: location.longitude ?? 0.0,
+  //     radius: location.radius?.toDouble() ?? 0.0,
+  //   )).toList();
+  //
+  //   print("Geofences: ${offices.map((geo) => geo.name)}");
+  //
+  //   isInsideAnyGeofence.value = false;
+  //
+  //   for (GeofenceModel office in offices) {
+  //     double distance = GeoUtils.haversine(
+  //       8.953694,7.467342, office.latitude, office.longitude,
+  //     );
+  //
+  //     print("Distance to ${office.name}: $distance meters");
+  //
+  //     if (distance <= office.radius) {
+  //       print('Entered geofence: ${office.name}');
+  //       location.value = office.name;
+  //       isInsideAnyGeofence.value = true;
+  //       isCircularProgressBarOn.value = false;
+  //       break; // Exit loop if inside a geofence
+  //     }
+  //     break;
+  //   }
+  //
+  //   // If not inside any geofence, get location from coordinates
+  //   if (!isInsideAnyGeofence.value) {
+  //     List<Placemark> placemark = await placemarkFromCoordinates(lati.value, longi.value);
+  //     location.value =
+  //     "${placemark[0].street ?? ''},"
+  //         "${placemark[0].subLocality ?? ''},"
+  //         "${placemark[0].subAdministrativeArea ?? ''},"
+  //         "${placemark[0].locality ?? ''},"
+  //         "${placemark[0].administrativeArea ?? ''},"
+  //         "${placemark[0].postalCode ?? ''},"
+  //         "${placemark[0].country ?? ''}";
+  //
+  //     print("Location from coordinates: ${location.value}");
+  //   }
+  // }
+
 
   Future<void> getLocationStatus() async {
     bool isLocationEnabled = await Geolocator.isLocationServiceEnabled();
@@ -896,21 +1753,6 @@ class ClockAttendanceController extends GetxController {
 
   Future<void> handleClockInOut(
       BuildContext context, GlobalKey<SlideActionState> key) async {
-    // isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    // if (!isDeviceConnected) {
-    //   Fluttertoast.showToast(
-    //     msg:
-    //     "No Internet Connectivity Detected.",
-    //     toastLength: Toast.LENGTH_LONG,
-    //     backgroundColor: Colors.black54,
-    //     gravity: ToastGravity.BOTTOM,
-    //     timeInSecForIosWeb: 1,
-    //     textColor: Colors.white,
-    //     fontSize: 16.0,
-    //   );
-    //   //  key.currentState!.reset();
-    //   // return;
-    // }
 
     try {
       final lastAttend = await service.getLastAttendance(
@@ -963,9 +1805,14 @@ class ClockAttendanceController extends GetxController {
         ..durationWorked = "0 hours 0 minutes"
         ..noOfHours = 0.0
         ..offDay = false
-        ..month = DateFormat('MMMM yyyy').format(time);
+        ..month = DateFormat('MMMM yyyy').format(time)
+        ..comments = "No Comment"
+      ;
 
       await service.saveAttendance(attendance);
+      // Update the clockIn stream after saving the attendance
+      _clockInStreamController.add(DateFormat('hh:mm a').format(time));
+      _clockInLocationStreamController.add(location.value);
       Fluttertoast.showToast(
         msg: "Clocking-In..",
         toastLength: Toast.LENGTH_LONG,
@@ -1017,6 +1864,8 @@ class ClockAttendanceController extends GetxController {
             attendanceResult[0].clockIn.toString(),
             DateFormat('h:mm a').format(time)),
       );
+      _clockOutStreamController.add(DateFormat('hh:mm a').format(time));
+      _clockOutLocationStreamController.add(location.value);
       Fluttertoast.showToast(
         msg: "Clocking-Out..",
         toastLength: Toast.LENGTH_LONG,
@@ -1149,7 +1998,9 @@ class ClockAttendanceController extends GetxController {
     return totalTime;
   }
 
-  void showBottomSheet(BuildContext context) {
+
+
+  void showBottomSheet3(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     final ClockAttendanceController controller =
@@ -1160,7 +2011,7 @@ class ClockAttendanceController extends GetxController {
           return Container(
             padding: const EdgeInsets.only(left: 20, right: 20),
             width: screenWidth,
-            height: MediaQuery.of(context).size.height * 0.65,
+            height: screenHeight * 0.65,
             color: Colors.white,
             alignment: Alignment.center,
             child: SingleChildScrollView(
@@ -1213,6 +2064,7 @@ class ClockAttendanceController extends GetxController {
                       fontSize: screenWidth / 23,
                     ),
                   )),
+                  SizedBox(height: 10),
                   MyInputField(
                     title: "Date",
                     hint: DateFormat("dd/MM/yyyy").format(_selectedDate),

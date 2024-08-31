@@ -57,43 +57,48 @@ const AttendanceModelSchema = CollectionSchema(
       name: r'clockOutLongitude',
       type: IsarType.double,
     ),
-    r'date': PropertySchema(
+    r'comments': PropertySchema(
       id: 8,
+      name: r'comments',
+      type: IsarType.string,
+    ),
+    r'date': PropertySchema(
+      id: 9,
       name: r'date',
       type: IsarType.string,
     ),
     r'durationWorked': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'durationWorked',
       type: IsarType.string,
     ),
     r'isSynced': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'isUpdated': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'isUpdated',
       type: IsarType.bool,
     ),
     r'month': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'month',
       type: IsarType.string,
     ),
     r'noOfHours': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'noOfHours',
       type: IsarType.double,
     ),
     r'offDay': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'offDay',
       type: IsarType.bool,
     ),
     r'voided': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'voided',
       type: IsarType.bool,
     )
@@ -143,6 +148,12 @@ int _attendanceModelEstimateSize(
     }
   }
   {
+    final value = object.comments;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.date;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -177,14 +188,15 @@ void _attendanceModelSerialize(
   writer.writeDouble(offsets[5], object.clockOutLatitude);
   writer.writeString(offsets[6], object.clockOutLocation);
   writer.writeDouble(offsets[7], object.clockOutLongitude);
-  writer.writeString(offsets[8], object.date);
-  writer.writeString(offsets[9], object.durationWorked);
-  writer.writeBool(offsets[10], object.isSynced);
-  writer.writeBool(offsets[11], object.isUpdated);
-  writer.writeString(offsets[12], object.month);
-  writer.writeDouble(offsets[13], object.noOfHours);
-  writer.writeBool(offsets[14], object.offDay);
-  writer.writeBool(offsets[15], object.voided);
+  writer.writeString(offsets[8], object.comments);
+  writer.writeString(offsets[9], object.date);
+  writer.writeString(offsets[10], object.durationWorked);
+  writer.writeBool(offsets[11], object.isSynced);
+  writer.writeBool(offsets[12], object.isUpdated);
+  writer.writeString(offsets[13], object.month);
+  writer.writeDouble(offsets[14], object.noOfHours);
+  writer.writeBool(offsets[15], object.offDay);
+  writer.writeBool(offsets[16], object.voided);
 }
 
 AttendanceModel _attendanceModelDeserialize(
@@ -202,14 +214,15 @@ AttendanceModel _attendanceModelDeserialize(
     clockOutLatitude: reader.readDoubleOrNull(offsets[5]),
     clockOutLocation: reader.readStringOrNull(offsets[6]),
     clockOutLongitude: reader.readDoubleOrNull(offsets[7]),
-    date: reader.readStringOrNull(offsets[8]),
-    durationWorked: reader.readStringOrNull(offsets[9]),
-    isSynced: reader.readBoolOrNull(offsets[10]),
-    isUpdated: reader.readBoolOrNull(offsets[11]),
-    month: reader.readStringOrNull(offsets[12]),
-    noOfHours: reader.readDoubleOrNull(offsets[13]),
-    offDay: reader.readBoolOrNull(offsets[14]),
-    voided: reader.readBoolOrNull(offsets[15]),
+    comments: reader.readStringOrNull(offsets[8]),
+    date: reader.readStringOrNull(offsets[9]),
+    durationWorked: reader.readStringOrNull(offsets[10]),
+    isSynced: reader.readBoolOrNull(offsets[11]),
+    isUpdated: reader.readBoolOrNull(offsets[12]),
+    month: reader.readStringOrNull(offsets[13]),
+    noOfHours: reader.readDoubleOrNull(offsets[14]),
+    offDay: reader.readBoolOrNull(offsets[15]),
+    voided: reader.readBoolOrNull(offsets[16]),
   );
   object.id = id;
   return object;
@@ -243,16 +256,18 @@ P _attendanceModelDeserializeProp<P>(
     case 9:
       return (reader.readStringOrNull(offset)) as P;
     case 10:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 11:
       return (reader.readBoolOrNull(offset)) as P;
     case 12:
-      return (reader.readStringOrNull(offset)) as P;
-    case 13:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 14:
       return (reader.readBoolOrNull(offset)) as P;
+    case 13:
+      return (reader.readStringOrNull(offset)) as P;
+    case 14:
+      return (reader.readDoubleOrNull(offset)) as P;
     case 15:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 16:
       return (reader.readBoolOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1307,6 +1322,160 @@ extension AttendanceModelQueryFilter
   }
 
   QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'comments',
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'comments',
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'comments',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'comments',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'comments',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'comments',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'comments',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'comments',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'comments',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'comments',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'comments',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
+      commentsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'comments',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterFilterCondition>
       dateIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -2140,6 +2309,20 @@ extension AttendanceModelQuerySortBy
     });
   }
 
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterSortBy>
+      sortByComments() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterSortBy>
+      sortByCommentsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.desc);
+    });
+  }
+
   QueryBuilder<AttendanceModel, AttendanceModel, QAfterSortBy> sortByDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'date', Sort.asc);
@@ -2362,6 +2545,20 @@ extension AttendanceModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterSortBy>
+      thenByComments() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AttendanceModel, AttendanceModel, QAfterSortBy>
+      thenByCommentsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.desc);
+    });
+  }
+
   QueryBuilder<AttendanceModel, AttendanceModel, QAfterSortBy> thenByDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'date', Sort.asc);
@@ -2543,6 +2740,13 @@ extension AttendanceModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<AttendanceModel, AttendanceModel, QDistinct> distinctByComments(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'comments', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<AttendanceModel, AttendanceModel, QDistinct> distinctByDate(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2658,6 +2862,12 @@ extension AttendanceModelQueryProperty
       clockOutLongitudeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'clockOutLongitude');
+    });
+  }
+
+  QueryBuilder<AttendanceModel, String?, QQueryOperations> commentsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'comments');
     });
   }
 

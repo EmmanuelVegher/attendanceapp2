@@ -155,6 +155,8 @@ void onStart(ServiceInstance service) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
         final now = DateTime.now();
+        // Check if it's a weekday (Monday - Friday)
+        if (now.weekday >= DateTime.monday && now.weekday <= DateTime.friday) {
 
         List<AttendanceModel> clockInTime = await IsarService().getAttendanceForDate(
             DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
@@ -465,28 +467,29 @@ void onStart(ServiceInstance service) async {
               ),
             );
 
-          }else if(clockInTime[0].clockOut != "--/--"){
-
-            //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
-
-            flutterLocalNotificationsPlugin.show(
-              888,
-              'Attendance App',
-              'You have successfully clocked out for the day!',
-              const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'my_foreground',
-                  'MY FOREGROUND SERVICE',
-                  icon: 'clock_in',
-                  ongoing: true,
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  playSound: true,
-                ),
-              ),
-            );
-
           }
+          // else if(clockInTime[0].clockOut != "--/--"){
+          //
+          //   //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
+          //
+          //   flutterLocalNotificationsPlugin.show(
+          //     888,
+          //     'Attendance App',
+          //     'You have successfully clocked out for the day!',
+          //     const NotificationDetails(
+          //       android: AndroidNotificationDetails(
+          //         'my_foreground',
+          //         'MY FOREGROUND SERVICE',
+          //         icon: 'clock_in',
+          //         ongoing: true,
+          //         importance: Importance.max,
+          //         priority: Priority.high,
+          //         playSound: true,
+          //       ),
+          //     ),
+          //   );
+          //
+          // }
 
         }
 
@@ -531,28 +534,29 @@ void onStart(ServiceInstance service) async {
               ),
             );
 
-          }else if(clockInTime[0].clockOut != "--/--"){
-
-            //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
-
-            flutterLocalNotificationsPlugin.show(
-              888,
-              'Attendance App',
-              'You have successfully clocked out for the day!',
-              const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'my_foreground',
-                  'MY FOREGROUND SERVICE',
-                  icon: 'clock_in',
-                  ongoing: true,
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  playSound: true,
-                ),
-              ),
-            );
-
           }
+          // else if(clockInTime[0].clockOut != "--/--"){
+          //
+          //   //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
+          //
+          //   flutterLocalNotificationsPlugin.show(
+          //     888,
+          //     'Attendance App',
+          //     'You have successfully clocked out for the day!',
+          //     const NotificationDetails(
+          //       android: AndroidNotificationDetails(
+          //         'my_foreground',
+          //         'MY FOREGROUND SERVICE',
+          //         icon: 'clock_in',
+          //         ongoing: true,
+          //         importance: Importance.max,
+          //         priority: Priority.high,
+          //         playSound: true,
+          //       ),
+          //     ),
+          //   );
+          //
+          // }
 
         }
 
@@ -598,28 +602,29 @@ void onStart(ServiceInstance service) async {
               ),
             );
 
-          }else if(clockInTime[0].clockOut != "--/--"){
-
-            //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
-
-            flutterLocalNotificationsPlugin.show(
-              888,
-              'Attendance App',
-              'You have successfully clocked out for the day!',
-              const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'my_foreground',
-                  'MY FOREGROUND SERVICE',
-                  icon: 'clock_in',
-                  ongoing: true,
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  playSound: true,
-                ),
-              ),
-            );
-
           }
+          // else if(clockInTime[0].clockOut != "--/--"){
+          //
+          //   //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
+          //
+          //   flutterLocalNotificationsPlugin.show(
+          //     888,
+          //     'Attendance App',
+          //     'You have successfully clocked out for the day!',
+          //     const NotificationDetails(
+          //       android: AndroidNotificationDetails(
+          //         'my_foreground',
+          //         'MY FOREGROUND SERVICE',
+          //         icon: 'clock_in',
+          //         ongoing: true,
+          //         importance: Importance.max,
+          //         priority: Priority.high,
+          //         playSound: true,
+          //       ),
+          //     ),
+          //   );
+          //
+          // }
 
         }
 
@@ -663,28 +668,29 @@ void onStart(ServiceInstance service) async {
               ),
             );
 
-          }else if(clockInTime[0].clockOut != "--/--"){
-
-            //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
-
-            flutterLocalNotificationsPlugin.show(
-              888,
-              'Attendance App',
-              'You have successfully clocked out for the day!',
-              const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'my_foreground',
-                  'MY FOREGROUND SERVICE',
-                  icon: 'clock_in',
-                  ongoing: true,
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  playSound: true,
-                ),
-              ),
-            );
-
           }
+          // else if(clockInTime[0].clockOut != "--/--"){
+          //
+          //   //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
+          //
+          //   flutterLocalNotificationsPlugin.show(
+          //     888,
+          //     'Attendance App',
+          //     'You have successfully clocked out for the day!',
+          //     const NotificationDetails(
+          //       android: AndroidNotificationDetails(
+          //         'my_foreground',
+          //         'MY FOREGROUND SERVICE',
+          //         icon: 'clock_in',
+          //         ongoing: true,
+          //         importance: Importance.max,
+          //         priority: Priority.high,
+          //         playSound: true,
+          //       ),
+          //     ),
+          //   );
+          //
+          // }
 
         }
 
@@ -728,28 +734,29 @@ void onStart(ServiceInstance service) async {
               ),
             );
 
-          }else if(clockInTime[0].clockOut != "--/--"){
-
-            //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
-
-            flutterLocalNotificationsPlugin.show(
-              888,
-              'Attendance App',
-              'You have successfully clocked out for the day!',
-              const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'my_foreground',
-                  'MY FOREGROUND SERVICE',
-                  icon: 'clock_in',
-                  ongoing: true,
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  playSound: true,
-                ),
-              ),
-            );
-
           }
+          // else if(clockInTime[0].clockOut != "--/--"){
+          //
+          //   //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
+          //
+          //   flutterLocalNotificationsPlugin.show(
+          //     888,
+          //     'Attendance App',
+          //     'You have successfully clocked out for the day!',
+          //     const NotificationDetails(
+          //       android: AndroidNotificationDetails(
+          //         'my_foreground',
+          //         'MY FOREGROUND SERVICE',
+          //         icon: 'clock_in',
+          //         ongoing: true,
+          //         importance: Importance.max,
+          //         priority: Priority.high,
+          //         playSound: true,
+          //       ),
+          //     ),
+          //   );
+          //
+          // }
 
         }
 
@@ -793,28 +800,29 @@ void onStart(ServiceInstance service) async {
               ),
             );
 
-          }else if(clockInTime[0].clockOut != "--/--"){
-
-            //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
-
-            flutterLocalNotificationsPlugin.show(
-              888,
-              'Attendance App',
-              'You have successfully clocked out for the day!',
-              const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'my_foreground',
-                  'MY FOREGROUND SERVICE',
-                  icon: 'clock_in',
-                  ongoing: true,
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  playSound: true,
-                ),
-              ),
-            );
-
           }
+          // else if(clockInTime[0].clockOut != "--/--"){
+          //
+          //   //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
+          //
+          //   flutterLocalNotificationsPlugin.show(
+          //     888,
+          //     'Attendance App',
+          //     'You have successfully clocked out for the day!',
+          //     const NotificationDetails(
+          //       android: AndroidNotificationDetails(
+          //         'my_foreground',
+          //         'MY FOREGROUND SERVICE',
+          //         icon: 'clock_in',
+          //         ongoing: true,
+          //         importance: Importance.max,
+          //         priority: Priority.high,
+          //         playSound: true,
+          //       ),
+          //     ),
+          //   );
+          //
+          // }
 
         }
 
@@ -858,28 +866,29 @@ void onStart(ServiceInstance service) async {
               ),
             );
 
-          }else if(clockInTime[0].clockOut != "--/--"){
-
-            //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
-
-            flutterLocalNotificationsPlugin.show(
-              888,
-              'Attendance App',
-              'You have successfully clocked out for the day!',
-              const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'my_foreground',
-                  'MY FOREGROUND SERVICE',
-                  icon: 'clock_in',
-                  ongoing: true,
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  playSound: true,
-                ),
-              ),
-            );
-
           }
+          // else if(clockInTime[0].clockOut != "--/--"){
+          //
+          //   //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
+          //
+          //   flutterLocalNotificationsPlugin.show(
+          //     888,
+          //     'Attendance App',
+          //     'You have successfully clocked out for the day!',
+          //     const NotificationDetails(
+          //       android: AndroidNotificationDetails(
+          //         'my_foreground',
+          //         'MY FOREGROUND SERVICE',
+          //         icon: 'clock_in',
+          //         ongoing: true,
+          //         importance: Importance.max,
+          //         priority: Priority.high,
+          //         playSound: true,
+          //       ),
+          //     ),
+          //   );
+          //
+          // }
 
         }
 
@@ -923,28 +932,29 @@ void onStart(ServiceInstance service) async {
               ),
             );
 
-          }else if(clockInTime[0].clockOut != "--/--"){
-
-            //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
-
-            flutterLocalNotificationsPlugin.show(
-              888,
-              'Attendance App',
-              'You have successfully clocked out for the day!',
-              const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'my_foreground',
-                  'MY FOREGROUND SERVICE',
-                  icon: 'clock_in',
-                  ongoing: true,
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  playSound: true,
-                ),
-              ),
-            );
-
           }
+          // else if(clockInTime[0].clockOut != "--/--"){
+          //
+          //   //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
+          //
+          //   flutterLocalNotificationsPlugin.show(
+          //     888,
+          //     'Attendance App',
+          //     'You have successfully clocked out for the day!',
+          //     const NotificationDetails(
+          //       android: AndroidNotificationDetails(
+          //         'my_foreground',
+          //         'MY FOREGROUND SERVICE',
+          //         icon: 'clock_in',
+          //         ongoing: true,
+          //         importance: Importance.max,
+          //         priority: Priority.high,
+          //         playSound: true,
+          //       ),
+          //     ),
+          //   );
+          //
+          // }
 
         }
 
@@ -988,28 +998,29 @@ void onStart(ServiceInstance service) async {
               ),
             );
 
-          }else if(clockInTime[0].clockOut != "--/--"){
-
-            //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
-
-            flutterLocalNotificationsPlugin.show(
-              888,
-              'Attendance App',
-              'You have successfully clocked out for the day!',
-              const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'my_foreground',
-                  'MY FOREGROUND SERVICE',
-                  icon: 'clock_in',
-                  ongoing: true,
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  playSound: true,
-                ),
-              ),
-            );
-
           }
+          // else if(clockInTime[0].clockOut != "--/--"){
+          //
+          //   //print("clockInTime[0].clockOut=====${clockInTime[0].clockOut}");
+          //
+          //   flutterLocalNotificationsPlugin.show(
+          //     888,
+          //     'Attendance App',
+          //     'You have successfully clocked out for the day!',
+          //     const NotificationDetails(
+          //       android: AndroidNotificationDetails(
+          //         'my_foreground',
+          //         'MY FOREGROUND SERVICE',
+          //         icon: 'clock_in',
+          //         ongoing: true,
+          //         importance: Importance.max,
+          //         priority: Priority.high,
+          //         playSound: true,
+          //       ),
+          //     ),
+          //   );
+          //
+          // }
 
         }
 
@@ -1032,6 +1043,10 @@ void onStart(ServiceInstance service) async {
             "device": device,
           },
         );
+        } // End of weekday check
+        // else{
+        //   log("Today is ${now.weekday},and cannot show notification");
+        // }
       }
     }
   });
@@ -1074,18 +1089,24 @@ void backgroundTaskIsolate(ServiceInstance service) async {
   final notifyHelper = NotifyHelper();
   notifyHelper.initializeNotification();
 
-  notifyHelper.scheduleDailyNotifications(
-      1, 'Good Morning!', 'Have a productive day!', 8, 0);
-  notifyHelper.scheduleDailyNotifications(
-      2, 'Good Evening!', 'Time to unwind!', 17, 0);
+  // Schedule notifications only if it's a weekday
+  if (DateTime.now().weekday >= 1 && DateTime.now().weekday <= 5) {
+    notifyHelper.scheduleDailyNotifications(
+        1, 'Good Morning!', 'Have a productive day!', 8, 0);
+    notifyHelper.scheduleDailyNotifications(
+        2, 'Good Evening!', 'Time to unwind!', 17, 0);
+  }
 
   Timer.periodic(const Duration(minutes: 1), (timer) async {
     final now = DateTime.now();
 
-    if (now.hour == 12 && now.minute == 35) {
-      LocationTrackingService.trackLocation();
-    }
+    // Check if it's a weekday (Monday - Friday)
+    if (now.weekday >= 1 && now.weekday <= 5) {
+      if (now.hour == 12 && now.minute == 00) {
+        LocationTrackingService.trackLocation();
+      }
 
-    service.invoke('update', {'current time': DateTime.now().toString()});
+      service.invoke('update', {'current time': DateTime.now().toString()});
+    }
   });
 }

@@ -8,14 +8,18 @@ import 'package:attendanceapp/widgets/dashboard_widget.dart';
 import 'package:attendanceapp/widgets/drawer.dart';
 import 'package:attendanceapp/widgets/drawer2.dart';
 import 'package:attendanceapp/widgets/drawer3.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import '../../model/locationmodel.dart';
+import '../../model/statemodel.dart';
 import '../../model/user_model.dart';
 import '../../services/location_services.dart';
 import '../../services/notification_services.dart';
@@ -210,7 +214,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                         builder: (context) => MyFlutterApp()),
                   );
                 } else if (value == 'option2') {
-                  // Do something for option 2
+                  _checkForUpdates();
                 }
                 // ... add cases for other options
               },
@@ -226,16 +230,16 @@ class _UserDashBoardState extends State<UserDashBoard> {
                       ],
                     ),
                   ),
-                  // PopupMenuItem<String>(
-                  //   value: 'option2',
-                  //   child: Row(
-                  //     children: const [
-                  //       Icon(Icons.person, color: Colors.red,),
-                  //       SizedBox(width: 8),
-                  //       Text('Profile'),
-                  //     ],
-                  //   ),
-                  // ),
+                  PopupMenuItem<String>(
+                    value: 'option2',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.update, color: Colors.red,),
+                        SizedBox(width: 8),
+                        Text('Check For Updates'),
+                      ],
+                    ),
+                  ),
                   // ... add more PopupMenuItems for other buttons
                 ];
               },
@@ -762,6 +766,67 @@ class _UserDashBoardState extends State<UserDashBoard> {
         )
       ],
     );
+  }
+
+  _checkForUpdates() async {
+    Fluttertoast.showToast(
+      msg: "Checking For updates..",
+      toastLength: Toast.LENGTH_LONG,
+      backgroundColor: Colors.black54,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+    await IsarService().cleanLocationCollection().then((_) async {
+     await IsarService().cleanStateCollection().then((_){
+       fetchDataAndInsertIntoIsar();
+       Fluttertoast.showToast(
+         msg: "Updates Check Done..",
+         toastLength: Toast.LENGTH_LONG,
+         backgroundColor: Colors.black54,
+         gravity: ToastGravity.BOTTOM,
+         timeInSecForIosWeb: 1,
+         textColor: Colors.white,
+         fontSize: 16.0,
+       );
+     });
+    });
+  }
+
+  void fetchDataAndInsertIntoIsar() async {
+    final firestore = FirebaseFirestore.instance;
+    final locationCollection = await firestore.collection('Location').get();
+
+    for (final stateDoc in locationCollection.docs) {
+      final state = stateDoc.id;
+      //print("stateSnap====${state}");
+      final stateSave = StateModel()..stateName = state;
+
+      IsarService().saveState(stateSave);
+
+      final lgaCollectionRef = await firestore
+          .collection('Location')
+          .doc(state)
+          .collection(state)
+          .get();
+
+      for (final lgaDoc in lgaCollectionRef.docs) {
+        final lga = lgaDoc.id;
+        // print("lgaSnap====${lga}");
+        final data = lgaDoc.data() as Map<String, dynamic>;
+        //print("data====${data}");
+
+        final locationSave = LocationModel()
+          ..state = state
+          ..locationName = data['LocationName']
+          ..latitude = double.parse(data['Latitude'].toString())
+          ..longitude = double.parse(data['Longitude'].toString())
+          ..radius = double.parse(data['Radius'].toString());
+
+        IsarService().saveLocation(locationSave);
+      }
+    }
   }
 
   _bottomSheetButton(

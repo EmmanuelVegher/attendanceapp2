@@ -23,6 +23,7 @@ class UserFields {
   static final String clockOutLocation = 'Clock Out Location';
   static final String durationWorked = 'Duration Worked';
   static final String noOfHours = 'Number Of Hours';
+  static final String comments = 'Comments';
 
   static List<String> getFields() => [
         id,
@@ -46,7 +47,8 @@ class UserFields {
         clockOutLongitude,
         clockOutLocation,
         durationWorked,
-        noOfHours
+        noOfHours,
+    comments
       ];
 }
 
@@ -73,6 +75,7 @@ class User {
   final String clockOutLocation;
   final String durationWorked;
   final String noOfHours;
+  final String comments;
 
   const User(
       {this.id,
@@ -96,10 +99,12 @@ class User {
       required this.clockOutLongitude,
       required this.clockOutLocation,
       required this.durationWorked,
-      required this.noOfHours});
+      required this.noOfHours,
+        required this.comments,
+      });
 
   String toParam() =>
-      "?state=$state&project=$project&firstName=$firstName&lastName=$lastName&designation=$designation&department=$department&location=$location&staffCategory=$staffCategory&mobile=$mobile&date=$date&emailAddress=$emailAddress&clockIn=$clockIn&clockInLatitude=$clockInLatitude&clockInLongitude=$clockInLongitude&clockInLocation=$clockInLocation&clockOut=$clockOut&clockOutLatitude=$clockOutLatitude&clockOutLongitude=$clockOutLongitude&clockOutLocation=$clockOutLocation&durationWorked=$durationWorked&noOfHours=$noOfHours";
+      "?state=$state&project=$project&firstName=$firstName&lastName=$lastName&designation=$designation&department=$department&location=$location&staffCategory=$staffCategory&mobile=$mobile&date=$date&emailAddress=$emailAddress&clockIn=$clockIn&clockInLatitude=$clockInLatitude&clockInLongitude=$clockInLongitude&clockInLocation=$clockInLocation&clockOut=$clockOut&clockOutLatitude=$clockOutLatitude&clockOutLongitude=$clockOutLongitude&clockOutLocation=$clockOutLocation&durationWorked=$durationWorked&noOfHours=$noOfHours&comments=$comments";
 
   User copy(
           {int? id,
@@ -123,7 +128,8 @@ class User {
           String? clockOutLongitude,
           String? clockOutLocation,
           String? durationWorked,
-          String? noOfHours}) =>
+          String? noOfHours,
+          String? comments}) =>
       User(
           id: id ?? this.id,
           state: state ?? this.state,
@@ -146,7 +152,9 @@ class User {
           clockOutLongitude: clockOutLongitude ?? this.clockOutLongitude,
           clockOutLocation: clockOutLocation ?? this.clockOutLocation,
           durationWorked: durationWorked ?? this.durationWorked,
-          noOfHours: noOfHours ?? this.noOfHours);
+          noOfHours: noOfHours ?? this.noOfHours,
+        comments: comments?? this.comments
+      );
 
   static User fromJson(Map<String, dynamic> json) => User(
         id: jsonDecode(json[UserFields.id]),
@@ -171,6 +179,7 @@ class User {
         clockOutLocation: json[UserFields.clockOutLocation],
         durationWorked: json[UserFields.durationWorked],
         noOfHours: json[UserFields.noOfHours],
+        comments:json[UserFields.comments]
       );
 
   Map<String, dynamic> toJson() => {
@@ -196,5 +205,6 @@ class User {
         UserFields.clockOutLocation: clockOutLocation,
         UserFields.durationWorked: durationWorked,
         UserFields.noOfHours: noOfHours,
+        UserFields.comments: comments,
       };
 }

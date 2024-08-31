@@ -153,6 +153,11 @@ class IsarService extends DatabaseAdapter {
     return await isar.locationModels.filter().stateEqualTo(state).findAll();
   }
 
+  Future<List<LocationModel>> getAllLocations() async {
+    final isar = await db;
+    return await isar.locationModels.where().findAll();
+  }
+
   Future<List<AttendanceModel>> getAttendanceFor1990() async {
     final isar = await db;
     return await isar.attendanceModels
@@ -212,6 +217,57 @@ class IsarService extends DatabaseAdapter {
     yield* isar.attendanceModels.where().watch();
   }
 
+
+
+  Stream<List<BioModel>> watchBioInfoWithFirebaseAuth() async*  {
+    // ... (implementation to watch BioInfo changes in Isar)
+    final isar = await db;
+    //yield* isar.bioModels.where().watch();
+    final query = isar.bioModels.where().filter().firebaseAuthIdIsNotNull().build();
+
+    await for (final results in query.watch(fireImmediately: true)) {
+      if (results.isNotEmpty) {
+        yield results;
+      }
+    }
+  }
+
+
+
+  Stream<AttendanceModel?> watchLastAttendance(String month) async* {
+    final isar = await db; // Assuming 'db' is a Future<Isar>
+
+    await for (final attendance in isar.attendanceModels.where()
+        .filter()
+        .monthEqualTo(month)
+        .sortByDateDesc()
+        .watch(fireImmediately: true)) {
+      yield attendance.isNotEmpty ? attendance.first : null;
+    }
+  }
+
+  Stream<List<AttendanceModel>> getHourWorkedForMonth(String month) async* {
+    final isar = await db;
+    final query = isar.attendanceModels
+        .where()
+        .filter()
+        .monthEqualTo(month)
+        .and()
+        .offDayEqualTo(false)
+    // .and()
+    // .isUpdatedEqualTo(true)
+        .build();
+
+    await for (final results in query.watch(fireImmediately: true)) {
+      if (results.isNotEmpty) {
+        yield results;
+      }
+    }
+    // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
+  }
+
+
+
   Future<Isar> openDB() async {
     final directory = await getApplicationSupportDirectory();
     if (Isar.instanceNames.isEmpty) {
@@ -233,6 +289,16 @@ class IsarService extends DatabaseAdapter {
     await isar.writeTxn(() => isar.clear());
   }
 
+  Future<void> cleanLocationCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.locationModels.clear()); // Truncate collection
+  }
+
+  Future<void> cleanStateCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.stateModels.clear()); // Truncate collection
+  }
+
   Future<List<AttendanceModel>> getAttendanceFor(
       AttendanceModel attendanceModel) async {
     final isar = await db;
@@ -249,25 +315,7 @@ class IsarService extends DatabaseAdapter {
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
   }
 
-  Stream<List<AttendanceModel>> getHourWorkedForMonth(String month) async* {
-    final isar = await db;
-    final query = isar.attendanceModels
-        .where()
-        .filter()
-        .monthEqualTo(month)
-        .and()
-        .offDayEqualTo(false)
-        // .and()
-        // .isUpdatedEqualTo(true)
-        .build();
 
-    await for (final results in query.watch(fireImmediately: true)) {
-      if (results.isNotEmpty) {
-        yield results;
-      }
-    }
-    // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
-  }
 
   Stream<List<AttendanceModel>> getDaysOffForMonth(String month) async* {
     final isar = await db;
@@ -474,6 +522,21 @@ class IsarService extends DatabaseAdapter {
     });
   }
 
+  Future<void> updateAttendanceWithComment(
+      int id,
+      AttendanceModel attendanceModels,
+      String comments) async {
+    final isar = await db;
+    final attendanceUpdate = await isar.attendanceModels.get(id);
+
+    attendanceUpdate!
+      ..comments = comments;
+
+    await isar.writeTxn(() async {
+      await isar.attendanceModels.put(attendanceUpdate);
+    });
+  }
+
   Future<AttendanceModel?> getSpecificAttendance(int id) async {
     final isar = await db;
     return await isar.attendanceModels.filter().idEqualTo(id).findFirst();
@@ -601,10 +664,17 @@ class IsarService extends DatabaseAdapter {
   //   }
   // }
 
-  removeAttendance(AttendanceModel attendanceModel) async {
+  // removeAttendance(AttendanceModel attendanceModel,int id) async {
+  //   final isar = await db;
+  //   await isar.writeTxn(() async {
+  //     await isar.attendanceModels.delete(attendanceModel.id);
+  //   });
+  // }
+
+  removeAttendance(int id) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      await isar.attendanceModels.delete(attendanceModel.id);
+      await isar.attendanceModels.delete(id);
     });
   }
 

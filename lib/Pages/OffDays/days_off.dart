@@ -49,6 +49,7 @@ class DaysOffPage extends StatefulWidget {
 
 class _DaysOffPageState extends State<DaysOffPage> {
   // final DaysOffController _taskController = Get.put(TaskController());
+  final TextEditingController _commentsController = TextEditingController();
   final ClockAttendanceController controller =
   Get.put(ClockAttendanceController(IsarService()));
 
@@ -107,7 +108,8 @@ class _DaysOffPageState extends State<DaysOffPage> {
     "Other Leaves",
     "Absent",
     "Travel",
-    "Remote Working"
+    "Remote Working",
+    "Security Crisis"
   ];
   int _selectedColor = 0;
   // Future<int> getCurrentDateRecordCount() async {
@@ -509,6 +511,22 @@ class _DaysOffPageState extends State<DaysOffPage> {
                   ))
                 ],
               ),
+              SizedBox(
+                height: 12,
+              ),
+
+          TextField(
+            controller: _commentsController,
+            maxLines: 3, // Allow multiple lines
+            decoration: InputDecoration(
+              hintText: "Comments (If Any)",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15.0), // More pronounced curve
+                borderSide: BorderSide(color: Colors.grey), // Customize border color
+              ), // Add a border
+            ),),
+
+
               SizedBox(height: 18),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -719,6 +737,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
         ..offDay = true
         ..durationWorked = _reasons
         ..noOfHours = _diffHoursWorked(_startTime, _endTime)
+        ..comments = _commentsController.text.isEmpty ? 'No Comment' : _commentsController.text  // Check for empty string
         ..month = DateFormat('MMMM yyyy').format(_selectedDate);
 
       await widget.service.saveAttendance(attendnce);

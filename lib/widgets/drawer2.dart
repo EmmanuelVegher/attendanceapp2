@@ -364,12 +364,13 @@ void _switchAccountValidation(BuildContext context) async {
   // SharedPreferences preferences = await SharedPreferences.getInstance();
 
   if (attendanceNotSynced.length == 0) {
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) {
         return LoginPage(
           service: IsarService(),
         );
       }),
+          (route) => false, // Remove all previous routes
     );
     Fluttertoast.showToast(
         msg: "Login to switch account",

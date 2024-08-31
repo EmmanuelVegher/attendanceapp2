@@ -92,13 +92,51 @@ Future<void> _updateEmptyClockInLocation() async {
     await IsarService().getAttendanceForEmptyClockInLocation();
 
     for (var attend in attendanceForEmptyLocation) {
+      // Create a variable
+      var location2 = "";
+      bool isInsideAnyGeofence = false;
       List<Placemark> placemark = await placemarkFromCoordinates(
           attend.clockInLatitude!, attend.clockInLongitude!);
+      List<LocationModel> isarLocations =
+      await IsarService().getLocationsByState(placemark[0].administrativeArea);
+      // Convert Isar locations to GeofenceModel
+      List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+        name: location.locationName!, // Use 'locationName'
+        latitude: location.latitude ?? 0.0,
+        longitude: location.longitude ?? 0.0,
+        radius: location.radius?.toDouble() ?? 0.0,
+      )).toList();
+
+      print("Officessss == ${offices}");
+
+      isInsideAnyGeofence = false;
+      for (GeofenceModel office in offices) {
+        double distance = GeoUtils.haversine(
+            attend.clockInLatitude!, attend.clockInLongitude!, office.latitude, office.longitude);
+        if (distance <= office.radius) {
+          print('Entered office: ${office.name}');
+
+          location2 = office.name;
+          isInsideAnyGeofence = true;
+          break;
+        }
+      }
+
+      if (!isInsideAnyGeofence) {
+        List<Placemark> placemark = await placemarkFromCoordinates(
+            attend.clockInLatitude!, attend.clockInLongitude!);
+
+        location2 =
+        "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+        print("Location from map === ${location2}");
+      }
+
 
       IsarService().updateEmptyClockInLocation(
         attend.id,
         AttendanceModel(),
-        "${placemark[0].street}, ${placemark[0].subLocality}, ${placemark[0].subAdministrativeArea}, ${placemark[0].locality}, ${placemark[0].administrativeArea}, ${placemark[0].postalCode}, ${placemark[0].country}",
+        location2,
       );
     }
   } catch (e) {
@@ -113,13 +151,51 @@ Future<void> _updateEmptyClockOutLocation() async {
     await IsarService().getAttendanceForEmptyClockOutLocation();
 
     for (var attend in attendanceForEmptyLocation) {
+      // Create a variable
+      var location2 = "";
+      bool isInsideAnyGeofence = false;
       List<Placemark> placemark = await placemarkFromCoordinates(
           attend.clockOutLatitude!, attend.clockOutLongitude!);
+      List<LocationModel> isarLocations =
+      await IsarService().getLocationsByState(placemark[0].administrativeArea);
+
+      // Convert Isar locations to GeofenceModel
+      List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+        name: location.locationName!, // Use 'locationName'
+        latitude: location.latitude ?? 0.0,
+        longitude: location.longitude ?? 0.0,
+        radius: location.radius?.toDouble() ?? 0.0,
+      )).toList();
+
+      print("Officessss == ${offices}");
+
+      isInsideAnyGeofence = false;
+      for (GeofenceModel office in offices) {
+        double distance = GeoUtils.haversine(
+            attend.clockOutLatitude!, attend.clockOutLongitude!, office.latitude, office.longitude);
+        if (distance <= office.radius) {
+          print('Entered office: ${office.name}');
+
+          location2 = office.name;
+          isInsideAnyGeofence = true;
+          break;
+        }
+      }
+
+      if (!isInsideAnyGeofence) {
+        List<Placemark> placemark = await placemarkFromCoordinates(
+            attend.clockOutLatitude!, attend.clockOutLongitude!);
+
+        location2 =
+        "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+        print("Location from map === ${location2}");
+      }
 
       IsarService().updateEmptyClockOutLocation(
         attend.id,
         AttendanceModel(),
-        "${placemark[0].street}, ${placemark[0].subLocality}, ${placemark[0].subAdministrativeArea}, ${placemark[0].locality}, ${placemark[0].administrativeArea}, ${placemark[0].postalCode}, ${placemark[0].country}",
+        location2,
       );
     }
   } catch (e) {

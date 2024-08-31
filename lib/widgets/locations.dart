@@ -230,7 +230,7 @@ final Projects = [
   "Catholic Parliamentary Liason"
 ];
 
-final Roles = ["User", "Admin"];
+final Roles = ["User"];
 
 final StaffCategory = ["", "HQ/State Staff", "Facility Staff"];
 

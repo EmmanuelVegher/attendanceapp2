@@ -13,12 +13,16 @@ import 'package:attendanceapp/widgets/drawer.dart';
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:geocoding/geocoding.dart';
 // import 'package:get_storage/get_storage.dart';
 // import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../OffDays/update_attendance.dart';
+import 'attendance_home.dart';
 
 class CalendarScreen extends StatefulWidget {
   final IsarService service;
@@ -58,6 +62,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Color primary = const Color(0xffeef444c);
 
   String _month = DateFormat("MMMM yyyy").format(DateTime.now());
+
+  // Method to refresh the CalendarScreen
+  void refresh() {
+    setState(() {
+      // You can add any specific logic here to update data if needed
+      // For example, you could refetch attendance data from Isar:
+      // widget.service.searchAllAttendance().then((attendance) {
+      //   // Update your state variables with the new attendance data
+      // });
+    });
+  }
 
   @override
   void initState() {
@@ -137,6 +152,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // Future<void> _getAllAttendance() async {
 
   // }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -304,10 +321,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       itemCount: attendance.length,
                       itemBuilder: (context, index) {
                         return attendance[index].month == _month
-                            ? Container(
+                            ? GestureDetector(
+                            onTap: () {
+                              // _showBottomSheet2(
+                              //     context, attendance[index].id);
+
+                              _showAttendanceOptionsDialog(context, attendance[index].id);
+                            },
+                            child:
+                        // Flexible( // This will expand only if there's extra space
+                        //     child:
+                        Container(
                                 margin: EdgeInsets.only(
-                                    top: index > 0 ? 12 : 0, left: 6, right: 6),
-                                height: 180,
+                                    top: index > 0 ? 20 : 0, left: 6, right: 6),
+                                //height: 300,
                                 decoration: const BoxDecoration(
                                   color: Colors.white,
                                   boxShadow: [
@@ -320,219 +347,297 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(20)),
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    // first Expanded Widget
+                                child: Column(
+                                  children:[
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        // first Expanded Widget
+                                        Container(
+                                          margin: const EdgeInsets.only(),
+                                          padding: const EdgeInsets.all(5),
+                                          width: screenWidth * 0.30,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                //Colors.redAccent,
+                                                //Colors.black,
+                                                Colors.deepOrange,
+                                                Colors.deepOrange,
+                                              ],
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                            ),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(24),
+                                              topRight: Radius.circular(24),
+                                            ),
+                                          ),
+                                          child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  attendance[index].date.toString(),
+                                                  style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 26,
+                                                    color: Colors.white,
+                                                      fontWeight:FontWeight.bold
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Text(
+                                                  attendance[index].offDay == true
+                                                      ? "DayOff: ${attendance[index].durationWorked}"
+                                                      : "Hour : ${attendance[index].durationWorked}",
+                                                  style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 26,
+                                                    color: Colors.white,
+                                                      fontWeight:FontWeight.bold
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Text(
+                                                  attendance[index]
+                                                      .isSynced
+                                                      .toString() ==
+                                                      "true"
+                                                      ? "Synced"
+                                                      : "Not Synced",
+                                                  style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 27,
+                                                    color: attendance[index]
+                                                        .isSynced
+                                                        .toString() ==
+                                                        "true"
+                                                        ? Color.fromARGB(
+                                                        255, 6, 202, 12)
+                                                        : Color.fromARGB(
+                                                        255, 252, 252, 252),
+                                                  ),
+                                                ),
+                                              ]),
+                                        ),
+
+                                        // Second Expanded Widget
+
+                                        SizedBox(
+                                          width: screenWidth * 0.27,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                "Clock In",
+                                                style: TextStyle(
+                                                    fontFamily: "NexaLight",
+                                                    fontSize: screenWidth / 20,
+                                                    color: attendance[index]
+                                                        .clockIn
+                                                        .toString() ==
+                                                        "--/--"
+                                                        ? Colors.red
+                                                        : Colors.black54),
+                                              ),
+                                              Text(
+                                                attendance[index]
+                                                    .clockIn
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 18,
+                                                    color: attendance[index]
+                                                        .clockIn
+                                                        .toString() ==
+                                                        "--/--"
+                                                        ? Colors.red
+                                                        : Colors.black),
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Text(
+                                                "Lat:${attendance[index].clockInLatitude.toString()}",
+                                                style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 30,
+                                                    color: attendance[index]
+                                                        .clockInLatitude
+                                                        .toString() ==
+                                                        "0.0"
+                                                        ? Colors.red
+                                                        : Colors.black54),
+                                              ),
+                                              Text(
+                                                "Long:${attendance[index].clockInLongitude.toString()}",
+                                                style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 30,
+                                                    color: attendance[index]
+                                                        .clockInLongitude
+                                                        .toString() ==
+                                                        "0.0"
+                                                        ? Colors.red
+                                                        : Colors.black54),
+                                              ),
+                                              // Text(
+                                              //   "Location:${attendance[index].clockInLocation.toString()}",
+                                              //   style: TextStyle(
+                                              //     fontFamily: "NexaBold",
+                                              //     fontSize: screenWidth / 30,
+                                              //   ),
+                                              // ),
+                                            ],
+                                          ),
+                                        ),
+                                        // Third Expanded Widget
+                                        SizedBox(
+                                          width: screenWidth * 0.28,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                "Clock Out",
+                                                style: TextStyle(
+                                                    fontFamily: "NexaLight",
+                                                    fontSize: screenWidth / 20,
+                                                    color: attendance[index]
+                                                        .clockOut
+                                                        .toString() ==
+                                                        "--/--"
+                                                        ? Colors.red
+                                                        : Colors.black54),
+                                              ),
+                                              Text(
+                                                attendance[index]
+                                                    .clockOut
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 18,
+                                                    color: attendance[index]
+                                                        .clockOut
+                                                        .toString() ==
+                                                        "--/--"
+                                                        ? Colors.red
+                                                        : Colors.black),
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Text(
+                                                "Lat:${attendance[index].clockOutLatitude.toString()}",
+                                                style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 30,
+                                                    color: attendance[index]
+                                                        .clockOutLatitude
+                                                        .toString() ==
+                                                        "0.0"
+                                                        ? Colors.red
+                                                        : Colors.black54),
+                                              ),
+                                              Text(
+                                                "Long:${attendance[index].clockOutLongitude.toString()}",
+                                                style: TextStyle(
+                                                    fontFamily: "NexaBold",
+                                                    fontSize: screenWidth / 30,
+                                                    color: attendance[index]
+                                                        .clockOutLongitude
+                                                        .toString() ==
+                                                        "0.0"
+                                                        ? Colors.red
+                                                        : Colors.black54),
+                                              )
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                     Container(
-                                      margin: const EdgeInsets.only(),
-                                      padding: const EdgeInsets.all(5),
-                                      width: screenWidth * 0.30,
+                                     width: screenWidth * 1,
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
-                                            Colors.redAccent,
+                                            Colors.deepOrange,
                                             Colors.black,
                                           ],
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(24),
-                                        ),
-                                      ),
-                                      child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              attendance[index].date.toString(),
-                                              style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 26,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              attendance[index].offDay == true
-                                                  ? "DayOff: ${attendance[index].durationWorked}"
-                                                  : "Hour : ${attendance[index].durationWorked}",
-                                              style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 26,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              attendance[index]
-                                                          .isSynced
-                                                          .toString() ==
-                                                      "true"
-                                                  ? "Synced"
-                                                  : "Not Synced",
-                                              style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 27,
-                                                color: attendance[index]
-                                                            .isSynced
-                                                            .toString() ==
-                                                        "true"
-                                                    ? Color.fromARGB(
-                                                        255, 6, 202, 12)
-                                                    : Color.fromARGB(
-                                                        255, 252, 252, 252),
-                                              ),
-                                            ),
-                                          ]),
-                                    ),
 
-                                    // Second Expanded Widget
-                                    SizedBox(
-                                      width: screenWidth * 0.27,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Clock In",
-                                            style: TextStyle(
-                                                fontFamily: "NexaLight",
-                                                fontSize: screenWidth / 20,
-                                                color: attendance[index]
-                                                            .clockIn
-                                                            .toString() ==
-                                                        "--/--"
-                                                    ? Colors.red
-                                                    : Colors.black54),
-                                          ),
-                                          Text(
-                                            attendance[index]
-                                                .clockIn
-                                                .toString(),
-                                            style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 18,
-                                                color: attendance[index]
-                                                            .clockIn
-                                                            .toString() ==
-                                                        "--/--"
-                                                    ? Colors.red
-                                                    : Colors.black),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            "Lat:${attendance[index].clockInLatitude.toString()}",
-                                            style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 30,
-                                                color: attendance[index]
-                                                            .clockInLatitude
-                                                            .toString() ==
-                                                        "0.0"
-                                                    ? Colors.red
-                                                    : Colors.black54),
-                                          ),
-                                          Text(
-                                            "Long:${attendance[index].clockInLongitude.toString()}",
-                                            style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 30,
-                                                color: attendance[index]
-                                                            .clockInLongitude
-                                                            .toString() ==
-                                                        "0.0"
-                                                    ? Colors.red
-                                                    : Colors.black54),
-                                          ),
-                                          // Text(
-                                          //   "Location:${attendance[index].clockInLocation.toString()}",
-                                          //   style: TextStyle(
-                                          //     fontFamily: "NexaBold",
-                                          //     fontSize: screenWidth / 30,
-                                          //   ),
-                                          // ),
-                                        ],
+                                         begin: Alignment.centerRight,
+                                          end: Alignment.centerLeft,
+                                         // begin: Alignment.bottomCenter,
+                                        //  end: Alignment.topCenter,
+                                        ),
+                                        borderRadius: BorderRadius.only(
+                                          bottomLeft: Radius.circular(24),
+                                          bottomRight: Radius.circular(24),
+                                        ),
+
+
                                       ),
+                                      padding: const EdgeInsets.fromLTRB(15.0, 3.0, 15.0, 2.0), // Adjust values
+                                      child: Column(
+                                        children:[
+
+                                          Text(
+                                            "Clock-In Location: ${attendance[index].clockInLocation.toString()}",
+                                            style: TextStyle(
+                                              fontFamily: "NexaBold",
+                                              fontSize: screenWidth / 30,
+                                              color: Colors.white,
+                                              fontWeight:FontWeight.bold
+                                            ),
+                                          ),
+                                          SizedBox(height:5),
+                                          Text(
+                                            "Clock-Out Location: ${attendance[index].clockOutLocation.toString()}",
+                                            style: TextStyle(
+                                              fontFamily: "NexaBold",
+                                              fontSize: screenWidth / 30,
+                                              color: Colors.white,
+                                                fontWeight:FontWeight.bold
+                                            ),
+                                          ),
+                                          SizedBox(height:5),
+                                          Text(
+                                            "Comments: ${attendance[index].comments.toString()}",
+                                            style: TextStyle(
+                                              fontFamily: "NexaBold",
+                                              fontSize: screenWidth / 30,
+                                              color: Colors.white,
+                                                fontWeight:FontWeight.bold
+                                            ),
+                                          ),
+                                        ]
+                                      )
+
                                     ),
-                                    // Third Expanded Widget
-                                    SizedBox(
-                                      width: screenWidth * 0.28,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Clock Out",
-                                            style: TextStyle(
-                                                fontFamily: "NexaLight",
-                                                fontSize: screenWidth / 20,
-                                                color: attendance[index]
-                                                            .clockOut
-                                                            .toString() ==
-                                                        "--/--"
-                                                    ? Colors.red
-                                                    : Colors.black54),
-                                          ),
-                                          Text(
-                                            attendance[index]
-                                                .clockOut
-                                                .toString(),
-                                            style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 18,
-                                                color: attendance[index]
-                                                            .clockOut
-                                                            .toString() ==
-                                                        "--/--"
-                                                    ? Colors.red
-                                                    : Colors.black),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            "Lat:${attendance[index].clockOutLatitude.toString()}",
-                                            style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 30,
-                                                color: attendance[index]
-                                                            .clockOutLatitude
-                                                            .toString() ==
-                                                        "0.0"
-                                                    ? Colors.red
-                                                    : Colors.black54),
-                                          ),
-                                          Text(
-                                            "Long:${attendance[index].clockOutLongitude.toString()}",
-                                            style: TextStyle(
-                                                fontFamily: "NexaBold",
-                                                fontSize: screenWidth / 30,
-                                                color: attendance[index]
-                                                            .clockOutLongitude
-                                                            .toString() ==
-                                                        "0.0"
-                                                    ? Colors.red
-                                                    : Colors.black54),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  ],
+                                  ]
+
                                 ),
+
                               )
+
+
+
+                       // )
+
+                        )
                             : SizedBox();
                       },
                     );
@@ -548,6 +653,207 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+  _showAttendanceOptionsDialog(BuildContext context, int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Delete Attendance"),
+          content: Text("Do you want to delete this attendance?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Close the first dialog
+                Navigator.of(context).pop();
+                // Show the confirmation dialog
+                _showDeleteConfirmationDialog(context, id);
+              },
+              child: Text("Delete"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _showDeleteConfirmationDialog(BuildContext context, int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirm Delete"),
+          content: Text("Are you sure you want to delete this attendance? This action cannot be undone."),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await widget.service.removeAttendance(id);
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return AttendanceHomeScreen(service: IsarService());
+                    },
+                  ),
+                );
+                Fluttertoast.showToast(
+                  msg: "Attendance Deleted",
+                  toastLength: Toast.LENGTH_LONG,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              },
+              child: Text("Yes"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("No"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  _showBottomSheet2(BuildContext context, int id) {
+    return showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Container(
+            padding: const EdgeInsets.only(top: 4),
+            height: MediaQuery.of(context).size.height * 0.26,
+            width: MediaQuery.of(context).size.width * 1,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.grey[350],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  height: 6,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.deepOrange,
+                  ),
+                ),
+                Spacer(),
+                // _bottomSheetButton(
+                //   label: "Update Attendance",
+                //   onTap: () async {
+                //     final attendanceUpdate =
+                //     await widget.service.getSpecificAttendance(id);
+                //     final attendanceList =
+                //     await widget.service.getListSpecificAttendance(id);
+                //     Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //             builder: (context) => UpdateAttendance(
+                //               service: IsarService(),
+                //               attendanceUpdate: attendanceUpdate,
+                //               //  feedbackList:feedbackList,
+                //               passedId: id,
+                //             )));
+                //     Fluttertoast.showToast(
+                //         msg: "Attendance Updated",
+                //         toastLength: Toast.LENGTH_LONG,
+                //         backgroundColor: Colors.black54,
+                //         gravity: ToastGravity.BOTTOM,
+                //         timeInSecForIosWeb: 1,
+                //         textColor: Colors.white,
+                //         fontSize: 16.0);
+                //     //_updateFeedback(context, id);
+                //     //_taskController.markTaskCompleted(task.id!);
+                //     //Navigator.of(context).pop();
+                //   },
+                //   clr: Colors.red,
+                //   context: context,
+                // ),
+                _bottomSheetButton(
+                  label: "Delete Attendance",
+                  onTap: () async {
+                    await widget.service
+                        .removeAttendance(id);
+                    //Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) {
+                        return AttendanceHomeScreen(
+                          service: IsarService(),
+                        );
+                      }),
+                    );
+                    Fluttertoast.showToast(
+                        msg: "Attendance Deleted",
+                        toastLength: Toast.LENGTH_LONG,
+                        backgroundColor: Colors.black54,
+                        gravity: ToastGravity.BOTTOM,
+                        timeInSecForIosWeb: 1,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                  },
+                  clr: Colors.orange,
+                  context: context,
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                _bottomSheetButton(
+                  label: "Close",
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  clr: Colors.red,
+                  isClose: true,
+                  context: context,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  _bottomSheetButton(
+      {required String label,
+        required Function()? onTap,
+        required Color clr,
+        bool isClose = false,
+        required BuildContext context}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        height: 55,
+        width: MediaQuery.of(context).size.width * 0.9,
+        decoration: BoxDecoration(
+         color: label == "Close" ? Colors.red : Colors.blue,
+          border: Border.all(
+            width: 2,
+            color: Colors.grey[300]!,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          //color: Colors.transparent,
+        ),
+        child: Center(
+          child: Text(label,
+              style: TextStyle(
+                  fontSize: 16, color: Colors.white, fontFamily: "NexaBold")),
+        ),
+      ),
+    );
+  }
 /*
   // ------------------
   showDialogBox() => showCupertinoDialog<String>(

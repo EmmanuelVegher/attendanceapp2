@@ -2890,7 +2890,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                   String department = departmentName;
                                   String designatn = designation;
                                   String project = value3;
-                                  String role = value4;
+                                  String role = value4 == ""?"User":value4;
                                   String password = _passwordControl.text;
 
                                   showDialog(
@@ -2931,8 +2931,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                     'role': role,
                                     'isVerified': isVeriffied,
                                   }).then((value) async {
+
+                                    try{}catch(e){}
                                     // Replace "your-bucket-name" with your actual Google Cloud Storage bucket name
-                                    String bucketName = "AttendanceApp";
+                                    //String bucketName = "AttendanceApp";
+                                    String bucketName = "attendanceapp-a6853.appspot.com";
 
                                     // Specify the path where you want to store the image in the bucket
                                     //String storagePath = "profile_pics/${DateTime.now().millisecondsSinceEpoch}.jpg";
@@ -2966,20 +2969,75 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                           builder: (context) => LoginPage(
                                               service: IsarService())),
                                       (Route<dynamic> route) => false);
+
+                                  Fluttertoast.showToast(
+                                    msg: "Registration Completed",
+                                    toastLength: Toast.LENGTH_LONG,
+                                    backgroundColor: Colors.black54,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  );
                                 } on EmailAlreadyInUseAuthException {
                                   await showErrorDialog(
                                       context, "Email Already in Use");
+                                  Fluttertoast.showToast(
+                                    msg: "Email Already in Use",
+                                    toastLength: Toast.LENGTH_LONG,
+                                    backgroundColor: Colors.black54,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  );
                                 } on WeakPasswordAuthException {
                                   await showErrorDialog(
                                       context, "Weak Password");
+                                  Fluttertoast.showToast(
+                                    msg: "Weak Password",
+                                    toastLength: Toast.LENGTH_LONG,
+                                    backgroundColor: Colors.black54,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  );
                                 } on InvalidEmailAuthException {
                                   await showErrorDialog(
                                       context, "Invalid Email");
+                                  Fluttertoast.showToast(
+                                    msg: "Invalid Email",
+                                    toastLength: Toast.LENGTH_LONG,
+                                    backgroundColor: Colors.black54,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  );
                                 } on GenericAuthException {
                                   await showErrorDialog(
                                       context, "Authentication Error");
+                                  Fluttertoast.showToast(
+                                    msg: "Authentication Error",
+                                    toastLength: Toast.LENGTH_LONG,
+                                    backgroundColor: Colors.black54,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  );
                                 } catch (e) {
                                   await showErrorDialog(context, e.toString());
+                                  Fluttertoast.showToast(
+                                    msg: "${e.toString()}",
+                                    toastLength: Toast.LENGTH_LONG,
+                                    backgroundColor: Colors.black54,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  );
                                 }
                               }
                             },

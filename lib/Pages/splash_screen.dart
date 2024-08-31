@@ -14,7 +14,11 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http; // Import http package for network requests
+import 'package:http/http.dart' as http;
+
+import '../model/locationmodel.dart';
+import '../services/geofencing.dart';
+import '../widgets/geo_utils.dart'; // Import http package for network requests
 
 class SplashScreen extends StatefulWidget {
   final IsarService service;
@@ -78,6 +82,15 @@ class _SplashScreenState extends State<SplashScreen> {
         log("Firebase Authentication Error: ${e.toString()}");
         // You can display a user-friendly error message here
         // ...
+        Fluttertoast.showToast(
+          msg: "Error: ${e.toString()}",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
       }
     });
   }
@@ -122,10 +135,23 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             )),
             SizedBox(height: screenHeight * 0.05),
-            Text("Attendance v1.0",
+            Text("Attendance v1.3 ",
                 style: TextStyle(
                     color: const Color.fromARGB(255, 97, 9, 9),
                     fontSize: screenWidth * 0.05,
+                    fontWeight: FontWeight.bold)),
+            SizedBox(height: screenHeight * 0.05),
+            Text("| Powered By:CARITAS Nigeria |",
+                style: TextStyle(
+                    color: const Color.fromARGB(255, 97, 9, 9),
+                    fontSize: screenWidth * 0.04,
+                    fontWeight: FontWeight.bold)),
+
+            SizedBox(height: screenHeight * 0.05),
+            Text("Developer: Emmanuel Vegher",
+                style: TextStyle(
+                    color: const Color.fromARGB(255, 97, 9, 9),
+                    fontSize: screenWidth * 0.03,
                     fontWeight: FontWeight.bold))
           ],
         ),
@@ -189,7 +215,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 unSyncedAttend.clockOutLongitude.toString(),
                 unSyncedAttend.clockOutLocation.toString(),
                 unSyncedAttend.durationWorked.toString(),
-                unSyncedAttend.noOfHours.toString())
+                unSyncedAttend.noOfHours.toString(),
+                unSyncedAttend.comments.toString()
+            )
                 .then((value) async {
               await FirebaseFirestore.instance
                   .collection("Staff")
@@ -214,6 +242,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 'month': unSyncedAttend.month,
                 'durationWorked': unSyncedAttend.durationWorked,
                 'offDay': unSyncedAttend.offDay,
+                'comments':unSyncedAttend.comments
               }).then((value) => IsarService().updateSyncStatus(
                   unSyncedAttend.id, AttendanceModel(), true));
             })
@@ -251,7 +280,9 @@ class _SplashScreenState extends State<SplashScreen> {
             unSyncedAttend.clockOutLongitude.toString(),
             unSyncedAttend.clockOutLocation.toString(),
             unSyncedAttend.durationWorked.toString(),
-            unSyncedAttend.noOfHours.toString())
+            unSyncedAttend.noOfHours.toString(),
+            unSyncedAttend.comments.toString()
+        )
             .then((value) async {
           IsarService()
               .updateSyncStatus(unSyncedAttend.id, AttendanceModel(), true);
@@ -287,51 +318,117 @@ class _SplashScreenState extends State<SplashScreen> {
   //This method updates all empty Clock-In Location Using the Latitude and Longitude during clock-out
   Future<void> _updateEmptyClockInLocation() async {
     try {
-      //First, query the list of all records with empty Clock-In Location
       List<AttendanceModel> attendanceForEmptyLocation =
       await IsarService().getAttendanceForEmptyClockInLocation();
 
-      //Iterate through each queried loop
       for (var attend in attendanceForEmptyLocation) {
         // Create a variable
-        //var location = "";
-        //Input the queried latitude and Lngitude, but also assign 0.0 to any null Latitude and Longitude
+        var location2 = "";
+        bool isInsideAnyGeofence = false;
         List<Placemark> placemark = await placemarkFromCoordinates(
             attend.clockInLatitude!, attend.clockInLongitude!);
+        List<LocationModel> isarLocations =
+        await IsarService().getLocationsByState(placemark[0].administrativeArea);
+        // Convert Isar locations to GeofenceModel
+        List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+          name: location.locationName!, // Use 'locationName'
+          latitude: location?.latitude ?? 0.0,
+          longitude: location.longitude ?? 0.0,
+          radius: location.radius?.toDouble() ?? 0.0,
+        )).toList();
 
-        //print("ClockInPlacemarker = $placemark");
+        print("Officessss == ${offices}");
 
-        //Update all missing Clock In location
-        IsarService().updateEmptyClockInLocation(attend.id, AttendanceModel(),
-            "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}");
-        //print(attend.clockInLatitude);
+        isInsideAnyGeofence = false;
+        for (GeofenceModel office in offices) {
+          double distance = GeoUtils.haversine(
+              attend.clockInLatitude!, attend.clockInLongitude!, office.latitude, office.longitude);
+          if (distance <= office.radius) {
+            print('Entered office: ${office.name}');
+
+            location2 = office.name;
+            isInsideAnyGeofence = true;
+            break;
+          }
+        }
+
+        if (!isInsideAnyGeofence) {
+          List<Placemark> placemark = await placemarkFromCoordinates(
+              attend.clockInLatitude!, attend.clockInLongitude!);
+
+          location2 =
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+          print("Location from map === ${location2}");
+        }
+
+
+        IsarService().updateEmptyClockInLocation(
+          attend.id,
+          AttendanceModel(),
+          location2,
+        );
       }
     } catch (e) {
       log(e.toString());
     }
   }
 
+
+
 //This method updates all empty Clock-Out Location Using the Latitude and Longitude during clock-out
   Future<void> _updateEmptyClockOutLocation() async {
     try {
-      //First, query the list of all records with empty Clock-In Location
       List<AttendanceModel> attendanceForEmptyLocation =
       await IsarService().getAttendanceForEmptyClockOutLocation();
 
-      //Iterate through each queried loop
       for (var attend in attendanceForEmptyLocation) {
         // Create a variable
-        // var location = "";
-        //Input the queried latitude and Lngitude, but also assign 0.0 to any null Latitude and Longitude
+        var location2 = "";
+        bool isInsideAnyGeofence = false;
         List<Placemark> placemark = await placemarkFromCoordinates(
             attend.clockOutLatitude!, attend.clockOutLongitude!);
+        List<LocationModel> isarLocations =
+        await IsarService().getLocationsByState(placemark[0].administrativeArea);
 
-        // print("ClockOutPlacemarker = $placemark");
+        // Convert Isar locations to GeofenceModel
+        List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+          name: location.locationName!, // Use 'locationName'
+          latitude: location.latitude ?? 0.0,
+          longitude: location.longitude ?? 0.0,
+          radius: location.radius?.toDouble() ?? 0.0,
+        )).toList();
 
-        //Update all missing Clock In location
-        IsarService().updateEmptyClockOutLocation(attend.id, AttendanceModel(),
-            "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}");
-        //print(attend.clockInLatitude);
+        print("Officessss == ${offices}");
+
+        isInsideAnyGeofence = false;
+        for (GeofenceModel office in offices) {
+          double distance = GeoUtils.haversine(
+              attend.clockOutLatitude!, attend.clockOutLongitude!, office.latitude, office.longitude);
+          if (distance <= office.radius) {
+            print('Entered office: ${office.name}');
+
+            location2 = office.name;
+            isInsideAnyGeofence = true;
+            break;
+          }
+        }
+
+        if (!isInsideAnyGeofence) {
+          List<Placemark> placemark = await placemarkFromCoordinates(
+              attend.clockOutLatitude!, attend.clockOutLongitude!);
+
+          location2 =
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+          print("Location from map === ${location2}");
+        }
+
+        IsarService().updateEmptyClockOutLocation(
+          attend.id,
+          AttendanceModel(),
+          location2,
+        );
       }
     } catch (e) {
       log(e.toString());
@@ -367,7 +464,7 @@ class _SplashScreenState extends State<SplashScreen> {
       String clockOutLongitude1,
       String clockOutLocation1,
       String durationWorked1,
-      String noOfHours1,
+      String noOfHours1, String comments1,
       ) async {
     final user = await User(
         state: state1,
@@ -390,7 +487,9 @@ class _SplashScreenState extends State<SplashScreen> {
         clockOutLongitude: clockOutLongitude1,
         clockOutLocation: clockOutLocation1,
         durationWorked: durationWorked1,
-        noOfHours: noOfHours1);
+        noOfHours: noOfHours1,
+      comments: comments1
+    );
     final id = await AttendanceGSheetsApi.getRowCount() + 1;
     final newUser = user.copy(id: id);
     await AttendanceGSheetsApi.insert([newUser.toJson()]);

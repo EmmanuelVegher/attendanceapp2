@@ -115,17 +115,62 @@ class LoginController extends GetxController {
         }
       } on UserNotFoundAuthException {
         showErrorDialog(context, "User not Found");
+        Fluttertoast.showToast(
+          msg: "Error: User not Found!",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
       } on WrongPasswordAuthException {
         showErrorDialog(context, "Wrong Password");
+        Fluttertoast.showToast(
+          msg: "Error: Wrong Password",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
       } on GenericAuthException {
         showErrorDialog(context, "Authentication Error");
+        Fluttertoast.showToast(
+          msg: "Error: Authentication Error!",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
       } catch (e) {
         String error = "";
         if (e.toString() ==
             "RangeError (index): Invalid value: Valid value range is empty: 0") {
           error = "Staff Email Address does not exist!!!";
+          Fluttertoast.showToast(
+            msg: "Staff Email Address does not exist!!!",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
         } else {
           error = "Error occurred!!!";
+          Fluttertoast.showToast(
+            msg: "Error occurred!!!",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
         }
         showErrorDialog(context, error);
       } finally {
