@@ -214,7 +214,7 @@ final Projects = [
   "ACCESS Project",
   //
   "ECHO SAHARA Project",
-  "GFFO Phase II Poject",
+  "GFFO Phase II Project",
   "Norway MFA Project",
   "NHF Project",
   "B-SLiC Project",
@@ -230,7 +230,8 @@ final Projects = [
   "Catholic Parliamentary Liason"
 ];
 
-final Roles = ["User"];
+// Assuming 'Roles' is a list of strings representing roles
+List<String> Roles = ["User"];
 
 final StaffCategory = ["", "HQ/State Staff", "Facility Staff"];
 

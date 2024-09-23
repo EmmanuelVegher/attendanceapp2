@@ -21,6 +21,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../Pages/home.dart';
 import '../model/app_usage_model.dart';
+import '../model/appversion.dart';
+import '../model/departmentmodel.dart';
+import '../model/designationmodel.dart';
+import '../model/last_update_date.dart';
+import '../model/projectmodel.dart';
+import '../model/reasonfordaysoff.dart';
+import '../model/staffcategory.dart';
 import '../widgets/constants.dart';
 import '../widgets/show_error_dialog.dart';
 
@@ -37,15 +44,22 @@ class LoginController extends GetxController {
   void onInit() {
     super.onInit();
     // service is now available here
+   // fetchLastUpdateDateAndInsertIntoIsar(IsarService());
   }
 
   void togglePasswordVisibility() {
     isObscure.value = !isObscure.value;
   }
+
+
+
+
   Future<void> handleLogin(BuildContext context, IsarService service) async {
     final email = emailAddressController.text.trim();
     final password = passwordController.text.trim();
+    final firestore = FirebaseFirestore.instance;
 
+    final getAppVersion = await service.getAppVersionInfo();
     if (formKey.currentState!.validate()) {
       try {
         Get.dialog(const Center(child: CircularProgressIndicator()),
@@ -70,10 +84,18 @@ class LoginController extends GetxController {
         await box.clear().then((value) async {
           await service.cleanDB().then((value) async {
             await _insertSuperUser(service); // Pass service to _insertSuperUser
+            await _insertVersion();
           }).then((value) async {
             await _autoFirebaseDBUpdate(service, snap.docs[0].id);  // Pass service to _autoFirebaseDBUpdate
           }).then((value) async {
-            fetchDataAndInsertIntoIsar(service); // Pass service to fetchDataAndInsertIntoIsar
+            await fetchDataAndInsertIntoIsar(service); // Pass service to fetchDataAndInsertIntoIsar
+            await fetchDepartmentAndDesignationAndInsertIntoIsar(service);
+            fetchStaffCategoryAndInsertIntoIsar(service);
+            fetchReasonsForDaysOffAndInsertIntoIsar(service);
+            fetchLastUpdateDateAndInsertIntoIsar(service);
+            fetchProjectAndInsertIntoIsar(service);
+            fetchAppVersionAndInsertIntoIsar(service);
+
           });
         });
 
@@ -100,6 +122,44 @@ class LoginController extends GetxController {
           ..state = snap.docs[0]['state']
           ..firebaseAuthId = snap.docs[0]['id'];
 
+        try{
+          final lastUpdateDateDoc = await firestore
+              .collection('AppVersion')
+              .doc('AppVersion')
+              .get();
+
+          if (lastUpdateDateDoc.exists) {
+            // Get the data from the document
+            final data = lastUpdateDateDoc.data();
+
+
+            if (data != null && data.containsKey('appVersionDate')) {
+              // Safely extract the timestamp and convert to DateTime
+              final timestamp = data['appVersionDate'] as Timestamp;
+              final appVersionDate = timestamp.toDate();
+              final versionNumber = data['appVersion'];
+
+              print("appVersionDate ====${appVersionDate}");
+              print("versionNumber ====${versionNumber}");
+
+              if(getAppVersion[0].appVersion == versionNumber){
+                await service.updateAppVersion1(1,AppVersionModel(),appVersionDate,DateTime.now(),true);
+              }else{
+                await service.updateAppVersion2(1,AppVersionModel(),DateTime.now(),false);
+              }
+              print("Last appVersionDate saved: $appVersionDate");
+            } else {
+              print("Document does not contain 'appVersionDate' field.");
+            }
+          } else {
+            print("Document 'appVersionDate' not found.");
+          }
+
+        }catch(e){
+          print("appVersionDate compare error: $e");
+        }
+
+
         await service.saveBioData(bioData)
             .then((value) async {
           // Save the current date after successful login
@@ -108,7 +168,20 @@ class LoginController extends GetxController {
           await service.saveLastUsedDate(appUsage); // Call the method
         });
 
-       if (context.mounted) {
+        final getAppVersion1 = await service.getAppVersionInfo();
+
+        if (getAppVersion1[0].latestVersion == false) {
+          Fluttertoast.showToast(
+            msg: "You are yet to upgrade to the latest version",
+            toastLength: Toast.LENGTH_SHORT,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }else
+          if (context.mounted ) {
           Get.off(() => HomePage(
             //  service: service
           ));
@@ -178,6 +251,17 @@ class LoginController extends GetxController {
           Get.back();
         }
       }
+    }
+  }
+
+  Future<void> _insertVersion() async {
+    final getAppVersion = await service.getAppVersionInfo();
+
+    if (getAppVersion.length == 0) {
+      final appVersion = AppVersionModel()
+        ..appVersion = appVersionConstant;
+
+      await service.saveAppVersionData(appVersion);
     }
   }
 
@@ -253,7 +337,10 @@ class LoginController extends GetxController {
           ..offDay = attendanceHistory.offDay
           ..durationWorked = attendanceHistory.durationWorked
           ..noOfHours = attendanceHistory.noOfHours
-          ..month = attendanceHistory.month;
+          ..comments = attendanceHistory.comments
+          ..month = attendanceHistory.month
+
+        ;
 
         service.saveAttendance(attendnce);
       }
@@ -269,7 +356,7 @@ class LoginController extends GetxController {
     }
   }
 
-  void fetchDataAndInsertIntoIsar(IsarService service) async {
+  Future<void> fetchDataAndInsertIntoIsar(IsarService service) async {
     final firestore = FirebaseFirestore.instance;
     final locationCollection = await firestore.collection('Location').get();
 
@@ -297,10 +384,172 @@ class LoginController extends GetxController {
           ..locationName = data['LocationName']
           ..latitude = double.parse(data['Latitude'].toString())
           ..longitude = double.parse(data['Longitude'].toString())
+          ..category =  data['category']
           ..radius = double.parse(data['Radius'].toString());
 
         service.saveLocation(locationSave);
       }
+    }
+  }
+
+
+  Future<void> fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final designationCollection = await firestore.collection('Designation').get();
+
+    for (final departmentDoc in designationCollection.docs) {
+      final department = departmentDoc.id;
+      //print("stateSnap====${state}");
+      final departmentSave = DepartmentModel()..departmentName = department;
+
+      service.saveDepartment(departmentSave);
+
+      final designationCollectionRef = await firestore
+          .collection('Designation')
+          .doc(department)
+          .collection(department)
+          .get();
+
+      for (final designationDoc in designationCollectionRef.docs) {
+        final designation = designationDoc.id;
+        // print("lgaSnap====${lga}");
+        final data = designationDoc.data() as Map<String, dynamic>;
+        //print("data====${data}");
+
+        final designationSave = DesignationModel()
+          ..departmentName = department
+          ..designationName = data['designationName']
+          ..category = data['category']
+
+        ;
+
+        service.saveDesignation(designationSave);
+      }
+    }
+  }
+
+  Future<void> fetchProjectAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final projectCollection = await firestore.collection('Project').get();
+
+    for (final projectDoc in projectCollection.docs) {
+      final project = projectDoc.id;
+      //print("stateSnap====${state}");
+      final projectSave = ProjectModel()..project = project;
+
+      service.saveProject(projectSave);
+
+
+    }
+  }
+
+  Future<void> fetchLastUpdateDateAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+
+    try {
+      final lastUpdateDateDoc = await firestore
+          .collection('LastUpdateDate')
+          .doc("LastUpdateDate")
+          .get();
+
+      if (lastUpdateDateDoc.exists) {
+        // Get the data from the document
+        final data = lastUpdateDateDoc.data();
+
+        if (data != null && data.containsKey('LastUpdateDate')) {
+          // Safely extract the timestamp and convert to DateTime
+          final timestamp = data['LastUpdateDate'] as Timestamp;
+          final lastUpdate = timestamp.toDate();
+
+          print("LastUpdateDate ====${lastUpdate}");
+
+          final lastUpdateSave = LastUpdateDateModel()
+            ..lastUpdateDate = lastUpdate;
+
+          await service.saveLastUpdateDate(lastUpdateSave);
+         // await service.updateAppVersion(1,AppVersionModel(),lastUpdate);
+          print("Last update date saved: $lastUpdate");
+        } else {
+          print("Document does not contain 'lastUpdate' field.");
+        }
+      } else {
+        print("Document 'LastUpdateDate' not found.");
+      }
+    } catch (e) {
+      print("Error fetching last update date: $e");
+      // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  }
+
+  Future<void> fetchAppVersionAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final getAppVersion = await service.getAppVersionInfo();
+
+    try {
+      final lastUpdateDateDoc = await firestore
+          .collection('AppVersion')
+         // .doc(getAppVersion[0].appVersion)
+          .doc('AppVersion')
+          .get();
+
+      if (lastUpdateDateDoc.exists) {
+        // Get the data from the document
+        final data = lastUpdateDateDoc.data();
+
+
+        if (data != null && data.containsKey('appVersionDate')) {
+          // Safely extract the timestamp and convert to DateTime
+          final timestamp = data['appVersionDate'] as Timestamp;
+          final appVersionDate = timestamp.toDate();
+          final versionNumber = data['appVersion'];
+
+          print("appVersionDate ====${appVersionDate}");
+          print("versionNumber ====${versionNumber}");
+
+
+          if(getAppVersion[0].appVersion == versionNumber){
+            await service.updateAppVersion1(1,AppVersionModel(),appVersionDate,DateTime.now(),true);
+          }else{
+            await service.updateAppVersion2(1,AppVersionModel(),DateTime.now(),false);
+          }
+          print("Last appVersionDate saved: $appVersionDate");
+        } else {
+          print("Document does not contain 'appVersionDate' field.");
+        }
+      } else {
+        print("Document 'appVersionDate' not found.");
+      }
+    } catch (e) {
+      print("Error fetching last appVersionDate: $e");
+      // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  }
+
+  void fetchReasonsForDaysOffAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final reasonsForDaysOffCollection = await firestore.collection('ReasonsForDaysOff').get();
+
+    for (final reasonsForDaysOffDoc in reasonsForDaysOffCollection.docs) {
+      final reasonsForDaysOff = reasonsForDaysOffDoc.id;
+      //print("stateSnap====${state}");
+      final reasonsForDaysOffSave = ReasonForDaysOffModel()..reasonForDaysOff = reasonsForDaysOff;
+
+      service.saveReasonForDaysOff(reasonsForDaysOffSave);
+
+    }
+  }
+
+  void fetchStaffCategoryAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final staffCategoryCollection = await firestore.collection('StaffCategory').get();
+
+    for (final staffCategoryDoc in staffCategoryCollection.docs) {
+      final staffCategory = staffCategoryDoc.id;
+      //print("stateSnap====${state}");
+      final staffCategorySave = StaffCategoryModel()..staffCategory = staffCategory;
+
+      service.saveStaffCategory(staffCategorySave);
+
     }
   }
 

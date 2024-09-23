@@ -18,7 +18,14 @@ import 'package:month_year_picker/month_year_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import '../../model/appversion.dart';
+import '../../model/departmentmodel.dart';
+import '../../model/designationmodel.dart';
+import '../../model/last_update_date.dart';
 import '../../model/locationmodel.dart';
+import '../../model/projectmodel.dart';
+import '../../model/reasonfordaysoff.dart';
+import '../../model/staffcategory.dart';
 import '../../model/statemodel.dart';
 import '../../model/user_model.dart';
 import '../../services/location_services.dart';
@@ -50,16 +57,18 @@ class _UserDashBoardState extends State<UserDashBoard> {
   AttendanceModel attendanceModel = AttendanceModel();
   var notifyHelper;
   var _timer;
+  var versionNumber;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    fetchVersion(IsarService());
     _getUserDetail();
     tz.initializeTimeZones();
-    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      _checkTimeAndTriggerNotification();
-    });
+    // _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+    //   _checkTimeAndTriggerNotification();
+    // });
     notifyHelper = NotifyHelper();
     notifyHelper.initializeNotification();
     notifyHelper.requestIOSPermissions();
@@ -79,17 +88,6 @@ class _UserDashBoardState extends State<UserDashBoard> {
     }
   }
 
-  void _checkTimeAndTriggerNotification() {
-    final now = DateTime.now();
-    print("Current Time === ${now}");
-    if (now.hour == 8 && now.minute == 0) {
-      notifyHelper.displayNotification(
-          title: "Clock In Notification", body: "It's 8 AM, don't forget to clock in!");
-    } else if (now.hour == 16 && now.minute == 45) {
-      notifyHelper.displayNotification(
-          title: "Clock Out Notification", body: "It's 5 PM, don't forget to clock out!");
-    }
-  }
 
   List<FlSpot> getPlotPoints(List entireData) {
     dataSet = [];
@@ -174,7 +172,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    //_timer.cancel();
     super.dispose();
   }
 
@@ -240,6 +238,16 @@ class _UserDashBoardState extends State<UserDashBoard> {
                       ],
                     ),
                   ),
+                  PopupMenuItem<String>(
+                    value: 'option3',
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.red,),
+                        SizedBox(width: 8),
+                        Text('$versionNumber'),
+                      ],
+                    ),
+                  ),
                   // ... add more PopupMenuItems for other buttons
                 ];
               },
@@ -295,7 +303,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                               padding: const EdgeInsets.only(right: 20),
                               child: GestureDetector(
                                 onTap: () async {
-                                  _checkTimeAndTriggerNotification();
+                                 // _checkTimeAndTriggerNotification();
                                   final month = await showMonthYearPicker(
                                       context: context,
                                       initialDate: DateTime.now(),
@@ -508,7 +516,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                           top: index > 0 ? 12 : 0,
                                           left: 6,
                                           right: 6),
-                                      height: 70,
+                                      height: MediaQuery.of(context).size.height * 0.13,
                                       decoration: const BoxDecoration(
                                         color: Colors.white,
                                         boxShadow: [
@@ -557,7 +565,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                                         fontFamily:
                                                         "NexaBold",
                                                         fontSize:
-                                                        screenWidth / 23,
+                                                        screenWidth / 35,
                                                         color: Colors.white,
                                                       ),
                                                     ),
@@ -779,20 +787,99 @@ class _UserDashBoardState extends State<UserDashBoard> {
       fontSize: 16.0,
     );
     await IsarService().cleanLocationCollection().then((_) async {
-     await IsarService().cleanStateCollection().then((_){
-       fetchDataAndInsertIntoIsar();
-       Fluttertoast.showToast(
-         msg: "Updates Check Done..",
-         toastLength: Toast.LENGTH_LONG,
-         backgroundColor: Colors.black54,
-         gravity: ToastGravity.BOTTOM,
-         timeInSecForIosWeb: 1,
-         textColor: Colors.white,
-         fontSize: 16.0,
-       );
+     await IsarService().cleanStateCollection().then((_) async {
+       await IsarService().cleanStaffCategoryCollection().then((_) async {
+         await IsarService().cleanReasonsForDayOffCollection().then((_) async {
+           await IsarService().cleanDesignationCollection().then((_) async {
+             await IsarService().cleanDepartmentCollection().then((_) async {
+               await IsarService().cleanLastUpdateDateCollection();
+               await IsarService().cleanProjectCollection();
+               fetchDataAndInsertIntoIsar();
+               fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
+               //fetchProjectAndInsertIntoIsar(IsarService());
+               fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
+               fetchStaffCategoryAndInsertIntoIsar(IsarService());
+               await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
+               await fetchProjectAndInsertIntoIsar(IsarService());
+               await fetchAppVersionAndInsertIntoIsar(IsarService());
+               Fluttertoast.showToast(
+                 msg: "Updates on Database Completed",
+                 toastLength: Toast.LENGTH_LONG,
+                 backgroundColor: Colors.black54,
+                 gravity: ToastGravity.BOTTOM,
+                 timeInSecForIosWeb: 1,
+                 textColor: Colors.white,
+                 fontSize: 16.0,
+               );
+             });
+           });
+         });
+       });
      });
     });
   }
+
+  Future<void> fetchLastUpdateDateAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+
+    try {
+      final lastUpdateDateDoc = await firestore
+          .collection('LastUpdateDate')
+          .doc("LastUpdateDate")
+          .get();
+
+      if (lastUpdateDateDoc.exists) {
+        // Get the data from the document
+        final data = lastUpdateDateDoc.data();
+
+        if (data != null && data.containsKey('LastUpdateDate')) {
+          // Safely extract the timestamp and convert to DateTime
+          final timestamp = data['LastUpdateDate'] as Timestamp;
+          final lastUpdate = timestamp.toDate();
+
+          print("LastUpdateDate ====${lastUpdate}");
+
+          final lastUpdateSave = LastUpdateDateModel()
+            ..lastUpdateDate = lastUpdate;
+
+          await service.saveLastUpdateDate(lastUpdateSave);
+          // await service.updateAppVersion(1,AppVersionModel(),lastUpdate);
+          print("Last update date saved: $lastUpdate");
+        } else {
+          print("Document does not contain 'lastUpdate' field.");
+        }
+      } else {
+        print("Document 'LastUpdateDate' not found.");
+      }
+    } catch (e) {
+      print("Error fetching last update date: $e");
+      // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  }
+
+  Future<void> fetchProjectAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final projectCollection = await firestore.collection('Project').get();
+
+    for (final projectDoc in projectCollection.docs) {
+      final project = projectDoc.id;
+      //print("stateSnap====${state}");
+      final projectSave = ProjectModel()..project = project;
+
+      service.saveProject(projectSave);
+
+
+    }
+  }
+
+  Future<void> fetchVersion(IsarService service) async {
+    final getAppVersion = await service.getAppVersionInfo();
+    versionNumber =  getAppVersion[0].appVersion;
+
+
+  }
+
+
 
   void fetchDataAndInsertIntoIsar() async {
     final firestore = FirebaseFirestore.instance;
@@ -822,10 +909,132 @@ class _UserDashBoardState extends State<UserDashBoard> {
           ..locationName = data['LocationName']
           ..latitude = double.parse(data['Latitude'].toString())
           ..longitude = double.parse(data['Longitude'].toString())
+          ..category =  data['category']
           ..radius = double.parse(data['Radius'].toString());
 
         IsarService().saveLocation(locationSave);
       }
+    }
+  }
+
+  void fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final designationCollection = await firestore.collection('Designation').get();
+
+    for (final departmentDoc in designationCollection.docs) {
+      final department = departmentDoc.id;
+      //print("stateSnap====${state}");
+      final departmentSave = DepartmentModel()..departmentName = department;
+
+      service.saveDepartment(departmentSave);
+
+      final designationCollectionRef = await firestore
+          .collection('Designation')
+          .doc(department)
+          .collection(department)
+          .get();
+
+      for (final designationDoc in designationCollectionRef.docs) {
+        final designation = designationDoc.id;
+        // print("lgaSnap====${lga}");
+        final data = designationDoc.data() as Map<String, dynamic>;
+        //print("data====${data}");
+
+        final designationSave = DesignationModel()
+          ..departmentName = department
+          ..designationName = data['designationName']
+          ..category = data['category']
+
+        ;
+
+        service.saveDesignation(designationSave);
+      }
+    }
+  }
+
+  // void fetchProjectAndInsertIntoIsar(IsarService service) async {
+  //   final firestore = FirebaseFirestore.instance;
+  //   final projectCollection = await firestore.collection('Project').get();
+  //
+  //   for (final projectDoc in projectCollection.docs) {
+  //     final project = projectDoc.id;
+  //     //print("stateSnap====${state}");
+  //     final projectSave = ProjectModel()..project = project;
+  //
+  //     service.saveProject(projectSave);
+  //
+  //
+  //   }
+  // }
+
+  Future<void> fetchAppVersionAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final getAppVersion = await service.getAppVersionInfo();
+
+    try {
+      final lastUpdateDateDoc = await firestore
+          .collection('AppVersion')
+      // .doc(getAppVersion[0].appVersion)
+          .doc('AppVersion')
+          .get();
+
+      if (lastUpdateDateDoc.exists) {
+        // Get the data from the document
+        final data = lastUpdateDateDoc.data();
+
+
+        if (data != null && data.containsKey('appVersionDate')) {
+          // Safely extract the timestamp and convert to DateTime
+          final timestamp = data['appVersionDate'] as Timestamp;
+          final appVersionDate = timestamp.toDate();
+          final versionNumber = data['appVersion'];
+
+          print("appVersionDate ====${appVersionDate}");
+          print("versionNumber ====${versionNumber}");
+
+          if(getAppVersion[0].appVersion == versionNumber){
+            await service.updateAppVersion1(1,AppVersionModel(),appVersionDate,DateTime.now(),true);
+          }else{
+            await service.updateAppVersion2(1,AppVersionModel(),DateTime.now(),false);
+          }
+          print("Last appVersionDate saved: $appVersionDate");
+        } else {
+          print("Document does not contain 'appVersionDate' field.");
+        }
+      } else {
+        print("Document 'appVersionDate' not found.");
+      }
+    } catch (e) {
+      print("Error fetching last appVersionDate: $e");
+      // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  }
+
+  void fetchReasonsForDaysOffAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final reasonsForDaysOffCollection = await firestore.collection('ReasonsForDaysOff').get();
+
+    for (final reasonsForDaysOffDoc in reasonsForDaysOffCollection.docs) {
+      final reasonsForDaysOff = reasonsForDaysOffDoc.id;
+      //print("stateSnap====${state}");
+      final reasonsForDaysOffSave = ReasonForDaysOffModel()..reasonForDaysOff = reasonsForDaysOff;
+
+      service.saveReasonForDaysOff(reasonsForDaysOffSave);
+
+    }
+  }
+
+  void fetchStaffCategoryAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final staffCategoryCollection = await firestore.collection('StaffCategory').get();
+
+    for (final staffCategoryDoc in staffCategoryCollection.docs) {
+      final staffCategory = staffCategoryDoc.id;
+      //print("stateSnap====${state}");
+      final staffCategorySave = StaffCategoryModel()..staffCategory = staffCategory;
+
+      service.saveStaffCategory(staffCategorySave);
+
     }
   }
 

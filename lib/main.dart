@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ui';
 import 'package:attendanceapp/Pages/splash_screen.dart';
 import 'package:attendanceapp/api/Attendance_gsheet_api.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
@@ -11,11 +12,14 @@ import 'package:attendanceapp/widgets/constants.dart';
 import 'package:attendanceapp/widgets/geo_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -31,7 +35,8 @@ import 'model/locationmodel.dart';
 import 'model/track_location_model.dart';
 import 'services/background_service.dart';
 
-// Define the global navigatorKey
+
+// Global navigator key
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 int id = 0;
@@ -40,253 +45,187 @@ RxBool isDeviceConnected = false.obs;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await GetStorage.init();
-  tz.initializeTimeZones();
 
-  // Initialize notification service
-  await NotifyHelper().initializeNotification();
-
-  // Check for Network Connection
-  var connectivityResult = await Connectivity().checkConnectivity();
-  if (connectivityResult != ConnectivityResult.none) {
-    await Firebase.initializeApp();
-  } else {
-    print('No network connection available.');
-  }
-
-  pref = await SharedPreferences.getInstance();
-  await AttendanceGSheetsApi.init();
-  await Hive.initFlutter();
-  await IsarService().openDB();
-  configLoading();
-
-  // Asynchronous tasks
-  await  _updateEmptyLocationForTwelve().then((_)async{
-    syncCompleteDataForLocationForTwelve();
-  });
-  await _updateEmptyClockInLocation().then((_) async {
-    await _updateEmptyClockOutLocation();
-  });
-
-  configScreenLoader(
-    loader: const AlertDialog(
-      title: Text('Global Loader..'),
-    ),
-    bgBlur: 20.0,
-  );
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // Initialize Firebase and other services
+  await initializeServices();
+  tz.initializeTimeZones();  // Initialize time zones
 
   runApp(MyApp());
+
+  // Initialize and start background services
+  //await initializeBackgroundService();
 
   // Initialize and start the background service
   await initializeService();
 }
 
-// Update empty Clock-In location
+Future<void> initializeServices() async {
+  // Ensure Firebase is initialized first
+  await Firebase.initializeApp();
+
+  // Initialize other services
+  await Future.wait([
+    GetStorage.init(),
+    NotifyHelper().initializeNotification(),
+    Hive.initFlutter(),
+    IsarService().openDB(),
+    AttendanceGSheetsApi.init(),
+    _setupCrashlytics(),
+    _checkNetworkConnectivity(),
+  ]);
+
+  tz.initializeTimeZones();
+  pref = await SharedPreferences.getInstance();
+  configLoading();
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Update locations based on data
+  await _updateEmptyLocationForTwelve();
+  await _updateEmptyClockInLocation();
+  await _updateEmptyClockOutLocation();
+}
+
+Future<void> _setupCrashlytics() async {
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+}
+
+Future<void> _checkNetworkConnectivity() async {
+  var connectivityResult = await Connectivity().checkConnectivity();
+  isDeviceConnected.value = connectivityResult != ConnectivityResult.none;
+}
+
 Future<void> _updateEmptyClockInLocation() async {
   try {
     List<AttendanceModel> attendanceForEmptyLocation =
     await IsarService().getAttendanceForEmptyClockInLocation();
 
     for (var attend in attendanceForEmptyLocation) {
-      // Create a variable
-      var location2 = "";
-      bool isInsideAnyGeofence = false;
-      List<Placemark> placemark = await placemarkFromCoordinates(
-          attend.clockInLatitude!, attend.clockInLongitude!);
-      List<LocationModel> isarLocations =
-      await IsarService().getLocationsByState(placemark[0].administrativeArea);
-      // Convert Isar locations to GeofenceModel
-      List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
-        name: location.locationName!, // Use 'locationName'
-        latitude: location.latitude ?? 0.0,
-        longitude: location.longitude ?? 0.0,
-        radius: location.radius?.toDouble() ?? 0.0,
-      )).toList();
-
-      print("Officessss == ${offices}");
-
-      isInsideAnyGeofence = false;
-      for (GeofenceModel office in offices) {
-        double distance = GeoUtils.haversine(
-            attend.clockInLatitude!, attend.clockInLongitude!, office.latitude, office.longitude);
-        if (distance <= office.radius) {
-          print('Entered office: ${office.name}');
-
-          location2 = office.name;
-          isInsideAnyGeofence = true;
-          break;
-        }
-      }
-
-      if (!isInsideAnyGeofence) {
-        List<Placemark> placemark = await placemarkFromCoordinates(
-            attend.clockInLatitude!, attend.clockInLongitude!);
-
-        location2 =
-        "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
-
-        print("Location from map === ${location2}");
-      }
-
-
-      IsarService().updateEmptyClockInLocation(
-        attend.id,
-        AttendanceModel(),
-        location2,
+      var location2 = await _getLocationName(
+        attend.clockInLatitude!,
+        attend.clockInLongitude!,
+        "clock-in",
       );
+
+      if (location2.isNotEmpty) {
+        await IsarService().updateEmptyClockInLocation(
+          attend.id,
+          AttendanceModel(),
+          location2,
+        );
+      }
     }
   } catch (e) {
-    log(e.toString());
+    log("Error updating empty Clock-In locations: ${e.toString()}");
   }
 }
 
-// Update empty Clock-Out location
 Future<void> _updateEmptyClockOutLocation() async {
   try {
     List<AttendanceModel> attendanceForEmptyLocation =
     await IsarService().getAttendanceForEmptyClockOutLocation();
 
     for (var attend in attendanceForEmptyLocation) {
-      // Create a variable
-      var location2 = "";
-      bool isInsideAnyGeofence = false;
-      List<Placemark> placemark = await placemarkFromCoordinates(
-          attend.clockOutLatitude!, attend.clockOutLongitude!);
-      List<LocationModel> isarLocations =
-      await IsarService().getLocationsByState(placemark[0].administrativeArea);
-
-      // Convert Isar locations to GeofenceModel
-      List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
-        name: location.locationName!, // Use 'locationName'
-        latitude: location.latitude ?? 0.0,
-        longitude: location.longitude ?? 0.0,
-        radius: location.radius?.toDouble() ?? 0.0,
-      )).toList();
-
-      print("Officessss == ${offices}");
-
-      isInsideAnyGeofence = false;
-      for (GeofenceModel office in offices) {
-        double distance = GeoUtils.haversine(
-            attend.clockOutLatitude!, attend.clockOutLongitude!, office.latitude, office.longitude);
-        if (distance <= office.radius) {
-          print('Entered office: ${office.name}');
-
-          location2 = office.name;
-          isInsideAnyGeofence = true;
-          break;
-        }
-      }
-
-      if (!isInsideAnyGeofence) {
-        List<Placemark> placemark = await placemarkFromCoordinates(
-            attend.clockOutLatitude!, attend.clockOutLongitude!);
-
-        location2 =
-        "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
-
-        print("Location from map === ${location2}");
-      }
-
-      IsarService().updateEmptyClockOutLocation(
-        attend.id,
-        AttendanceModel(),
-        location2,
+      var location2 = await _getLocationName(
+        attend.clockOutLatitude!,
+        attend.clockOutLongitude!,
+        "clock-out",
       );
+
+      if (location2.isNotEmpty) {
+        await IsarService().updateEmptyClockOutLocation(
+          attend.id,
+          AttendanceModel(),
+          location2,
+        );
+      }
     }
   } catch (e) {
-    log(e.toString());
+    log("Error updating empty Clock-Out locations: ${e.toString()}");
   }
+}
+
+Future<String> _getLocationName(double latitude, double longitude, String type) async {
+  String locationName = '';
+  bool isInsideGeofence = false;
+
+  try {
+    List<Placemark> placemark = await placemarkFromCoordinates(latitude, longitude);
+    List<LocationModel> isarLocations =
+    await IsarService().getLocationsByState(placemark[0].administrativeArea);
+
+    List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+      name: location.locationName!,
+      latitude: location.latitude ?? 0.0,
+      longitude: location.longitude ?? 0.0,
+      radius: location.radius?.toDouble() ?? 0.0,
+    )).toList();
+
+    for (GeofenceModel office in offices) {
+      double distance = GeoUtils.haversine(latitude, longitude, office.latitude, office.longitude);
+      if (distance <= office.radius) {
+        log('Entered office: ${office.name}');
+        locationName = office.name;
+        isInsideGeofence = true;
+        break;
+      }
+    }
+
+    if (!isInsideGeofence) {
+      locationName = "${placemark[0].street}, ${placemark[0].subLocality}, ${placemark[0].locality}, ${placemark[0].administrativeArea}, ${placemark[0].country}";
+    }
+  } catch (e) {
+    log("Error fetching location name for $type: ${e.toString()}");
+  }
+
+  return locationName;
 }
 
 Future<void> _updateEmptyLocationForTwelve() async {
-
-  //First, query the list of all records with empty Clock-In Location
-  List<TrackLocationModel> attendanceForEmptyLocationFor12 =
-  await IsarService().getAttendanceForEmptyLocationFor12();
-
   try {
+    List<TrackLocationModel> attendanceForEmptyLocationFor12 =
+    await IsarService().getAttendanceForEmptyLocationFor12();
+
     for (var attend in attendanceForEmptyLocationFor12) {
-      // Create a variable
-      var location2 = "";
-      bool isInsideAnyGeofence = false;
-      List<Placemark> placemark = await placemarkFromCoordinates(
-          attend.latitude!, attend.longitude!);
+      var location2 = await _getLocationName(
+        attend.latitude!,
+        attend.longitude!,
+        "12pm",
+      );
 
-      List<LocationModel> isarLocations =
-      await IsarService().getLocationsByState(placemark[0].administrativeArea);
-
-      // Convert Isar locations to GeofenceModel
-      List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
-        name: location.locationName!, // Use 'locationName'
-        latitude: location.latitude ?? 0.0,
-        longitude: location.longitude ?? 0.0,
-        radius: location.radius?.toDouble() ?? 0.0,
-      )).toList();
-
-      print("Officessss == ${offices}");
-
-      isInsideAnyGeofence = false;
-      for (GeofenceModel office in offices) {
-        double distance = GeoUtils.haversine(
-            attend.latitude!, attend.longitude!, office.latitude, office.longitude);
-        if (distance <= office.radius) {
-          print('Entered office: ${office.name}');
-
-          location2 = office.name;
-          isInsideAnyGeofence = true;
-          break;
-        }
+      if (location2.isNotEmpty) {
+        await IsarService().updateEmptyLocationFor12(
+          attend.id,
+          TrackLocationModel(),
+          location2,
+        );
       }
-
-      if (!isInsideAnyGeofence) {
-        List<Placemark> placemark = await placemarkFromCoordinates(
-            attend.latitude!, attend.longitude!);
-
-        location2 =
-        "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
-
-        print("Location from map === ${location2}");
-      }
-
-      //Input the queried latitude and Lngitude, but also assign 0.0 to any null Latitude and Longitude
-
-
-      //log("ClockOutPlacemarker = $location");
-
-      //Update all missing Clock In location
-      await IsarService().updateEmptyLocationFor12(
-          attend.id, TrackLocationModel(), location2);
-      //print(attend.clockInLatitude);
     }
   } catch (e) {
-    log(e.toString());
+    log("Error updating 12pm locations: ${e.toString()}");
   }
-
-  //Iterate through each queried loop
 }
 
-Future<void>syncCompleteDataForLocationForTwelve() async {
+Future<void> syncCompleteDataForLocationForTwelve() async {
   try {
-    // The try block first of all saves the data in the google sheet for the visualization and then on the firebase database as an extra backup database  before chahing the sync status on Mobile App to "Synced"
-    //Query the firebase and get the records having updated records
     QuerySnapshot snap = await FirebaseFirestore.instance
         .collection("Staff")
         .where("id", isEqualTo: firebaseAuthId)
         .get();
 
-    List<AttendanceModel> getAttendanceForPartialUnSynced =
-    await IsarService().getAttendanceForPartialUnSynced();
-
-    List<TrackLocationModel> getTracklocationForPartialUnSynced =
+    List<TrackLocationModel> unSyncedLocations =
     await IsarService().getTracklocationForPartialUnSynced();
 
-    for (var unSyncedTrackLocation in getTracklocationForPartialUnSynced){
-      log("Synching Tracked location by 12pm");
+    for (var unSyncedTrackLocation in unSyncedLocations) {
+      log("Synching tracked location for 12pm");
       await FirebaseFirestore.instance
           .collection("Staff")
           .doc(snap.docs[0].id)
@@ -297,38 +236,120 @@ Future<void>syncCompleteDataForLocationForTwelve() async {
         'longitudeBy12': unSyncedTrackLocation.longitude,
         'Date': unSyncedTrackLocation.timestamp,
         'locationName': unSyncedTrackLocation.locationName,
-      }).then((value){
-        IsarService().updateSyncStatusForTrackLocationBy12(
-            unSyncedTrackLocation.id, TrackLocationModel(), true);
       });
+
+      await IsarService().updateSyncStatusForTrackLocationBy12(
+        unSyncedTrackLocation.id,
+        TrackLocationModel(),
+        true,
+      );
     }
-
-
   } catch (e) {
-    // The catch block executes incase firebase database encounters an error thereby only saving the data in the google sheet for the analytics before chahing the sync status on Mobile App to "Synced"
-    log("Sync Error Skipping firebase DB = ${e.toString()}");
-
+    log("Sync Error Skipping firebase DB: ${e.toString()}");
   }
 }
 
+Future<Position> _getUserLocation() async {
+  bool serviceEnabled;
+  LocationPermission permission;
 
+  // Check if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled, don't continue.
+    return Future.error('Location services are disabled.');
+  }
 
-// Configure EasyLoading
-void configLoading() {
+  // Check for location permissions.
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied.
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are permanently denied.
+    return Future.error('Location permissions are permanently denied');
+  }
+
+  // When permissions are granted, get the position.
+  return await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.high,
+  );
+}
+
+Future<void> fetchAddressFromLocation() async {
+  try {
+    Position position = await _getUserLocation();
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    if (placemarks.isNotEmpty) {
+      final placemark = placemarks[0];
+      final address = '${placemark.street}, ${placemark.subLocality}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.country}';
+      log('Current Address: $address');
+    }
+  } catch (e) {
+    log('Error fetching address: $e');
+  }
+}
+
+Future<void> configLoading() async {
   EasyLoading.instance
-    ..displayDuration = const Duration(milliseconds: 2000)
-    ..indicatorType = EasyLoadingIndicatorType.fadingCircle
-    ..loadingStyle = EasyLoadingStyle.dark
-    ..indicatorSize = 45.0
+    ..loadingStyle = EasyLoadingStyle.light
+    ..indicatorType = EasyLoadingIndicatorType.circle
     ..radius = 10.0
-    ..progressColor = Colors.yellow
-    ..backgroundColor = Colors.green
-    ..indicatorColor = Colors.yellow
-    ..textColor = Colors.yellow
-    ..maskColor = Colors.blue.withOpacity(0.5)
-    ..userInteractions = true
+    ..progressColor = Colors.blue
+    ..backgroundColor = Colors.white
+    ..indicatorColor = Colors.blue
+    ..textColor = Colors.black
+    ..maskColor = Colors.black.withOpacity(0.5)
+    ..userInteractions = false
     ..dismissOnTap = false;
 }
+//
+// Future<void> initializeBackgroundService() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//
+//   // Initialize the background service
+//   await FlutterBackgroundService().startService();
+//   FlutterBackgroundService().sendData({"action": "setAsForeground"});
+//
+//   // Configure the background service
+//   FlutterBackgroundService().onDataReceived.listen((event) {
+//     if (event!["action"] == "setAsForeground") {
+//       FlutterBackgroundService().setForegroundMode(true);
+//     }
+//   });
+//
+//   // Perform background work here
+//   Timer.periodic(Duration(seconds: 15), (timer) async {
+//     Position position = await Geolocator.getCurrentPosition(
+//       desiredAccuracy: LocationAccuracy.high,
+//     );
+//     log('Background Location: ${position.latitude}, ${position.longitude}');
+//   });
+// }
+
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return GetMaterialApp(
+//       navigatorKey: navigatorKey,
+//       title: 'Attendance App',
+//       theme: ThemeData(
+//         primarySwatch: Colors.blue,
+//       ),
+//       home: SplashScreen(service: IsarService(),),
+//       builder: EasyLoading.init(),
+//     );
+//   }
+// }
 
 // MyApp widget
 class MyApp extends StatefulWidget {

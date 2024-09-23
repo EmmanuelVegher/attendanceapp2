@@ -25,6 +25,11 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+// Add the Crashlytics Gradle plugin
+//apply plugin: 'com.google.firebase.crashlytics'
+
+
+
 
 android {
     compileSdkVersion flutter.compileSdkVersion
@@ -75,7 +80,10 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation platform('com.google.firebase:firebase-bom:31.2.0')
-    //implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    //flutter pub add firebase_crashlytics && flutter pub add firebase_analyticsimplementation 'com.google.firebase:firebase-crashlytics:18.3.1'
     implementation 'com.google.firebase:firebase-analytics'
     implementation("androidx.multidex:multidex:2.0.1")
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.2.4'
+
+
 }

@@ -37,9 +37,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart'; // Correct import for geolocator
+import '../../model/appversion.dart';
+import '../../model/departmentmodel.dart';
+import '../../model/designationmodel.dart';
+import '../../model/last_update_date.dart';
 import '../../model/locationmodel.dart';
+import '../../model/projectmodel.dart';
+import '../../model/reasonfordaysoff.dart';
+import '../../model/staffcategory.dart';
+import '../../model/statemodel.dart';
 import '../../model/track_location_model.dart';
 import '../../services/notification_services.dart';
+import '../../widgets/constants.dart';
 import '../../widgets/geo_utils.dart';
 import '../profile_page.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -91,6 +100,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
   String? _savedFilePath;
   bool _localOnly = false;
   bool _copyFileToCacheDir = true;
+  bool isAppCheckShown = false;
   String? _pickedFilePath;
   var notifyHelper;
   var _timer;
@@ -119,6 +129,8 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     //getCurrentDateRecordCount();
     //_pickImage();
    // _checkTimeAndTriggerNotification();
+    checkForAppVersion();
+
     tz.initializeTimeZones();
     _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
       _checkTimeAndTriggerNotification();
@@ -332,6 +344,7 @@ Warning!!!
                           ..offDay = attendanceHistory.offDay
                           ..durationWorked = attendanceHistory.durationWorked
                           ..noOfHours = attendanceHistory.noOfHours
+                          ..comments = attendanceHistory.comments
                           ..month = attendanceHistory.month;
 
                         widget.service.saveAttendance(attendnce);
@@ -483,6 +496,7 @@ Warning!!!
           new ClockAttendance(
             IsarService(), service: IsarService(), controller: null,
           ),
+         // new AttendanceClock(IsarService()),
           // Inside the IndexedStack children:
           // new ClockAttendance(
           //   IsarService(),
@@ -1022,14 +1036,6 @@ Warning!!!
     Map<String, dynamic> params = {'Attendance': listAttendance};
     //print(params);
 
-    // for (var allAttend in getAllAttend) {
-    //   List<Map<String, dynamic>>? listAttendance =
-    //       allAttend.map((e) => e.toJson()).toList();
-    //   Map<String, dynamic> params = {'Attendance': listAttendance};
-    //   print(params);
-    //   //return params;
-    //   localFileSave.add(listAttendance);
-    // }
 
     print("localFileSave =======$params");
   }
@@ -1074,16 +1080,10 @@ Warning!!!
           // print(attendanceFor1990);
           await file.delete(recursive: true);
 
-          // final File copiedFile = File(savePath2);
-          // copiedFile.
 
-          //file.writeAsStringSync("");
 
           file.writeAsStringSync(json.encode(attendanceModel));
-          //_pickFile();
-          // final File copiedFile = File(savePath);
-          // copiedFile.copySync(savePath2);
-          //moveFile(copiedFile, saveDirectory);
+
           Fluttertoast.showToast(
               msg: "Replacing Existing Backup..",
               toastLength: Toast.LENGTH_LONG,
@@ -1118,16 +1118,8 @@ Warning!!!
           log("Bio File exists");
           await file2.delete(recursive: true);
 
-          // final File copiedFile = File(savePath2);
-          // copiedFile.
-
-          //file.writeAsStringSync("");
 
           file2.writeAsStringSync(json.encode(bioModel));
-          //_pickFile();
-          // final File copiedFile = File(savePath);
-          // copiedFile.copySync(savePath2);
-          //moveFile(copiedFile, saveDirectory);
           Fluttertoast.showToast(
               msg: "Replacing Existing Backup..",
               toastLength: Toast.LENGTH_LONG,
@@ -1424,13 +1416,6 @@ Warning!!!
         List<Placemark> placemark = await placemarkFromCoordinates(
             attend.latitude!, attend.longitude!);
 
-        // setState(() {
-        //   location2 =
-        //   "${placemark[0].street},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
-        //
-        //   administrativeArea1 = "${placemark[0].administrativeArea}";
-        // });
-
 
         List<LocationModel> isarLocations =
         await widget.service.getLocationsByState(placemark[0].administrativeArea);
@@ -1544,15 +1529,414 @@ Warning!!!
     log("newUser ID ===== $newUser");
   }
 
+
+  checkForAppVersion() async {
+    final firestore = FirebaseFirestore.instance;
+    try {
+      List<AppVersionModel> getAppVersion =
+      await widget.service.getAppVersion();
+
+      List<LastUpdateDateModel> getlastUpdateDate =
+      await widget.service.getLastUpdateDate();
+
+      DateTime currentDate = DateTime.now();
+      log("getAppVersion[0].appVersion== ${getAppVersion[0].appVersion}");
+
+        if (getAppVersion[0].checkDate == null ||
+            currentDate.difference(getAppVersion[0].checkDate!).inDays > 3) {
+          final lastAppVersionDoc = await firestore
+              .collection('AppVersion')
+              .doc('AppVersion')
+              .get();
+
+          final lastUpdateDateDoc = await firestore
+              .collection('LastUpdateDate')
+              .doc('LastUpdateDate')
+              .get();
+
+          if (lastAppVersionDoc.exists) {
+            // Get the data from the document
+            final data = lastAppVersionDoc.data();
+
+
+            if (data != null && data.containsKey('appVersionDate')) {
+              // Safely extract the timestamp and convert to DateTime
+              final timestamp = data['appVersionDate'] as Timestamp;
+              final appVersionDate = timestamp.toDate();
+              final versionNumber = data['appVersion'];
+              DateTime newappVersionDate = appVersionDate.add(Duration(days: 16));
+
+              print("appVersionDate ====${appVersionDate}");
+              print("versionNumber ====${versionNumber}");
+
+              if (getAppVersion[0].appVersion != versionNumber &&
+                  !isAppCheckShown) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  // Prevent dismissing by tapping outside
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Update Available'),
+                      content: Text(
+                          'You are using an older version of the app (${getAppVersion[0]
+                              .appVersion}). Please update to the latest version (${versionNumber}), updated on ${DateFormat('MMMM dd, yyyy').format(appVersionDate)}. Kindly Note that you would be logged out on ${DateFormat('MMMM dd, yyyy').format(newappVersionDate)} if you do not upgrade to the latest version (${versionNumber})'),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () async {
+                            // TODO: Add logic to redirect to app store/update mechanism
+                            await IsarService().updateAppVersion(
+                                1, AppVersionModel(), DateTime.now(),false);
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                          child: Text('Close'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                //IsarService().updateAppVersion(1,AppVersionModel(),DateTime.now());
+                setState(() {
+                  isAppCheckShown == true;
+                });
+              }
+              print("Last appVersionDate saved: $appVersionDate");
+            } else {
+              print("Document does not contain 'appVersionDate' field.");
+            }
+          } else {
+            print("Document 'appVersionDate' not found.");
+          }
+
+          if (lastUpdateDateDoc.exists) {
+            // Get the data from the document
+            final data = lastUpdateDateDoc.data();
+
+
+            if (data != null && data.containsKey('LastUpdateDate')) {
+              // Safely extract the timestamp and convert to DateTime
+              final timestamp = data['LastUpdateDate'] as Timestamp;
+              final LastUpdateDate = timestamp.toDate();
+
+              print("appVersionDate ====${LastUpdateDate}");
+
+              if (LastUpdateDate.isAfter(
+                  getlastUpdateDate[0].lastUpdateDate!)) {
+                Fluttertoast.showToast(
+                  msg: "Updating Local Database!",
+                  toastLength: Toast.LENGTH_LONG,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+
+
+                await IsarService().cleanLocationCollection().then((
+                    value) async {
+                  await IsarService().cleanStateCollection();
+                  await IsarService().cleanDepartmentCollection();
+                  await IsarService().cleanDesignationCollection();
+                  //await IsarService().cleanAppVersionCollection();
+                  await IsarService().cleanReasonsForDayOffCollection();
+                  await IsarService().cleanStaffCategoryCollection();
+                  await IsarService().cleanLastUpdateDateCollection();
+                  await IsarService().cleanProjectCollection();
+                }).then((value) async {
+                  await _insertSuperUser(
+                      IsarService()); // Pass service to _insertSuperUser
+                  //await _insertVersion(); // Pass service to _autoFirebaseDBUpdate
+                }).then((value) async {
+                  await fetchDataAndInsertIntoIsar(
+                      IsarService()); // Pass service to fetchDataAndInsertIntoIsar
+                  await fetchDepartmentAndDesignationAndInsertIntoIsar(
+                      IsarService());
+                  await fetchStaffCategoryAndInsertIntoIsar(IsarService());
+                  await fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
+                  await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
+                  await fetchProjectAndInsertIntoIsar(IsarService());
+                  await fetchAppVersionAndInsertIntoIsar(IsarService());
+                });
+                Fluttertoast.showToast(
+                  msg: "Updating Local Database Completed!",
+                  toastLength: Toast.LENGTH_LONG,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              }
+              // print("Last appVersionDate saved: $appVersionDate");
+            } else {
+              print("Document does not contain 'LastUpdateDate' field.");
+            }
+          } else {
+            print("Document 'LastUpdateDate' not found.");
+          }
+        }
+
+
+
+
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "AppVersion Check Error: ${e.toString()}",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
+  Future<void> fetchDataAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final locationCollection = await firestore.collection('Location').get();
+
+    for (final stateDoc in locationCollection.docs) {
+      final state = stateDoc.id;
+      //print("stateSnap====${state}");
+      final stateSave = StateModel()..stateName = state;
+
+      service.saveState(stateSave);
+
+      final lgaCollectionRef = await firestore
+          .collection('Location')
+          .doc(state)
+          .collection(state)
+          .get();
+
+      for (final lgaDoc in lgaCollectionRef.docs) {
+        final lga = lgaDoc.id;
+        // print("lgaSnap====${lga}");
+        final data = lgaDoc.data() as Map<String, dynamic>;
+        //print("data====${data}");
+
+        final locationSave = LocationModel()
+          ..state = state
+          ..locationName = data['LocationName']
+          ..latitude = double.parse(data['Latitude'].toString())
+          ..longitude = double.parse(data['Longitude'].toString())
+          ..category =  data['category']
+          ..radius = double.parse(data['Radius'].toString());
+
+        service.saveLocation(locationSave);
+      }
+    }
+  }
+
+  Future<void> _insertSuperUser(IsarService service) async {
+    final bioInfoForSuperUser = await service.getBioInfoForSuperUser();
+
+    if (bioInfoForSuperUser.isEmpty) {
+      final bioData = BioModel()
+        ..emailAddress = "superuser@ccfng.org"
+        ..password = "Moderated@2023"
+        ..role = "Super-Admin"
+        ..department = "Software Development"
+        ..designation = "Software Developer"
+        ..firstName = "Super"
+        ..lastName = "User"
+        ..location = "Central Office"
+        ..mobile = "09020000000"
+        ..project = "CARITAS Nigeria"
+        ..staffCategory = "Team Lead"
+        ..state = "Abuja"
+        ..firebaseAuthId = firebaseAuthId;
+
+      await service.saveBioData(bioData);
+    }
+  }
+
+  Future<void> fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final designationCollection = await firestore.collection('Designation').get();
+
+    for (final departmentDoc in designationCollection.docs) {
+      final department = departmentDoc.id;
+      //print("stateSnap====${state}");
+      final departmentSave = DepartmentModel()..departmentName = department;
+
+      service.saveDepartment(departmentSave);
+
+      final designationCollectionRef = await firestore
+          .collection('Designation')
+          .doc(department)
+          .collection(department)
+          .get();
+
+      for (final designationDoc in designationCollectionRef.docs) {
+        final designation = designationDoc.id;
+        // print("lgaSnap====${lga}");
+        final data = designationDoc.data() as Map<String, dynamic>;
+        //print("data====${data}");
+
+        final designationSave = DesignationModel()
+          ..departmentName = department
+          ..designationName = data['designationName']
+          ..category = data['category']
+
+        ;
+
+        service.saveDesignation(designationSave);
+      }
+    }
+  }
+
+  Future<void> fetchProjectAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final projectCollection = await firestore.collection('Project').get();
+
+    for (final projectDoc in projectCollection.docs) {
+      final project = projectDoc.id;
+      //print("stateSnap====${state}");
+      final projectSave = ProjectModel()..project = project;
+
+      service.saveProject(projectSave);
+
+
+    }
+  }
+
+  Future<void> fetchLastUpdateDateAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+
+    try {
+      final lastUpdateDateDoc = await firestore
+          .collection('LastUpdateDate')
+          .doc("LastUpdateDate")
+          .get();
+
+      if (lastUpdateDateDoc.exists) {
+        // Get the data from the document
+        final data = lastUpdateDateDoc.data();
+
+        if (data != null && data.containsKey('LastUpdateDate')) {
+          // Safely extract the timestamp and convert to DateTime
+          final timestamp = data['LastUpdateDate'] as Timestamp;
+          final lastUpdate = timestamp.toDate();
+
+          print("LastUpdateDate ====${lastUpdate}");
+
+          final lastUpdateSave = LastUpdateDateModel()
+            ..lastUpdateDate = lastUpdate;
+
+          await service.saveLastUpdateDate(lastUpdateSave);
+          // await service.updateAppVersion(1,AppVersionModel(),lastUpdate);
+          print("Last update date saved: $lastUpdate");
+        } else {
+          print("Document does not contain 'lastUpdate' field.");
+        }
+      } else {
+        print("Document 'LastUpdateDate' not found.");
+      }
+    } catch (e) {
+      print("Error fetching last update date: $e");
+      // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  }
+  Future<void> _insertVersion() async {
+    final getAppVersion = await IsarService().getAppVersionInfo();
+
+    if (getAppVersion.length == 0) {
+      final appVersion = AppVersionModel()
+        ..appVersion = appVersionConstant;
+
+      await IsarService().saveAppVersionData(appVersion);
+    }
+  }
+
+  Future<void> fetchAppVersionAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final getAppVersion = await service.getAppVersionInfo();
+
+    try {
+      final lastUpdateDateDoc = await firestore
+          .collection('AppVersion')
+      // .doc(getAppVersion[0].appVersion)
+          .doc('AppVersion')
+          .get();
+
+      if (lastUpdateDateDoc.exists) {
+        // Get the data from the document
+        final data = lastUpdateDateDoc.data();
+
+
+        if (data != null && data.containsKey('appVersionDate')) {
+          // Safely extract the timestamp and convert to DateTime
+          final timestamp = data['appVersionDate'] as Timestamp;
+          final appVersionDate = timestamp.toDate();
+          final versionNumber = data['appVersion'];
+
+          print("appVersionDate ====${appVersionDate}");
+          print("versionNumber ====${versionNumber}");
+
+          if(getAppVersion[0].appVersion == versionNumber){
+            await service.updateAppVersion1(1,AppVersionModel(),appVersionDate,DateTime.now(),true);
+          }else{
+            await service.updateAppVersion2(1,AppVersionModel(),DateTime.now(),false);
+          }
+          print("Last appVersionDate saved: $appVersionDate");
+        } else {
+          print("Document does not contain 'appVersionDate' field.");
+        }
+      } else {
+        print("Document 'appVersionDate' not found.");
+      }
+    } catch (e) {
+      print("Error fetching last appVersionDate: $e");
+      // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  }
+
+  Future<void> fetchReasonsForDaysOffAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final reasonsForDaysOffCollection = await firestore.collection('ReasonsForDaysOff').get();
+
+    for (final reasonsForDaysOffDoc in reasonsForDaysOffCollection.docs) {
+      final reasonsForDaysOff = reasonsForDaysOffDoc.id;
+      //print("stateSnap====${state}");
+      final reasonsForDaysOffSave = ReasonForDaysOffModel()..reasonForDaysOff = reasonsForDaysOff;
+
+      service.saveReasonForDaysOff(reasonsForDaysOffSave);
+
+    }
+  }
+
+  Future<void> fetchStaffCategoryAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final staffCategoryCollection = await firestore.collection('StaffCategory').get();
+
+    for (final staffCategoryDoc in staffCategoryCollection.docs) {
+      final staffCategory = staffCategoryDoc.id;
+      //print("stateSnap====${state}");
+      final staffCategorySave = StaffCategoryModel()..staffCategory = staffCategory;
+
+      service.saveStaffCategory(staffCategorySave);
+
+    }
+  }
+
 // This Method updates all attendance that has a clock-out made. This is necessary for data validation and to ensure that folks sign-out appropraitely
   syncCompleteData() async {
     try {
       // The try block first of all saves the data in the google sheet for the visualization and then on the firebase database as an extra backup database  before chahing the sync status on Mobile App to "Synced"
       //Query the firebase and get the records having updated records
+      List<BioModel> getAttendanceForBio =
+      await widget.service.getBioInfoWithUserBio();
+
+
+
       QuerySnapshot snap = await FirebaseFirestore.instance
           .collection("Staff")
-          .where("id", isEqualTo: firebaseAuthId)
+          .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
           .get();
+
+
 
       List<AttendanceModel> getAttendanceForPartialUnSynced =
           await widget.service.getAttendanceForPartialUnSynced();
@@ -1582,58 +1966,85 @@ Warning!!!
             //Iterate through each queried loop
             for (var unSyncedAttend in getAttendanceForPartialUnSynced)
               {
-                await _updateGoogleSheet(
-                        state,
-                        project,
-                        firstName,
-                        lastName,
-                        designation,
-                        department,
-                        location,
-                        staffCategory,
-                        mobile,
-                        unSyncedAttend.date.toString(),
-                        emailAddress,
-                        unSyncedAttend.clockIn.toString(),
-                        unSyncedAttend.clockInLatitude.toString(),
-                        unSyncedAttend.clockInLongitude.toString(),
-                        unSyncedAttend.clockInLocation.toString(),
-                        unSyncedAttend.clockOut.toString(),
-                        unSyncedAttend.clockOutLatitude.toString(),
-                        unSyncedAttend.clockOutLongitude.toString(),
-                        unSyncedAttend.clockOutLocation.toString(),
-                        unSyncedAttend.durationWorked.toString(),
-                        unSyncedAttend.noOfHours.toString(),
-                    unSyncedAttend.comments.toString()
-                )
-                    .then((value) async {
-                  await FirebaseFirestore.instance
-                      .collection("Staff")
-                      .doc(snap.docs[0].id)
-                      .collection("Record")
-                      .doc(unSyncedAttend.date)
-                      .set({
-                    "Offline_DB_id": unSyncedAttend.id,
-                    'clockIn': unSyncedAttend.clockIn,
-                    'clockOut': unSyncedAttend.clockOut,
-                    'clockInLocation': unSyncedAttend.clockInLocation,
-                    'clockOutLocation': unSyncedAttend.clockOutLocation,
-                    'date': unSyncedAttend.date,
-                    'isSynced': true,
-                    'clockInLatitude': unSyncedAttend.clockInLatitude,
-                    'clockInLongitude': unSyncedAttend.clockInLongitude,
-                    'clockOutLatitude': unSyncedAttend.clockOutLatitude,
-                    'clockOutLongitude': unSyncedAttend.clockOutLongitude,
-                    'voided': unSyncedAttend.voided,
-                    'isUpdated': unSyncedAttend.isUpdated,
-                    'noOfHours': unSyncedAttend.noOfHours,
-                    'month': unSyncedAttend.month,
-                    'durationWorked': unSyncedAttend.durationWorked,
-                    'offDay': unSyncedAttend.offDay,
-                    'comments':unSyncedAttend.comments
-                  }).then((value) => widget.service.updateSyncStatus(
-                          unSyncedAttend.id, AttendanceModel(), true));
-                })
+
+          await FirebaseFirestore.instance
+              .collection("Staff")
+          .doc(snap.docs[0].id)
+          .collection("Record")
+          .doc(unSyncedAttend.date)
+          .set({
+        "Offline_DB_id": unSyncedAttend.id,
+        'clockIn': unSyncedAttend.clockIn,
+        'clockOut': unSyncedAttend.clockOut,
+        'clockInLocation': unSyncedAttend.clockInLocation,
+        'clockOutLocation': unSyncedAttend.clockOutLocation,
+        'date': unSyncedAttend.date,
+        'isSynced': true,
+        'clockInLatitude': unSyncedAttend.clockInLatitude,
+        'clockInLongitude': unSyncedAttend.clockInLongitude,
+        'clockOutLatitude': unSyncedAttend.clockOutLatitude,
+        'clockOutLongitude': unSyncedAttend.clockOutLongitude,
+        'voided': unSyncedAttend.voided,
+        'isUpdated': unSyncedAttend.isUpdated,
+        'noOfHours': unSyncedAttend.noOfHours,
+        'month': unSyncedAttend.month,
+        'durationWorked': unSyncedAttend.durationWorked,
+        'offDay': unSyncedAttend.offDay,
+        'comments':unSyncedAttend.comments
+      }).then((value) {
+        Fluttertoast.showToast(
+          msg: "Syncing to Server...",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        widget.service.updateSyncStatus(
+            unSyncedAttend.id, AttendanceModel(), true); // Update Isar
+      })
+          .catchError((error) {
+        Fluttertoast.showToast(
+          msg: "Server Write Error: ${error.toString()}",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      })
+                // ----------------
+                // await _updateGoogleSheet(
+                //         state,
+                //         project,
+                //         firstName,
+                //         lastName,
+                //         designation,
+                //         department,
+                //         location,
+                //         staffCategory,
+                //         mobile,
+                //         unSyncedAttend.date.toString(),
+                //         emailAddress,
+                //         unSyncedAttend.clockIn.toString(),
+                //         unSyncedAttend.clockInLatitude.toString(),
+                //         unSyncedAttend.clockInLongitude.toString(),
+                //         unSyncedAttend.clockInLocation.toString(),
+                //         unSyncedAttend.clockOut.toString(),
+                //         unSyncedAttend.clockOutLatitude.toString(),
+                //         unSyncedAttend.clockOutLongitude.toString(),
+                //         unSyncedAttend.clockOutLocation.toString(),
+                //         unSyncedAttend.durationWorked.toString(),
+                //         unSyncedAttend.noOfHours.toString(),
+                //     unSyncedAttend.comments.toString()
+                // )
+                //      .then((value) async {
+                //
+                // })
+
+                // ---------------
               }
           });
 
@@ -1643,61 +2054,56 @@ Warning!!!
     } catch (e) {
       // The catch block executes incase firebase database encounters an error thereby only saving the data in the google sheet for the analytics before chahing the sync status on Mobile App to "Synced"
       log("Sync Error Skipping firebase DB = ${e.toString()}");
-      List<AttendanceModel> getAttendanceForPartialUnSynced =
-          await widget.service.getAttendanceForPartialUnSynced();
+      // List<AttendanceModel> getAttendanceForPartialUnSynced =
+      //     await widget.service.getAttendanceForPartialUnSynced();
+      Fluttertoast.showToast(
+        msg: "Sync Error: ${e.toString()}",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
 
 
       //await _updateEmptyClockInAndOutLocation().then((value) async => {
       //Iterate through each queried loop
-      for (var unSyncedAttend in getAttendanceForPartialUnSynced) {
-        await _updateGoogleSheet(
-                state,
-                project,
-                firstName,
-                lastName,
-                designation,
-                department,
-                location,
-                staffCategory,
-                mobile,
-                unSyncedAttend.date.toString(),
-                emailAddress,
-                unSyncedAttend.clockIn.toString(),
-                unSyncedAttend.clockInLatitude.toString(),
-                unSyncedAttend.clockInLongitude.toString(),
-                unSyncedAttend.clockInLocation.toString(),
-                unSyncedAttend.clockOut.toString(),
-                unSyncedAttend.clockOutLatitude.toString(),
-                unSyncedAttend.clockOutLongitude.toString(),
-                unSyncedAttend.clockOutLocation.toString(),
-                unSyncedAttend.durationWorked.toString(),
-                unSyncedAttend.noOfHours.toString(),
-                unSyncedAttend.comments.toString(),
-        )
-            .then((value) async {
-          widget.service
-              .updateSyncStatus(unSyncedAttend.id, AttendanceModel(), true);
-        });
-      }
+      // for (var unSyncedAttend in getAttendanceForPartialUnSynced) {
+      //   await _updateGoogleSheet(
+      //           state,
+      //           project,
+      //           firstName,
+      //           lastName,
+      //           designation,
+      //           department,
+      //           location,
+      //           staffCategory,
+      //           mobile,
+      //           unSyncedAttend.date.toString(),
+      //           emailAddress,
+      //           unSyncedAttend.clockIn.toString(),
+      //           unSyncedAttend.clockInLatitude.toString(),
+      //           unSyncedAttend.clockInLongitude.toString(),
+      //           unSyncedAttend.clockInLocation.toString(),
+      //           unSyncedAttend.clockOut.toString(),
+      //           unSyncedAttend.clockOutLatitude.toString(),
+      //           unSyncedAttend.clockOutLongitude.toString(),
+      //           unSyncedAttend.clockOutLocation.toString(),
+      //           unSyncedAttend.durationWorked.toString(),
+      //           unSyncedAttend.noOfHours.toString(),
+      //           unSyncedAttend.comments.toString(),
+      //   )
+      //       .then((value) async {
+      //     widget.service
+      //         .updateSyncStatus(unSyncedAttend.id, AttendanceModel(), true);
+      //   });
+      // }
       // });
     }
   }
 
-  // void _startTimer(BuildContext context) {
-  //   Timer.periodic(const Duration(seconds: 60), (timer) {
-  //     log("timer started===========");
-  //     log("timer=====${timer.tick}");
-  //     if (isDeviceConnected) {
-  //       _updateEmptyClockInAndOutLocation().then((value) {
-  //         syncCompleteData();
-  //       }).then((value) {
-  //         ScaffoldMessenger.of(context)
-  //             .showSnackBar(const SnackBar(content: Text("Data synced...")));
-  //       });
-  //       //updateFullSyncedData();
-  //     }
-  //   });
-  // }
+
 
   Future<void> _startSynching() async {
     if (isDeviceConnected) {
@@ -1713,6 +2119,7 @@ Warning!!!
        await  _updateEmptyLocationForTwelve();
       }).then((value) async {
         await syncCompleteData();
+        await checkForAppVersion();
       })
       .then((value) {
         Fluttertoast.showToast(

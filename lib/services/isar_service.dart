@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:attendanceapp/model/attendancemodel.dart';
 import 'package:attendanceapp/model/bio_model.dart';
@@ -10,6 +11,13 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../model/app_usage_model.dart';
+import '../model/appversion.dart';
+import '../model/departmentmodel.dart';
+import '../model/designationmodel.dart';
+import '../model/last_update_date.dart';
+import '../model/projectmodel.dart';
+import '../model/reasonfordaysoff.dart';
+import '../model/staffcategory.dart';
 import '../model/track_location_model.dart';
 
 class IsarService extends DatabaseAdapter {
@@ -32,14 +40,134 @@ class IsarService extends DatabaseAdapter {
 
   Future<void> saveLocation(LocationModel newlocation) async {
     final isar = await db;
-    await isar
-        .writeTxnSync<int>(() => isar.locationModels.putSync(newlocation));
+    try{
+
+      await isar
+          .writeTxnSync<int>(() => isar.locationModels.putSync(newlocation));
+    }catch(e){
+      log("Error on save location:$e");
+
+    }
+
   }
+
 
   Future<void> saveState(StateModel newstate) async {
     final isar = await db;
     try {
       await isar.writeTxnSync<int>(() => isar.stateModels.putSync(newstate));
+    } catch (e) {
+      if (e is IsarError && e.message.contains("Unique index violated")) {
+        // Handle unique index violation
+        print("Error saving state: Unique index violated. State likely already exists.");
+        // You can either update the existing state or handle the error differently
+      } else {
+        // Handle other Isar errors
+        print("Error saving state: $e");
+      }
+    }
+  }
+
+  Future<void> saveDepartment(DepartmentModel newdepartment) async {
+    final isar = await db;
+    try {
+      await isar.writeTxnSync<int>(() => isar.departmentModels.putSync(newdepartment));
+    } catch (e) {
+      if (e is IsarError && e.message.contains("Unique index violated")) {
+        // Handle unique index violation
+        print("Error saving state: Unique index violated. State likely already exists.");
+        // You can either update the existing state or handle the error differently
+      } else {
+        // Handle other Isar errors
+        print("Error saving state: $e");
+      }
+    }
+  }
+
+  Future<void> saveDesignation(DesignationModel newdesignation) async {
+    final isar = await db;
+    try {
+      await isar.writeTxnSync<int>(() => isar.designationModels.putSync(newdesignation));
+    } catch (e) {
+      if (e is IsarError && e.message.contains("Unique index violated")) {
+        // Handle unique index violation
+        print("Error saving state: Unique index violated. State likely already exists.");
+        // You can either update the existing state or handle the error differently
+      } else {
+        // Handle other Isar errors
+        print("Error saving state: $e");
+      }
+    }
+  }
+
+  Future<void> saveProject(ProjectModel newproject) async {
+    final isar = await db;
+    try {
+      await isar.writeTxnSync<int>(() => isar.projectModels.putSync(newproject));
+    } catch (e) {
+      if (e is IsarError && e.message.contains("Unique index violated")) {
+        // Handle unique index violation
+        print("Error saving state: Unique index violated. State likely already exists.");
+        // You can either update the existing state or handle the error differently
+      } else {
+        // Handle other Isar errors
+        print("Error saving state: $e");
+      }
+    }
+  }
+
+  Future<void> saveAppVersion(AppVersionModel newappversion) async {
+    final isar = await db;
+    try {
+      await isar.writeTxnSync<int>(() => isar.appVersionModels.putSync(newappversion));
+    } catch (e) {
+      if (e is IsarError && e.message.contains("Unique index violated")) {
+        // Handle unique index violation
+        print("Error saving state: Unique index violated. State likely already exists.");
+        // You can either update the existing state or handle the error differently
+      } else {
+        // Handle other Isar errors
+        print("Error saving state: $e");
+      }
+    }
+  }
+
+  Future<void> saveLastUpdateDate(LastUpdateDateModel newlastupdatedate) async {
+    final isar = await db;
+    try {
+      await isar.writeTxnSync<int>(() => isar.lastUpdateDateModels.putSync(newlastupdatedate));
+    } catch (e) {
+      if (e is IsarError && e.message.contains("Unique index violated")) {
+        // Handle unique index violation
+        print("Error saving state: Unique index violated. State likely already exists.");
+        // You can either update the existing state or handle the error differently
+      } else {
+        // Handle other Isar errors
+        print("Error saving state: $e");
+      }
+    }
+  }
+
+  Future<void> saveStaffCategory(StaffCategoryModel newstaffcategory) async {
+    final isar = await db;
+    try {
+      await isar.writeTxnSync<int>(() => isar.staffCategoryModels.putSync(newstaffcategory));
+    } catch (e) {
+      if (e is IsarError && e.message.contains("Unique index violated")) {
+        // Handle unique index violation
+        print("Error saving state: Unique index violated. State likely already exists.");
+        // You can either update the existing state or handle the error differently
+      } else {
+        // Handle other Isar errors
+        print("Error saving state: $e");
+      }
+    }
+  }
+
+  Future<void> saveReasonForDaysOff(ReasonForDaysOffModel newreasonfordaysoff) async {
+    final isar = await db;
+    try {
+      await isar.writeTxnSync<int>(() => isar.reasonForDaysOffModels.putSync(newreasonfordaysoff));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -101,6 +229,59 @@ class IsarService extends DatabaseAdapter {
     });
   }
 
+  Future<void> updateAppVersion(
+      int id,
+      AppVersionModel appVersionModels,
+      DateTime checkDate,
+      bool isLatestVersion
+      ) async {
+    final isar = await db;
+    final updateSyncStatus = await isar.appVersionModels.get(id);
+
+    updateSyncStatus!..checkDate = checkDate
+    ..latestVersion = isLatestVersion;
+
+    await isar.writeTxn(() async {
+      await isar.appVersionModels.put(updateSyncStatus);
+    });
+  }
+
+  Future<void> updateAppVersion1(
+      int id,
+      AppVersionModel appVersionModels,
+      DateTime appVersionDate,
+      DateTime checkDate,
+      bool isLatestVersion
+      ) async {
+    final isar = await db;
+    final updateSyncStatus = await isar.appVersionModels.get(id);
+
+    updateSyncStatus!..checkDate = checkDate
+    ..appVersionDate = appVersionDate
+    ..latestVersion = isLatestVersion;
+
+    await isar.writeTxn(() async {
+      await isar.appVersionModels.put(updateSyncStatus);
+    });
+  }
+
+  Future<void> updateAppVersion2(
+      int id,
+      AppVersionModel appVersionModels,
+      DateTime checkDate,
+      bool isLatestVersion
+      ) async {
+    final isar = await db;
+    final updateSyncStatus = await isar.appVersionModels.get(id);
+
+    updateSyncStatus!..checkDate = checkDate
+      ..latestVersion = isLatestVersion;
+
+    await isar.writeTxn(() async {
+      await isar.appVersionModels.put(updateSyncStatus);
+    });
+  }
+
   Future<void> updateEmptyLocationFor12(
       int id,
       TrackLocationModel trackLocationModels,
@@ -120,6 +301,11 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveBioData(BioModel newbiodata) async {
     final isar = await db;
     await isar.writeTxnSync<int>(() => isar.bioModels.putSync(newbiodata));
+  }
+
+  Future<void> saveAppVersionData(AppVersionModel newappversiondata) async {
+    final isar = await db;
+    await isar.writeTxnSync<int>(() => isar.appVersionModels.putSync(newappversiondata));
   }
 
   Future<void> saveUserFace(UserFace newbiodata) async {
@@ -146,6 +332,53 @@ class IsarService extends DatabaseAdapter {
   Future<List<LocationModel>> getAllLocation() async {
     final isar = await db;
     return await isar.locationModels.where().findAll();
+  }
+
+  Future<List<String?>> getStatesFromIsar(String state) async {
+    final isar = await db;
+    final stateModels = await isar.stateModels.where().stateNameNotEqualTo(state).findAll();
+    return stateModels.map((model) => model.stateName).toList();
+  }
+
+  Future<List<String?>> getStatesFromIsarForFCT(String state) async {
+    final isar = await db;
+    final stateModels = await isar.stateModels.where().stateNameEqualTo(state).findAll();
+    return stateModels.map((model) => model.stateName).toList();
+  }
+
+  Future<List<String?>> getLocationsFromIsar(String state, String category) async {
+    final isar = await db;
+    final locationModels = await isar.locationModels.filter().stateEqualTo(state).categoryEqualTo(category).findAll();
+    return locationModels.map((model) => model.locationName).toList();
+  }
+  Future<List<String?>> getDepartmentsFromIsar() async {
+    final isar = await db;
+    final departmentModels = await isar.departmentModels.where().findAll();
+    return departmentModels.map((model) => model.departmentName).toList();
+  }
+
+  Future<List<String?>> getDesignationsFromIsar(String? department,String? category) async {
+    final isar = await db;
+    final designationModels = await isar.designationModels.filter().departmentNameEqualTo(department).categoryEqualTo(category).findAll();
+    return designationModels.map((model) => model.designationName).toList();
+  }
+
+  Future<List<String?>> getStaffCategoryFromIsar() async {
+    final isar = await db;
+    final staffCategoryModels = await isar.staffCategoryModels.where().findAll();
+    return staffCategoryModels.map((model) => model.staffCategory).toList();
+  }
+
+  Future<List<String?>> getReasonsForDaysOffFromIsar() async {
+    final isar = await db;
+    final reasonForDaysOffModels = await isar.reasonForDaysOffModels.where().findAll();
+    return reasonForDaysOffModels.map((model) => model.reasonForDaysOff).toList();
+  }
+
+  Future<List<String?>> getProjectFromIsar() async {
+    final isar = await db;
+    final projectModels = await isar.projectModels.where().findAll();
+    return projectModels.map((model) => model.project).toList();
   }
 
   Future<List<LocationModel>> getLocationsByState(String? state) async {
@@ -278,7 +511,14 @@ class IsarService extends DatabaseAdapter {
         LocationModelSchema,
         StateModelSchema,
         AppUsageModelSchema,
-        TrackLocationModelSchema
+        TrackLocationModelSchema,
+        DepartmentModelSchema,
+        DesignationModelSchema,
+        ProjectModelSchema,
+        AppVersionModelSchema,
+        ReasonForDaysOffModelSchema,
+        StaffCategoryModelSchema,
+        LastUpdateDateModelSchema
       ], inspector: true, directory: directory.path);
     }
     return Future.value(Isar.getInstance());
@@ -289,6 +529,8 @@ class IsarService extends DatabaseAdapter {
     await isar.writeTxn(() => isar.clear());
   }
 
+
+
   Future<void> cleanLocationCollection() async {
     final isar = await db;
     await isar.writeTxn(() => isar.locationModels.clear()); // Truncate collection
@@ -297,6 +539,40 @@ class IsarService extends DatabaseAdapter {
   Future<void> cleanStateCollection() async {
     final isar = await db;
     await isar.writeTxn(() => isar.stateModels.clear()); // Truncate collection
+  }
+
+  Future<void> cleanDepartmentCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.departmentModels.clear()); // Truncate collection
+  }
+  Future<void> cleanDesignationCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.designationModels.clear()); // Truncate collection
+  }
+
+  Future<void> cleanAppVersionCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.appVersionModels.clear()); // Truncate collection
+  }
+
+  Future<void> cleanReasonsForDayOffCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.reasonForDaysOffModels.clear()); // Truncate collection
+  }
+
+  Future<void> cleanStaffCategoryCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.staffCategoryModels.clear()); // Truncate collection
+  }
+
+  Future<void> cleanLastUpdateDateCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.lastUpdateDateModels.clear()); // Truncate collection
+  }
+
+  Future<void> cleanProjectCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.projectModels.clear()); // Truncate collection
   }
 
   Future<List<AttendanceModel>> getAttendanceFor(
@@ -370,6 +646,16 @@ class IsarService extends DatabaseAdapter {
         .findFirst();
     //where().sortByDateDesc().findFirst();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
+  }
+
+  Future<AttendanceModel?> getLastAttendanceFordate(String date) async {
+    await Future.delayed(const Duration(seconds: 1));
+    final isar = await db;
+    return await isar.attendanceModels
+        .filter()
+        .dateEqualTo(date)
+        .sortByDateDesc()
+        .findFirst();
   }
 
   Future<UserFace?> getLastUserFace() async {
@@ -451,6 +737,15 @@ class IsarService extends DatabaseAdapter {
         .findAll();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
   }
+  Future<List<AttendanceModel>> getAttendanceForId(int id) async {
+    final isar = await db;
+    return await isar.attendanceModels
+        .filter()
+        .idEqualTo(id)
+        .findAll();
+    // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
+  }
+
 
   getUnsyncedData() async {
     final isar = await db;
@@ -492,6 +787,22 @@ class IsarService extends DatabaseAdapter {
         .findAll();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
   }
+
+  // Future<void> updateAppVersion(
+  //     int id,
+  //     AppVersionModel appVersionModels,
+  //     DateTime appVersionDate) async {
+  //   final isar = await db;
+  //   final appVersionUpdate = await isar.appVersionModels.get(id);
+  //
+  //   appVersionUpdate!
+  //     ..appVersionDate = appVersionDate;
+  //
+  //   await isar.writeTxn(() async {
+  //     await isar.appVersionModels.put(appVersionUpdate);
+  //   });
+  // }
+
 
   Future<void> updateAttendance(
       int id,
@@ -738,6 +1049,20 @@ class IsarService extends DatabaseAdapter {
      final appUsage = isar.appUsageModels.where().findFirst();
     return appUsage;
   }
+  //
+  // Future<LastUpdateDateModel?> getLastUpdateDate() async {
+  //   // Retrieve the last used date from Isar (implementation depends on your Isar setup)
+  //   // Example: using a dedicated Isar object called 'AppUsage'
+  //   final isar = await db;
+  //   //return await isar.appUsageModels.where().findFirst();
+  //   final lastUpdateDate = isar.lastUpdateDateModels.where().findFirst();
+  //   return lastUpdateDate;
+  // }
+
+  // Future<List<AppVersionModel>> getAppVersionInfo() async {
+  //   final isar = await db;
+  //   return await isar.appVersionModels.where().findAll();
+  // }
 
   Future<void> saveLastUsedDate(AppUsageModel newappusagemodel) async {
     // Save the current date in Isar (implementation depends on your Isar setup)
@@ -780,6 +1105,40 @@ class IsarService extends DatabaseAdapter {
         .filter()
         .roleEqualTo("Super-Admin")
         .findAll();
+  }
+
+  Future<List<LastUpdateDateModel>> getUpdateDateInfo() async {
+    final isar = await db;
+    return await isar.lastUpdateDateModels.where().findAll();
+  }
+
+  Future<List<AppVersionModel>> getAppVersionInfo() async {
+    final isar = await db;
+    return await isar.appVersionModels.where().findAll();
+  }
+
+  Future<AppVersionModel?> getAppVersionInfo2() async {
+    // Retrieve the last used date from Isar (implementation depends on your Isar setup)
+    // Example: using a dedicated Isar object called 'AppUsage'
+    final isar = await db;
+    //return await isar.appUsageModels.where().findFirst();
+    final appVersion = isar.appVersionModels.where().findFirst();
+    return appVersion;
+  }
+
+  Future<List<BioModel>> getBioInfoWithUserBio() async {
+    final isar = await db;
+    return await isar.bioModels.where().filter().firebaseAuthIdIsNotNull().findAll();
+  }
+
+  Future<List<AppVersionModel>> getAppVersion() async {
+    final isar = await db;
+    return await isar.appVersionModels.where().filter().appVersionIsNotNull().findAll();
+  }
+
+  Future<List<LastUpdateDateModel>> getLastUpdateDate() async {
+    final isar = await db;
+    return await isar.lastUpdateDateModels.where().filter().lastUpdateDateIsNotNull().findAll();
   }
 
   Future<BioModel?> getBioInfoWithFirebaseAuth() async {

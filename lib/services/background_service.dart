@@ -55,11 +55,11 @@ void backgroundTaskIsolate(ServiceInstance service) async {
   notifyHelper.initializeNotification();
 
 
-  // Schedule the 8:00 AM and 5:00 PM notifications.
-  notifyHelper.scheduleDailyNotifications(
-      1, 'Good Morning!', 'Have a productive day!', 8, 0);
-  notifyHelper.scheduleDailyNotifications(
-      2, 'Good Evening!', 'Time to unwind!', 17, 0);
+  // // Schedule the 8:00 AM and 5:00 PM notifications.
+  // notifyHelper.scheduleDailyNotifications(
+  //     1, 'Good Morning!', 'Have a productive day!', 8, 0);
+  // notifyHelper.scheduleDailyNotifications(
+  //     2, 'Good Evening!', 'Time to unwind!', 17, 0);
 
   // Accessing the service instance to communicate with the main isolate
   Timer.periodic(const Duration(minutes: 1), (timer) async {

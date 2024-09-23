@@ -75,7 +75,7 @@ class NotifyHelper {
                 ),
               ),
             );
-            _scheduleClockOutReminders(); // Re-schedule the notification if needed.
+            //_scheduleClockOutReminders(); // Re-schedule the notification if needed.
             break;
           case NotificationResponseType.selectedNotificationAction:
           // Handle actions associated with specific action IDs.
@@ -87,94 +87,94 @@ class NotifyHelper {
     );
   }
 
-  // Schedule daily notifications for clock-out reminders (example).
-  Future<void> _scheduleClockOutReminders() async {
-    tz.initializeTimeZones();
-    tz.Location nigeriaTimeZone = tz.getLocation('Africa/Lagos');
-
-    DateTime now = DateTime.now();
-    DateTime fivePM = DateTime(now.year, now.month, now.day, 17, 0, 0);
-
-    if (fivePM.isBefore(now)) {
-      fivePM = DateTime(now.year, now.month, now.day + 1, 17, 0, 0);
-    }
-
-    tz.TZDateTime scheduledDate =
-    tz.TZDateTime.from(fivePM, nigeriaTimeZone);
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      0, // Unique notification ID
-      'Clock Out Reminder',
-      'Don\'t forget to clock out for the day!',
-      scheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'high_importance_channel',
-          'Clock Out Reminder',
-          importance: Importance.high,
-          playSound: true,
-        ),
-        iOS: DarwinNotificationDetails(
-          sound: 'default.wav',
-          presentSound: true,
-        ),
-      ),
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: "Clock-Out Reminder|+ Kindly remember to clock-out|",
-    );
-  }
-
-  // Schedules a daily notification for a specific time.
-  Future<void> scheduleDailyNotifications(
-      int id, String title, String body, int hour, int minute) async {
-    tz.initializeTimeZones();
-    tz.Location nigeriaTimeZone = tz.getLocation('Africa/Lagos');
-
-    final now = DateTime.now();
-    var scheduledTime = DateTime(now.year, now.month, now.day, hour, minute);
-
-    // Debugging: Print the initially calculated scheduled time
-    print("Initial Scheduled Time: $scheduledTime");
-
-    // If scheduled time has already passed, schedule for tomorrow.
-    if (scheduledTime.isBefore(now)) {
-      scheduledTime = scheduledTime.add(const Duration(days: 1));
-      print("Scheduling for Tomorrow: $scheduledTime"); // Debugging
-    }
-
-    tz.TZDateTime scheduledDate =
-    tz.TZDateTime.from(scheduledTime, nigeriaTimeZone);
-
-    // Debugging: Print the final scheduled date and time
-    print("Final Scheduled Date: $scheduledDate");
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'your_channel_id',
-          'your_channel_name',
-          importance: Importance.high,
-          playSound: true,
-        ),
-        iOS: DarwinNotificationDetails(
-          sound: 'default.wav',
-          presentSound: true,
-        ),
-      ),
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: '$title|+${body ?? ''}',
-    );
-  }
+  // // Schedule daily notifications for clock-out reminders (example).
+  // Future<void> _scheduleClockOutReminders() async {
+  //   tz.initializeTimeZones();
+  //   tz.Location nigeriaTimeZone = tz.getLocation('Africa/Lagos');
+  //
+  //   DateTime now = DateTime.now();
+  //   DateTime fivePM = DateTime(now.year, now.month, now.day, 17, 0, 0);
+  //
+  //   if (fivePM.isBefore(now)) {
+  //     fivePM = DateTime(now.year, now.month, now.day + 1, 17, 0, 0);
+  //   }
+  //
+  //   tz.TZDateTime scheduledDate =
+  //   tz.TZDateTime.from(fivePM, nigeriaTimeZone);
+  //
+  //   await flutterLocalNotificationsPlugin.zonedSchedule(
+  //     0, // Unique notification ID
+  //     'Clock Out Reminder',
+  //     'Don\'t forget to clock out for the day!',
+  //     scheduledDate,
+  //     const NotificationDetails(
+  //       android: AndroidNotificationDetails(
+  //         'high_importance_channel',
+  //         'Clock Out Reminder',
+  //         importance: Importance.high,
+  //         playSound: true,
+  //       ),
+  //       iOS: DarwinNotificationDetails(
+  //         sound: 'default.wav',
+  //         presentSound: true,
+  //       ),
+  //     ),
+  //     androidAllowWhileIdle: true,
+  //     uiLocalNotificationDateInterpretation:
+  //     UILocalNotificationDateInterpretation.absoluteTime,
+  //     matchDateTimeComponents: DateTimeComponents.time,
+  //     payload: "Clock-Out Reminder|+ Kindly remember to clock-out|",
+  //   );
+  // }
+  //
+  // // Schedules a daily notification for a specific time.
+  // Future<void> scheduleDailyNotifications(
+  //     int id, String title, String body, int hour, int minute) async {
+  //   tz.initializeTimeZones();
+  //   tz.Location nigeriaTimeZone = tz.getLocation('Africa/Lagos');
+  //
+  //   final now = DateTime.now();
+  //   var scheduledTime = DateTime(now.year, now.month, now.day, hour, minute);
+  //
+  //   // Debugging: Print the initially calculated scheduled time
+  //   print("Initial Scheduled Time: $scheduledTime");
+  //
+  //   // If scheduled time has already passed, schedule for tomorrow.
+  //   if (scheduledTime.isBefore(now)) {
+  //     scheduledTime = scheduledTime.add(const Duration(days: 1));
+  //     print("Scheduling for Tomorrow: $scheduledTime"); // Debugging
+  //   }
+  //
+  //   tz.TZDateTime scheduledDate =
+  //   tz.TZDateTime.from(scheduledTime, nigeriaTimeZone);
+  //
+  //   // Debugging: Print the final scheduled date and time
+  //   print("Final Scheduled Date: $scheduledDate");
+  //
+  //   await flutterLocalNotificationsPlugin.zonedSchedule(
+  //     id,
+  //     title,
+  //     body,
+  //     scheduledDate,
+  //     const NotificationDetails(
+  //       android: AndroidNotificationDetails(
+  //         'your_channel_id',
+  //         'your_channel_name',
+  //         importance: Importance.high,
+  //         playSound: true,
+  //       ),
+  //       iOS: DarwinNotificationDetails(
+  //         sound: 'default.wav',
+  //         presentSound: true,
+  //       ),
+  //     ),
+  //     androidAllowWhileIdle: true,
+  //     uiLocalNotificationDateInterpretation:
+  //     UILocalNotificationDateInterpretation.absoluteTime,
+  //     matchDateTimeComponents: DateTimeComponents.time,
+  //     payload: '$title|+${body ?? ''}',
+  //   );
+  // }
 
   // Configures the local timezone to 'Africa/Lagos'.
   Future<void> _configureLocalTimezone() async {

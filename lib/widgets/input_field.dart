@@ -5,78 +5,76 @@ class MyInputField extends StatelessWidget {
   final String hint;
   final TextEditingController? controller;
   final Widget? widget;
-  const MyInputField(
-      {Key? key,
-      required this.title,
-      required this.hint,
-      this.controller,
-      this.widget})
-      : super(key: key);
+
+  const MyInputField({
+    Key? key,
+    required this.title,
+    required this.hint,
+    this.controller,
+    this.widget,
+    TextInputType? keyboardType,
+    String? Function(dynamic value)? validator,
+    IconData? icon,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start, // Aligns title to start
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black87,
               fontFamily: "NexaBold",
               fontSize: 15,
             ),
           ),
           Container(
-            height: 50,
-            margin: EdgeInsets.only(top: 8.0),
+            height:50,
+            width: MediaQuery.of(context).size.width,
+            margin: const EdgeInsets.only(top: 8.0),
             decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey,
-                  width: 1.0,
-                ),
-                borderRadius: BorderRadius.circular(12)),
+              border: Border.all(
+                color: Colors.grey,
+                width: 1.0,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Row(
               children: [
                 Expanded(
                   child: TextFormField(
-                    readOnly: widget == null ? false : true,
+                    readOnly: widget == null ? false : true, // Makes field editable unless there's a widget
                     autofocus: false,
                     cursorColor: Colors.grey[700],
                     controller: controller,
                     style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: "NexaBold",
-                        color: Colors.grey[600]),
+                      fontSize: 14,
+                      fontFamily: "NexaBold",
+                      color: Colors.grey[600],
+                    ),
                     decoration: InputDecoration(
                       hintText: hint,
-                      contentPadding: EdgeInsets.only(left: 10),
-                      hintStyle: TextStyle(
-                          fontSize: 15,
-                          fontFamily: "NexaBold",
-                          color: Colors.black),
-                      focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                        color: Colors.white,
-                        width: 0,
-                      )),
-                      enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                        color: Colors.white,
-                        width: 0,
-                      )),
+                      hintStyle: const TextStyle(
+                        fontSize: 15,
+                        fontFamily: "NexaBold",
+                        color: Colors.black,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10), // Ensures text starts from the left
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
                     ),
-                    //keyboardType: TextInputType.multiline,
-                    //maxLines: null,
-                    //expands: true,
                   ),
                 ),
-                widget == null
-                    ? Container()
-                    : Container(
-                        child: widget,
-                      )
+                widget ?? Container(), // Uses widget or empty container if no widget provided
               ],
             ),
           ),

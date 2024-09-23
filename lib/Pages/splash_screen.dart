@@ -16,6 +16,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../model/appversion.dart';
+import '../model/last_update_date.dart';
 import '../model/locationmodel.dart';
 import '../services/geofencing.dart';
 import '../widgets/geo_utils.dart'; // Import http package for network requests
@@ -51,6 +53,7 @@ class _SplashScreenState extends State<SplashScreen> {
       // No internet, proceed to insert the super user (it doesn't require internet)
       _insertSuperUser().then((_){
         progress.value = 1.0;
+        _insertVersion();
         Timer(const Duration(seconds: 1), () => Get.off(() => AuthCheck(service: widget.service)));
         Fluttertoast.showToast(
           msg:
@@ -73,6 +76,8 @@ class _SplashScreenState extends State<SplashScreen> {
     _insertSuperUser().then((_) {
       progress.value = 0.5;
       try {
+        _insertVersion();
+        fetchLastUpdateDateAndInsertIntoIsar(IsarService());
         _syncCompleteData().then((_) {
           progress.value = 1.0;
           Timer(const Duration(seconds: 1), () => Get.off(() => AuthCheck(service: widget.service)));
@@ -134,8 +139,14 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Colors.black12,
               ),
             )),
+            SizedBox(height: screenHeight * 0.02),
+            Text("Attendance v1.5 ",
+                style: TextStyle(
+                    color: const Color.fromARGB(255, 97, 9, 9),
+                    fontSize: screenWidth * 0.05,
+                    fontWeight: FontWeight.bold)),
             SizedBox(height: screenHeight * 0.05),
-            Text("Attendance v1.3 ",
+            Text("2024-09-17",
                 style: TextStyle(
                     color: const Color.fromARGB(255, 97, 9, 9),
                     fontSize: screenWidth * 0.05,
@@ -182,9 +193,12 @@ class _SplashScreenState extends State<SplashScreen> {
       // The try block first of all saves the data in the google sheet for the visualization and then on the firebase database as an extra backup database  before changing the sync status on Mobile App to "Synced"
       //Query the firebase and get the records having updated records
       final bioData = await widget.service.getBioInfoWithFirebaseAuth();
+      List<BioModel> getAttendanceForBio =
+      await widget.service.getBioInfoWithUserBio();
+
       QuerySnapshot snap = await FirebaseFirestore.instance
           .collection("Staff")
-          .where("id", isEqualTo: bioData?.firebaseAuthId)
+          .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
           .get();
 
       List<AttendanceModel> getAttendanceForPartialUnSynced =
@@ -194,100 +208,134 @@ class _SplashScreenState extends State<SplashScreen> {
         //Iterate through each queried loop
         for (var unSyncedAttend in getAttendanceForPartialUnSynced)
           {
-            await _updateGoogleSheet(
-                bioData?.state ?? '',
-                bioData?.project ?? '',
-                bioData?.firstName ?? '',
-                bioData?.lastName ?? '',
-                bioData?.designation ?? '',
-                bioData?.department ?? '',
-                bioData?.location ?? '',
-                bioData?.staffCategory ?? '',
-                bioData?.mobile ?? '',
-                unSyncedAttend.date.toString(),
-                bioData?.emailAddress ?? '',
-                unSyncedAttend.clockIn.toString(),
-                unSyncedAttend.clockInLatitude.toString(),
-                unSyncedAttend.clockInLongitude.toString(),
-                unSyncedAttend.clockInLocation.toString(),
-                unSyncedAttend.clockOut.toString(),
-                unSyncedAttend.clockOutLatitude.toString(),
-                unSyncedAttend.clockOutLongitude.toString(),
-                unSyncedAttend.clockOutLocation.toString(),
-                unSyncedAttend.durationWorked.toString(),
-                unSyncedAttend.noOfHours.toString(),
-                unSyncedAttend.comments.toString()
-            )
-                .then((value) async {
-              await FirebaseFirestore.instance
-                  .collection("Staff")
-                  .doc(snap.docs[0].id)
-                  .collection("Record")
-                  .doc(unSyncedAttend.date)
-                  .set({
-                "Offline_DB_id": unSyncedAttend.id,
-                'clockIn': unSyncedAttend.clockIn,
-                'clockOut': unSyncedAttend.clockOut,
-                'clockInLocation': unSyncedAttend.clockInLocation,
-                'clockOutLocation': unSyncedAttend.clockOutLocation,
-                'date': unSyncedAttend.date,
-                'isSynced': true,
-                'clockInLatitude': unSyncedAttend.clockInLatitude,
-                'clockInLongitude': unSyncedAttend.clockInLongitude,
-                'clockOutLatitude': unSyncedAttend.clockOutLatitude,
-                'clockOutLongitude': unSyncedAttend.clockOutLongitude,
-                'voided': unSyncedAttend.voided,
-                'isUpdated': unSyncedAttend.isUpdated,
-                'noOfHours': unSyncedAttend.noOfHours,
-                'month': unSyncedAttend.month,
-                'durationWorked': unSyncedAttend.durationWorked,
-                'offDay': unSyncedAttend.offDay,
-                'comments':unSyncedAttend.comments
-              }).then((value) => IsarService().updateSyncStatus(
-                  unSyncedAttend.id, AttendanceModel(), true));
-            })
+          await FirebaseFirestore.instance
+              .collection("Staff")
+          .doc(snap.docs[0].id)
+          .collection("Record")
+          .doc(unSyncedAttend.date)
+          .set({
+        "Offline_DB_id": unSyncedAttend.id,
+        'clockIn': unSyncedAttend.clockIn,
+        'clockOut': unSyncedAttend.clockOut,
+        'clockInLocation': unSyncedAttend.clockInLocation,
+        'clockOutLocation': unSyncedAttend.clockOutLocation,
+        'date': unSyncedAttend.date,
+        'isSynced': true,
+        'clockInLatitude': unSyncedAttend.clockInLatitude,
+        'clockInLongitude': unSyncedAttend.clockInLongitude,
+        'clockOutLatitude': unSyncedAttend.clockOutLatitude,
+        'clockOutLongitude': unSyncedAttend.clockOutLongitude,
+        'voided': unSyncedAttend.voided,
+        'isUpdated': unSyncedAttend.isUpdated,
+        'noOfHours': unSyncedAttend.noOfHours,
+        'month': unSyncedAttend.month,
+        'durationWorked': unSyncedAttend.durationWorked,
+        'offDay': unSyncedAttend.offDay,
+        'comments':unSyncedAttend.comments
+      }).then((value) => IsarService().updateSyncStatus(
+          unSyncedAttend.id, AttendanceModel(), true)).then((value) {
+        Fluttertoast.showToast(
+          msg: "Server Updating!",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        widget.service.updateSyncStatus(
+            unSyncedAttend.id, AttendanceModel(), true); // Update Isar
+      })
+          .catchError((error) {
+        Fluttertoast.showToast(
+          msg: "Server Write Error: ${error.toString()}",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      })
+            // await _updateGoogleSheet(
+            //     bioData?.state ?? '',
+            //     bioData?.project ?? '',
+            //     bioData?.firstName ?? '',
+            //     bioData?.lastName ?? '',
+            //     bioData?.designation ?? '',
+            //     bioData?.department ?? '',
+            //     bioData?.location ?? '',
+            //     bioData?.staffCategory ?? '',
+            //     bioData?.mobile ?? '',
+            //     unSyncedAttend.date.toString(),
+            //     bioData?.emailAddress ?? '',
+            //     unSyncedAttend.clockIn.toString(),
+            //     unSyncedAttend.clockInLatitude.toString(),
+            //     unSyncedAttend.clockInLongitude.toString(),
+            //     unSyncedAttend.clockInLocation.toString(),
+            //     unSyncedAttend.clockOut.toString(),
+            //     unSyncedAttend.clockOutLatitude.toString(),
+            //     unSyncedAttend.clockOutLongitude.toString(),
+            //     unSyncedAttend.clockOutLocation.toString(),
+            //     unSyncedAttend.durationWorked.toString(),
+            //     unSyncedAttend.noOfHours.toString(),
+            //     unSyncedAttend.comments.toString()
+            // )
+            //     .then((value) async {
+            //
+            // })
+
           }
       });
     } catch (e) {
       // The catch block executes incase firebase database encounters an error thereby only saving the data in the google sheet for the analytics before chahing the sync status on Mobile App to "Synced"
       log("Sync Error Skipping firebase DB = ${e.toString()}");
-      List<AttendanceModel> getAttendanceForPartialUnSynced =
-      await IsarService().getAttendanceForPartialUnSynced();
-
-      final bioData = await widget.service.getBioInfoWithFirebaseAuth();
+      // Fluttertoast.showToast(
+      //   msg: "Server Write Error: ${e.toString()}",
+      //   toastLength: Toast.LENGTH_SHORT,
+      //   backgroundColor: Colors.black54,
+      //   gravity: ToastGravity.BOTTOM,
+      //   timeInSecForIosWeb: 1,
+      //   textColor: Colors.white,
+      //   fontSize: 16.0,
+      // );
+      // List<AttendanceModel> getAttendanceForPartialUnSynced =
+      // await IsarService().getAttendanceForPartialUnSynced();
+      //
+      // final bioData = await widget.service.getBioInfoWithFirebaseAuth();
 
       //await _updateEmptyClockInAndOutLocation().then((value) async => {
       //Iterate through each queried loop
-      for (var unSyncedAttend in getAttendanceForPartialUnSynced) {
-        await _updateGoogleSheet(
-            bioData?.state ?? '',
-            bioData?.project ?? '',
-            bioData?.firstName ?? '',
-            bioData?.lastName ?? '',
-            bioData?.designation ?? '',
-            bioData?.department ?? '',
-            bioData?.location ?? '',
-            bioData?.staffCategory ?? '',
-            bioData?.mobile ?? '',
-            unSyncedAttend.date.toString(),
-            bioData?.emailAddress ?? '',
-            unSyncedAttend.clockIn.toString(),
-            unSyncedAttend.clockInLatitude.toString(),
-            unSyncedAttend.clockInLongitude.toString(),
-            unSyncedAttend.clockInLocation.toString(),
-            unSyncedAttend.clockOut.toString(),
-            unSyncedAttend.clockOutLatitude.toString(),
-            unSyncedAttend.clockOutLongitude.toString(),
-            unSyncedAttend.clockOutLocation.toString(),
-            unSyncedAttend.durationWorked.toString(),
-            unSyncedAttend.noOfHours.toString(),
-            unSyncedAttend.comments.toString()
-        )
-            .then((value) async {
-          IsarService()
-              .updateSyncStatus(unSyncedAttend.id, AttendanceModel(), true);
-        });
-      }
+      // for (var unSyncedAttend in getAttendanceForPartialUnSynced) {
+      //   await _updateGoogleSheet(
+      //       bioData?.state ?? '',
+      //       bioData?.project ?? '',
+      //       bioData?.firstName ?? '',
+      //       bioData?.lastName ?? '',
+      //       bioData?.designation ?? '',
+      //       bioData?.department ?? '',
+      //       bioData?.location ?? '',
+      //       bioData?.staffCategory ?? '',
+      //       bioData?.mobile ?? '',
+      //       unSyncedAttend.date.toString(),
+      //       bioData?.emailAddress ?? '',
+      //       unSyncedAttend.clockIn.toString(),
+      //       unSyncedAttend.clockInLatitude.toString(),
+      //       unSyncedAttend.clockInLongitude.toString(),
+      //       unSyncedAttend.clockInLocation.toString(),
+      //       unSyncedAttend.clockOut.toString(),
+      //       unSyncedAttend.clockOutLatitude.toString(),
+      //       unSyncedAttend.clockOutLongitude.toString(),
+      //       unSyncedAttend.clockOutLocation.toString(),
+      //       unSyncedAttend.durationWorked.toString(),
+      //       unSyncedAttend.noOfHours.toString(),
+      //       unSyncedAttend.comments.toString()
+      //   )
+      //       .then((value) async {
+      //     IsarService()
+      //         .updateSyncStatus(unSyncedAttend.id, AttendanceModel(), true);
+      //   });
+      // }
       // });
     }
   }
@@ -314,6 +362,20 @@ class _SplashScreenState extends State<SplashScreen> {
       await widget.service.saveBioData(bioData);
     }
   }
+
+  Future<void> _insertVersion() async {
+    final getAppVersion = await widget.service.getAppVersionInfo();
+
+    if (getAppVersion.length == 0) {
+      final appVersion = AppVersionModel()
+        ..appVersion = appVersionConstant
+      ..latestVersion = ifLatestVersion;
+
+      await widget.service.saveAppVersionData(appVersion);
+    }
+  }
+
+
 
   //This method updates all empty Clock-In Location Using the Latitude and Longitude during clock-out
   Future<void> _updateEmptyClockInLocation() async {
@@ -375,6 +437,43 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
 
+  Future<void> fetchLastUpdateDateAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+
+    try {
+      final lastUpdateDateDoc = await firestore
+          .collection('LastUpdateDate')
+          .doc("LastUpdateDate")
+          .get();
+
+      if (lastUpdateDateDoc.exists) {
+        // Get the data from the document
+        final data = lastUpdateDateDoc.data();
+
+        if (data != null && data.containsKey('LastUpdateDate')) {
+          // Safely extract the timestamp and convert to DateTime
+          final timestamp = data['LastUpdateDate'] as Timestamp;
+          final lastUpdate = timestamp.toDate();
+
+          print("LastUpdateDate ====${lastUpdate}");
+
+          final lastUpdateSave = LastUpdateDateModel()
+            ..lastUpdateDate = lastUpdate;
+
+          await service.saveLastUpdateDate(lastUpdateSave);
+          // await service.updateAppVersion(1,AppVersionModel(),lastUpdate);
+          print("Last update date saved: $lastUpdate");
+        } else {
+          print("Document does not contain 'lastUpdate' field.");
+        }
+      } else {
+        print("Document 'LastUpdateDate' not found.");
+      }
+    } catch (e) {
+      print("Error fetching last update date: $e");
+      // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  }
 
 //This method updates all empty Clock-Out Location Using the Latitude and Longitude during clock-out
   Future<void> _updateEmptyClockOutLocation() async {

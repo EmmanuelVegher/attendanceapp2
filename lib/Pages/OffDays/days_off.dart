@@ -54,7 +54,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
   Get.put(ClockAttendanceController(IsarService()));
 
   DateTime _selectedDate = DateTime.now();
-  String _endTime = "11:59 PM";
+  String _endTime = "05:00 PM";
   String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
   String _reasons = "";
   //Create String Location
@@ -70,29 +70,9 @@ class _DaysOffPageState extends State<DaysOffPage> {
     // TODO: implement initState
     super.initState();
     _getUserDetail();
-    // _startLocationService().then((value){
-    //   //_startGeofencing();
-    //   _geofencingIsolate1();
-    // });
 
-    //_startGeofencing();
-
-    //getCurrentDateRecordCount();
   }
 
-  // // Start LOcation Service
-  // Future<void> _startLocationService() async {
-  //
-  //   LocationService locationService = LocationService();
-  //
-  //   Position? position = await locationService.getCurrentPosition();
-  //   if (position != null) {
-  //     setState(() {
-  //       UserModel.long = position.longitude;
-  //       UserModel.lat = position.latitude;
-  //     });
-  //   }
-  // }
 
   void _getUserDetail() async {
     final userDetail = await IsarService().getBioInfoWithFirebaseAuth();
@@ -101,236 +81,30 @@ class _DaysOffPageState extends State<DaysOffPage> {
     });
   }
 
-  List<String> reasonsForDayOff = [
-    "Holiday",
-    "Annual Leave",
-    "Sick Leave",
-    "Other Leaves",
-    "Absent",
-    "Travel",
-    "Remote Working",
-    "Security Crisis"
-  ];
+  Future<List<DropdownMenuItem<String>>> _fetchReasonsForDaysOffFromIsar() async {
+    // Query Isar database for designations based on the selected department
+    List<String?> reasonsForDaysOff = await IsarService().getReasonsForDaysOffFromIsar();
+
+    // Convert the designations list to DropdownMenuItem list
+    return reasonsForDaysOff.map((reasonsForDaysOff) => DropdownMenuItem<String>(
+      value: reasonsForDaysOff,
+      child: Text(reasonsForDaysOff!),
+    )).toList();
+  }
+
+  // List<String> reasonsForDayOff = [
+  //   "Holiday",
+  //   "Annual Leave",
+  //   "Sick Leave",
+  //   "Other Leaves",
+  //   "Absent",
+  //   "Travel",
+  //   "Remote Working",
+  //   "Security Crisis",
+  //   "Sit at Home",
+  //   "Trainings"
+  // ];
   int _selectedColor = 0;
-  // Future<int> getCurrentDateRecordCount() async {
-  //   final attendanceLast = await widget.service.getAttendanceForSpecificDate(
-  //       DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
-  //   //print("attendanceLastLength ===${attendanceLast.length}");
-
-  //   return attendanceLast.length;
-  // }
-  //
-
-  //
-  // void _startGeofencing() async {
-  //   List<GeofenceModel> offices = getGeofenceOffices();
-  //
-  //   // Create a ReceivePort to receive messages from the isolate.
-  //   final ReceivePort receivePort = ReceivePort();
-  //
-  //   // Spawn the isolate and send the ReceivePort to it.
-  //   Isolate isolate = await Isolate.spawn(_geofencingIsolate, receivePort.sendPort);
-  //
-  //   // Receive the offices data from the main isolate.
-  //   receivePort.listen((dynamic message) {
-  //     if (message is List<GeofenceModel>) {
-  //       // The isolate received the offices data.
-  //       // Perform geofencing logic here.
-  //       // Compare the location with geofence data.
-  //       // Send results back to the main isolate if needed.
-  //       // For example: message.send(result);
-  //     }
-  //   });
-  //
-  //   // Send the offices data to the isolate.
-  //   isolate.send(offices);
-  // }
-  //
-  // static void _geofencingIsolate(SendPort mainSendPort) {
-  //   // Receive the ReceivePort from the main isolate.
-  //   final ReceivePort receivePort = ReceivePort();
-  //   mainSendPort.send(receivePort.sendPort);
-  //
-  //   // Receive the offices data from the main isolate.
-  //   receivePort.listen((dynamic message) {
-  //     if (message is List<GeofenceModel>) {
-  //       // The isolate received the offices data.
-  //       // Perform geofencing logic here.
-  //       // Compare the location with geofence data.
-  //       // Send results back to the main isolate if needed.
-  //       mainSendPort.send(message);
-  //     }
-  //   });
-  // }
-
-  // _startGeofencing() async {
-  //   // Implement your geofencing logic here
-  //   // Get the current location periodically and check if it is inside the geofence
-  //
-  //   // Example: Get the current location every 10 seconds
-  //   // const Duration interval = Duration(seconds: 10);
-  //   //Timer.periodic(interval, (Timer timer) async {
-  //   Position position = await Geolocator.getCurrentPosition(
-  //     desiredAccuracy: LocationAccuracy.best,
-  //   );
-  //
-  //   print(position);
-  //   if (lati == 0.0) {
-  //     setState(() {
-  //       lati = position.latitude;
-  //       print("Setlati======$lati");
-  //     });
-  //   }
-  //
-  //   if (longi == 0.0) {
-  //     setState(() {
-  //       longi = position.longitude;
-  //       print("Setlongi======$longi");
-  //     });
-  //   }
-  //
-  //   // Check if the current position is inside the geofence
-  //   List<GeofenceModel> offices = getGeofenceOffices();
-  //   for (GeofenceModel office in offices) {
-  //     // double distance = Geolocator.distanceBetween(
-  //     //   office.latitude,
-  //     //   office.longitude,
-  //     //   position.latitude,
-  //     //   position.longitude,
-  //     //
-  //     // );
-  //
-  //     double distance =
-  //         GeoUtils.haversine(lati, longi, office.latitude, office.longitude);
-  //     //double distance = GeoUtils.calculateDistance(position.latitude,position.longitude, office.latitude, office.longitude);
-  //
-  //     if (distance <= office.radius) {
-  //       // Device is inside the geofence, perform geofencing actions for this office
-  //       print('Entered office: ${office.name}');
-  //
-  //       setState(() {
-  //         location = office.name;
-  //         print("location data === ${location}");
-  //       });
-  //       break;
-  //     } else {
-  //       // _getLocation(lati,longi);
-  //       List<Placemark> placemark = await placemarkFromCoordinates(lati, longi);
-  //       setState(() {
-  //         location =
-  //             "${placemark[0].street},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
-  //         print(location);
-  //       });
-  //     }
-  //   }
-  //   print(location);
-  // }
-  //
-  // //A function to get location using geocoding
-  // Future<void> _getLocation(double latitude, double longitude) async {
-  //   List<Placemark> placemark =
-  //       await placemarkFromCoordinates(latitude, longitude);
-  //   setState(() {
-  //     location =
-  //         "${placemark[0].street},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
-  //     print(location);
-  //   });
-  // }
-  //
-  // List<GeofenceModel> getGeofenceOffices() {
-  //   // Implement this function to return a list of GeofenceModel objects for your offices
-  //   // Example:
-  //   List<GeofenceModel> offices = [
-  //     GeofenceModel(
-  //         name: 'Pengassan Estate, Phase One, Lokogoma',
-  //         latitude: 8.9574134,
-  //         longitude: 7.4721153,
-  //         radius: 400),
-  //     GeofenceModel(
-  //         name: 'Catholic Secretariat Of Nigeria,Abuja',
-  //         latitude: 9.0197734,
-  //         longitude: 7.4734655,
-  //         radius: 400),
-  //     GeofenceModel(
-  //         name: 'CARITAS Nigeria Office-Enugu',
-  //         latitude: 6.4524674,
-  //         longitude: 7.5218469,
-  //         radius: 150),
-  //     GeofenceModel(
-  //         name: 'Asata Poly Sub District',
-  //         latitude: 6.4427887,
-  //         longitude: 7.5005692,
-  //         radius: 150),
-  //     GeofenceModel(
-  //         name: 'Mother of Christ Specialist Hospital',
-  //         latitude: 6.4345147,
-  //         longitude: 7.4893711,
-  //         radius: 160),
-  //     GeofenceModel(
-  //         name: 'Eastern Nigeria Medical Centre,Enugu',
-  //         latitude: 6.4312265,
-  //         longitude: 7.4896357,
-  //         radius: 160),
-  //     GeofenceModel(
-  //         name: 'Uwani Cottage Hospital,Enugu',
-  //         latitude: 6.4292375,
-  //         longitude: 7.4917646,
-  //         radius: 130),
-  //     GeofenceModel(
-  //         name: 'The Good Shepherd Specialist Hospital Uwani,Enugu',
-  //         latitude: 6.4265629,
-  //         longitude: 7.486832,
-  //         radius: 230),
-  //     GeofenceModel(
-  //         name: 'Royal Hospital,Enugu',
-  //         latitude: 6.4427566,
-  //         longitude: 7.4799519,
-  //         radius: 140),
-  //
-  //     GeofenceModel(
-  //         name: "Ntasi Obi Ndi No'Afufu Catholic Hospital,Enugu",
-  //         latitude: 6.4771196,
-  //         longitude: 7.501012,
-  //         radius: 200),
-  //     GeofenceModel(
-  //         name: "Obolloafor Health Centre, Enugu",
-  //         latitude: 6.9146421,
-  //         longitude: 7.5194495,
-  //         radius: 100),
-  //     GeofenceModel(
-  //         name: "Daughters of Divine Love, Enugu",
-  //         latitude: 6.8022734,
-  //         longitude: 7.4634361,
-  //         radius: 130),
-  //     GeofenceModel(
-  //         name: "Faith Foundation Mission Hospital,Enugu",
-  //         latitude: 6.8509808,
-  //         longitude: 7.378974,
-  //         radius: 170),
-  //     GeofenceModel(
-  //         name: "Chima Hospital Ugbaike, Enugu",
-  //         latitude: 6.9626863,
-  //         longitude: 7.5048304,
-  //         radius: 100),
-  //     GeofenceModel(
-  //         name: "Nsukka Health center,Enugu",
-  //         latitude: 6.8550867,
-  //         longitude: 7.3885888,
-  //         radius: 100),
-  //     GeofenceModel(
-  //         name: "Awgu General Hospital,Enugu",
-  //         latitude: 6.082718,
-  //         longitude: 7.4779434,
-  //         radius: 200),
-  //     GeofenceModel(
-  //         name: "Annunciation Specialist Hospital,Enugu",
-  //         latitude: 6.4678748,
-  //         longitude: 7.5899575,
-  //         radius: 160),
-  //     // Add more office coordinates
-  //   ];
-  //   return offices;
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -387,19 +161,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                     fontSize: screenWidth / 15,
                     fontWeight: FontWeight.bold),
               ),
-              // Obx(
-              //       () => Container(
-              //     alignment: Alignment.centerLeft,
-              //     child: Text(
-              //       "${controller.firstName.value.toString().toUpperCase()} ${controller.lastName.value.toString().toUpperCase()}",
-              //       style: TextStyle(
-              //         color: Colors.black54,
-              //         fontFamily: "NexaBold",
-              //         fontSize: screenWidth / 18,
-              //       ),
-              //     ),
-              //   ),
-              // ),
+
               SizedBox(height: 10), // Spacing between status and coordinates
               Obx(() => Text(
                 "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
@@ -437,44 +199,125 @@ class _DaysOffPageState extends State<DaysOffPage> {
                   ),
                 ),
               ),
-              MyInputField(
-                title: "Reasons For Day off",
-                hint: _reasons,
-                widget: DropdownButton(
-                  icon: Icon(
-                    Icons.keyboard_arrow_down,
-                    color: Colors.grey,
-                  ),
-                  iconSize: 32,
-                  elevation: 4,
-                  style: TextStyle(
-                      color: Get.isDarkMode ? Colors.white : Colors.black,
-                      fontSize: screenWidth / 25,
-                      fontFamily: "NexaBold"),
-                  underline: Container(
-                    height: 0,
-                  ),
-                  items: reasonsForDayOff.map<DropdownMenuItem<String>>(
-                    (String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(
-                          value,
-                          style: TextStyle(
-                              color:
-                                  Get.isDarkMode ? Colors.white : Colors.black,
-                              fontSize: screenWidth / 25,
-                              fontFamily: "NexaBold"),
-                        ),
-                      );
-                    },
-                  ).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _reasons = newValue!;
-                    });
-                  },
-                ),
+              // MyInputField(
+              //   title: "Reasons For Day off",
+              //   hint: _reasons,
+              //   widget: DropdownButton(
+              //     icon: Icon(
+              //       Icons.keyboard_arrow_down,
+              //       color: Colors.grey,
+              //     ),
+              //     iconSize: 32,
+              //     elevation: 4,
+              //     style: TextStyle(
+              //         color: Get.isDarkMode ? Colors.white : Colors.black,
+              //         fontSize: screenWidth / 25,
+              //         fontFamily: "NexaBold"),
+              //     underline: Container(
+              //       height: 0,
+              //     ),
+              //     items: reasonsForDayOff.map<DropdownMenuItem<String>>(
+              //       (String value) {
+              //         return DropdownMenuItem<String>(
+              //           value: value,
+              //           child: Text(
+              //             value,
+              //             style: TextStyle(
+              //                 color:
+              //                     Get.isDarkMode ? Colors.white : Colors.black,
+              //                 fontSize: screenWidth / 25,
+              //                 fontFamily: "NexaBold"),
+              //           ),
+              //         );
+              //       },
+              //     ).toList(),
+              //     onChanged: (String? newValue) {
+              //       setState(() {
+              //         _reasons = newValue!;
+              //       });
+              //     },
+              //   ),
+              // ),
+              FutureBuilder<List<DropdownMenuItem<String>>>(
+                future: _fetchReasonsForDaysOffFromIsar(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+                    // Check if facilityStateName is in the list of dropdown values
+                    String? selectedReasons = snapshot.data!.any((item) => item.value == _reasons)
+                        ? _reasons
+                        : null;
+
+                    // If there's no valid state selected, set the first item as the default
+                    if (selectedReasons == null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        setState(() {
+                          //facilityStateName = snapshot.data!.first.value!;
+                          // facilityStateName = "Select your state";
+                        });
+                      });
+                    }
+
+                    return MyInputField(
+                      title: "Reasons For Days Off",
+                      hint: "",
+                      widget: Container(
+                        width: MediaQuery.of(context).size.width*0.81,
+                        //height: MediaQuery.of(context).size.height * 1,// Set your desired width
+                        //color:Colors.red,
+                        child: SizedBox(
+                            child:SizedBox(
+                                child:
+                                DropdownButtonFormField<String>(
+
+                                  decoration: InputDecoration(
+                                    iconColor:Colors.blue,
+                                    labelText: "",
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  value: selectedReasons,
+                                  icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                  dropdownColor: Colors.white,
+                                  elevation: 4,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16,
+                                    fontFamily: "NexaBold",
+                                  ),
+                                  items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                    value: item.value,
+                                    child: Container( // Wrap the Text inside the DropdownMenuItem
+                                      // width: MediaQuery.of(context).size.width * 0.66,
+                                      //color: Colors.pink,// Adjust this width as needed
+                                      child: Text(
+                                        (item.child as Text).data!,
+                                        softWrap: true,
+                                      ),
+                                    ),
+                                  )).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _reasons = value!;
+                                      //staffingCategory = value!;
+                                      //disableddropdown = false;
+                                    });
+                                  },
+                                  isExpanded: true,
+                                ))),
+                      ),
+                    );
+
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                },
               ),
               Row(
                 children: [
@@ -616,72 +459,6 @@ class _DaysOffPageState extends State<DaysOffPage> {
     );
   }
 
-  // _startGeofencing1(SendPort sendPort) async {
-  //   var locationName = "";
-  //   // Implement your geofencing logic here
-  //   // Get the current location periodically and check if it is inside the geofence
-  //
-  //   // Example: Get the current location every 10 seconds
-  //   // const Duration interval = Duration(seconds: 10);
-  //   //Timer.periodic(interval, (Timer timer) async {
-  //   Position position = await Geolocator.getCurrentPosition(
-  //     desiredAccuracy: LocationAccuracy.best,
-  //   );
-  //
-  //   print(position);
-  //   if (lati == 0.0) {
-  //     setState(() {
-  //       lati = position.latitude;
-  //       print("Setlati======$lati");
-  //     });
-  //   }
-  //
-  //   if (longi == 0.0) {
-  //     setState(() {
-  //       longi = position.longitude;
-  //       print("Setlongi======$longi");
-  //     });
-  //   }
-  //
-  //   // Check if the current position is inside the geofence
-  //   List<GeofenceModel> offices = getGeofenceOffices();
-  //   for (GeofenceModel office in offices) {
-  //     // double distance = Geolocator.distanceBetween(
-  //     //   office.latitude,
-  //     //   office.longitude,
-  //     //   position.latitude,
-  //     //   position.longitude,
-  //     //
-  //     // );
-  //
-  //     double distance =
-  //         GeoUtils.haversine(lati, longi, office.latitude, office.longitude);
-  //     //double distance = GeoUtils.calculateDistance(position.latitude,position.longitude, office.latitude, office.longitude);
-  //
-  //     if (distance <= office.radius) {
-  //       // Device is inside the geofence, perform geofencing actions for this office
-  //       print('Entered office: ${office.name}');
-  //       locationName = office.name;
-  //       // setState(() {
-  //       //   locationName = office.name;
-  //       //   print("location data === ${locationName}");
-  //       // });
-  //       break;
-  //     } else {
-  //       locationName = _getLocation(lati, longi) as String;
-  //     }
-  //   }
-  //   sendPort.send(locationName);
-  // }
-  //
-  // _geofencingIsolate1() async {
-  //   final receivePort = ReceivePort();
-  //   //Create the Isolate
-  //   await Isolate.spawn(_startGeofencing1, receivePort.sendPort);
-  //   receivePort.listen((locationName) {
-  //     debugPrint('Result 2 : $locationName');
-  //   });
-  // }
 
   _validateData() {
     if (_reasons != "") {
@@ -770,32 +547,75 @@ class _DaysOffPageState extends State<DaysOffPage> {
     }
   }
 
+
+
+  // _getTimeFromUser({required bool isStartTime, required void Function(VoidCallback fn) setState}) async {
+  //   var pickedTime = await _showTimePicker();
+  //   if (pickedTime == null) {
+  //     print("Time Canceled");
+  //   } else {
+  //     // Format the time in 12-hour AM/PM format
+  //     String _formattedTime = pickedTime.format(context);
+  //
+  //     if (isStartTime) {
+  //       setState(() {
+  //         _startTime = _formattedTime;
+  //       });
+  //     } else {
+  //       setState(() {
+  //         _endTime = _formattedTime;
+  //       });
+  //     }
+  //   }
+  // }
+
   _getTimeFromUser({required bool isStartTime, required void Function(VoidCallback fn) setState}) async {
     var pickedTime = await _showTimePicker();
-    String _formatedTime = pickedTime.format(context);
     if (pickedTime == null) {
       print("Time Canceled");
-    } else if (isStartTime == true) {
-      setState(() {
-        _startTime = _formatedTime;
-      });
-    } else if (isStartTime == false) {
-      setState(() {
-        _endTime = _formatedTime;
-      });
+    } else {
+      // Format the time in 12-hour AM/PM format
+      String _formattedTime = DateFormat('hh:mm a').format(
+        DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+          pickedTime.hour,
+          pickedTime.minute,
+        ),
+      );
+
+      if (isStartTime) {
+        setState(() {
+          _startTime = _formattedTime;
+        });
+      } else {
+        setState(() {
+          _endTime = _formattedTime;
+        });
+      }
     }
   }
 
-  _showTimePicker() {
-    return showTimePicker(
-        initialEntryMode: TimePickerEntryMode.input,
-        context: context,
-        initialTime: TimeOfDay(
-          //_startTime --> 12:00 AM
-          hour: int.parse(_startTime.split(":")[0]),
-          minute: int.parse(_startTime.split(":")[1].split(" ")[0]),
-        ));
+// Helper function to display the time picker
+  Future<TimeOfDay?> _showTimePicker() async {
+    return await showTimePicker(
+      context: context,
+     initialTime: TimeOfDay.now(),
+     //  initialTime: TimeOfDay(
+     //      //_startTime --> 12:00 AM
+     //      hour: int.parse(_startTime.split(":")[0]),
+     //      minute: int.parse(_startTime.split(":")[1].split(" ")[0]),
+     //    ),
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false), // Set to false to use 12-hour format
+          child: child!,
+        );
+      },
+    );
   }
+
 
   _diffHoursWorked(String clockInTime, String clockOutTime) {
     var format = DateFormat("h:mm a");

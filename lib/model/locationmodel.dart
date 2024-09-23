@@ -9,6 +9,7 @@ class LocationModel {
   String? state;
   @Index(unique: true) // you can also use id = null to auto increment
   String? locationName;
+  String? category;
   double? latitude;
   double? longitude;
   double? radius;
@@ -17,6 +18,7 @@ class LocationModel {
   LocationModel(
       {this.state,
       this.locationName,
+        this.category,
       this.latitude,
       this.longitude,
       this.radius});
@@ -25,6 +27,7 @@ class LocationModel {
     return LocationModel(
       state: json['state'],
       locationName: json['locationName'],
+        category: json['category'],
       latitude: json['latitude'],
       longitude: json['longitude'],
       radius: json['radius']
@@ -36,6 +39,7 @@ class LocationModel {
       "id": id,
       'state': state,
       'locationName': locationName,
+      'category':category,
       'latitude': latitude,
       'longitude': longitude,
       'radius': radius

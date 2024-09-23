@@ -11,3 +11,5 @@ String project = "CARITAS Nigeria";
 String staffCategory = "Team Lead";
 String state = "Abuja";
 var firebaseAuthId = null;
+String appVersionConstant = "Version 1.5";
+bool ifLatestVersion = true;

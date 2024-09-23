@@ -7,6 +7,7 @@ import 'package:attendanceapp/model/attendancemodel.dart';
 // import 'package:attendanceapp/model/user_model.dart';
 import 'package:attendanceapp/services/isar_service.dart';
 import 'package:attendanceapp/widgets/drawer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:attendanceapp/widgets/progress_dialog.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:connectivity_plus/connectivity_plus.dart';
@@ -14,6 +15,7 @@ import 'package:attendanceapp/widgets/drawer.dart';
 // import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoding/geocoding.dart';
 // import 'package:geocoding/geocoding.dart';
 // import 'package:get_storage/get_storage.dart';
 // import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -21,6 +23,12 @@ import 'package:intl/intl.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../model/bio_model.dart';
+import '../../model/locationmodel.dart';
+import '../../model/track_location_model.dart';
+import '../../services/geofencing.dart';
+import '../../widgets/constants.dart';
+import '../../widgets/geo_utils.dart';
 import '../OffDays/update_attendance.dart';
 import 'attendance_home.dart';
 
@@ -315,7 +323,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   if (snapshot.hasData) {
                     final attendance = snapshot.data;
                     if (attendance!.isEmpty) {
-                      return const Center(child: Text('No Attendance found'));
+                      return const Center(child: Text('No Attendance found for the current month'));
                     }
                     return ListView.builder(
                       itemCount: attendance.length,
@@ -380,11 +388,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                               crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                               children: [
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
                                                 Text(
                                                   attendance[index].date.toString(),
                                                   style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 26,
+                                                    fontSize: screenWidth / 30,
                                                     color: Colors.white,
                                                       fontWeight:FontWeight.bold
                                                   ),
@@ -426,6 +437,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                         255, 252, 252, 252),
                                                   ),
                                                 ),
+                                                SizedBox(height: 10),
+                                                IconButton(
+                                                  icon: Icon(Icons.refresh, color: Colors.white, size: screenWidth / 18),
+                                                  onPressed: () {
+                                                    // Add your re-sync logic here
+                                                    syncCompleteData(attendance[index].id);
+                                                  },
+                                                ),
+
                                               ]),
                                         ),
 
@@ -642,7 +662,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       },
                     );
                   } else {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: Text('No Attendance ever recorded yet.Navigate to the Attendance page in the center tab and clock-in'));
                   }
                 },
               ),
@@ -680,6 +700,327 @@ class _CalendarScreenState extends State<CalendarScreen> {
         );
       },
     );
+  }
+  Future<void> _updateEmptyClockInAndOutLocation() async {
+    await _updateEmptyClockInLocation().then((value) {
+      _updateEmptyClockOutLocation();
+    });
+  }
+  //This method updates all empty Clock-In Location Using the Latitude and Longitude during clock-out
+  Future<void> _updateEmptyClockInLocation() async {
+    //First, query the list of all records with empty Clock-In Location
+    List<AttendanceModel> attendanceForEmptyLocation =
+    await widget.service.getAttendanceForEmptyClockInLocation();
+    try {
+      for (var attend in attendanceForEmptyLocation) {
+        // Create a variable
+        var location1 = "";
+        bool isInsideAnyGeofence = false;
+        //Input the queried latitude and Lngitude, but also assign 0.0 to any null Latitude and Longitude
+        List<Placemark> placemark = await placemarkFromCoordinates(
+            attend.clockInLatitude!, attend.clockInLongitude!);
+        List<LocationModel> isarLocations =
+        await  widget.service.getLocationsByState(placemark[0].administrativeArea);
+        // Convert Isar locations to GeofenceModel
+        List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+          name: location.locationName!, // Use 'locationName'
+          latitude: location.latitude ?? 0.0,
+          longitude: location.longitude ?? 0.0,
+          radius: location.radius?.toDouble() ?? 0.0,
+        )).toList();
+
+        print("Officessss == ${offices}");
+
+        isInsideAnyGeofence = false;
+        for (GeofenceModel office in offices) {
+          double distance = GeoUtils.haversine(
+              attend.clockInLatitude!, attend.clockInLongitude!, office.latitude, office.longitude);
+          if (distance <= office.radius) {
+            print('Entered office: ${office.name}');
+
+            location1 = office.name;
+            isInsideAnyGeofence = true;
+            break;
+          }
+        }
+
+        if (!isInsideAnyGeofence) {
+          List<Placemark> placemark = await placemarkFromCoordinates(
+              attend.clockInLatitude!, attend.clockInLongitude!);
+
+          location1 =
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+          print("Location from map === ${location1}");
+        }
+
+
+        //Update all missing Clock In location
+        await widget.service.updateEmptyClockInLocation(
+            attend.id, AttendanceModel(), location1);
+        //print(attend.clockInLatitude);
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+
+    //Iterate through each queried loop
+  }
+
+
+
+  Future<void> _updateEmptyClockOutLocation() async {
+    //First, query the list of all records with empty Clock-In Location
+    List<AttendanceModel> attendanceForEmptyLocation =
+    await widget.service.getAttendanceForEmptyClockOutLocation();
+
+    try {
+      for (var attend in attendanceForEmptyLocation) {
+        // Create a variable
+        var location2 = "";
+        bool isInsideAnyGeofence = false;
+        //Input the queried latitude and Lngitude, but also assign 0.0 to any null Latitude and Longitude
+        List<Placemark> placemark = await placemarkFromCoordinates(
+            attend.clockOutLatitude!, attend.clockOutLongitude!);
+        List<LocationModel> isarLocations =
+        await widget.service.getLocationsByState(placemark[0].administrativeArea);
+
+// Convert Isar locations to GeofenceModel
+        List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+          name: location.locationName!, // Use 'locationName'
+          latitude: location.latitude ?? 0.0,
+          longitude: location.longitude ?? 0.0,
+          radius: location.radius?.toDouble() ?? 0.0,
+        )).toList();
+
+        print("Officessss == ${offices}");
+
+        isInsideAnyGeofence = false;
+        for (GeofenceModel office in offices) {
+          double distance = GeoUtils.haversine(
+              attend.clockOutLatitude!, attend.clockOutLongitude!, office.latitude, office.longitude);
+          if (distance <= office.radius) {
+            print('Entered office: ${office.name}');
+
+            location2 = office.name;
+            isInsideAnyGeofence = true;
+            break;
+          }
+        }
+
+        if (!isInsideAnyGeofence) {
+          List<Placemark> placemark = await placemarkFromCoordinates(
+              attend.clockOutLatitude!, attend.clockOutLongitude!);
+
+          location2 =
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+          print("Location from map === ${location2}");
+        }
+
+        //Update all missing Clock In location
+        await widget.service.updateEmptyClockOutLocation(
+            attend.id, AttendanceModel(), location2);
+        //print(attend.clockInLatitude);
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+
+    //Iterate through each queried loop
+  }
+
+  // This Method updates all attendance that has a clock-out made. This is necessary for data validation and to ensure that folks sign-out appropraitely
+  syncCompleteData(int id) async {
+    try {
+      // The try block first of all saves the data in the google sheet for the visualization and then on the firebase database as an extra backup database  before chahing the sync status on Mobile App to "Synced"
+      //Query the firebase and get the records having updated records
+      List<BioModel> getAttendanceForBio =
+      await widget.service.getBioInfoWithUserBio();
+
+      QuerySnapshot snap = await FirebaseFirestore.instance
+          .collection("Staff")
+          .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
+          .get();
+
+      //print("firebaseAuthId == ${getAttendanceForBio[0].firebaseAuthId}");
+
+      List<AttendanceModel> getAttendanceForPartialUnSynced =
+      await widget.service.getAttendanceForId(id);
+
+      List<TrackLocationModel> getTracklocationForPartialUnSynced =
+      await widget.service.getTracklocationForPartialUnSynced();
+
+      for (var unSyncedTrackLocation in getTracklocationForPartialUnSynced){
+        log("Synching Tracked location by 12pm");
+        await FirebaseFirestore.instance
+            .collection("Staff")
+            .doc(snap.docs[0].id)
+            .collection("LocationBy12PM")
+            .doc(DateFormat('dd-MMMM-yyyy').format(unSyncedTrackLocation.timestamp!))
+            .set({
+          "latitudeBy12": unSyncedTrackLocation.latitude,
+          'longitudeBy12': unSyncedTrackLocation.longitude,
+          'Date': unSyncedTrackLocation.timestamp,
+          'locationName': unSyncedTrackLocation.locationName,
+        }).then((value){
+          widget.service.updateSyncStatusForTrackLocationBy12(
+              unSyncedTrackLocation.id, TrackLocationModel(), true);
+        });
+      }
+
+      await _updateEmptyClockInAndOutLocation().then((value) async => {
+        //Iterate through each queried loop
+        for (var unSyncedAttend in getAttendanceForPartialUnSynced)
+          {
+
+            await FirebaseFirestore.instance
+                .collection("Staff")
+                .doc(snap.docs[0].id)
+                .collection("Record")
+                .doc(unSyncedAttend.date)
+                .set({
+              "Offline_DB_id": unSyncedAttend.id,
+              'clockIn': unSyncedAttend.clockIn,
+              'clockOut': unSyncedAttend.clockOut,
+              'clockInLocation': unSyncedAttend.clockInLocation,
+              'clockOutLocation': unSyncedAttend.clockOutLocation,
+              'date': unSyncedAttend.date,
+              'isSynced': true,
+              'clockInLatitude': unSyncedAttend.clockInLatitude,
+              'clockInLongitude': unSyncedAttend.clockInLongitude,
+              'clockOutLatitude': unSyncedAttend.clockOutLatitude,
+              'clockOutLongitude': unSyncedAttend.clockOutLongitude,
+              'voided': unSyncedAttend.voided,
+              'isUpdated': unSyncedAttend.isUpdated,
+              'noOfHours': unSyncedAttend.noOfHours,
+              'month': unSyncedAttend.month,
+              'durationWorked': unSyncedAttend.durationWorked,
+              'offDay': unSyncedAttend.offDay,
+              'comments':unSyncedAttend.comments
+            }).then((value) {
+              Fluttertoast.showToast(
+                msg: "Syncing to Server...",
+                toastLength: Toast.LENGTH_SHORT,
+                backgroundColor: Colors.black54,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+              widget.service.updateSyncStatus(
+                  unSyncedAttend.id, AttendanceModel(), true).then((_){
+                Fluttertoast.showToast(
+                  msg: "Syncing Completed...",
+                  toastLength: Toast.LENGTH_SHORT,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              }); // Update Isar
+
+
+
+            })
+                .catchError((error) {
+              Fluttertoast.showToast(
+                msg: "Server Write Error: ${error.toString()}",
+                toastLength: Toast.LENGTH_SHORT,
+                backgroundColor: Colors.black54,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+            })
+            // ----------------
+            // await _updateGoogleSheet(
+            //         state,
+            //         project,
+            //         firstName,
+            //         lastName,
+            //         designation,
+            //         department,
+            //         location,
+            //         staffCategory,
+            //         mobile,
+            //         unSyncedAttend.date.toString(),
+            //         emailAddress,
+            //         unSyncedAttend.clockIn.toString(),
+            //         unSyncedAttend.clockInLatitude.toString(),
+            //         unSyncedAttend.clockInLongitude.toString(),
+            //         unSyncedAttend.clockInLocation.toString(),
+            //         unSyncedAttend.clockOut.toString(),
+            //         unSyncedAttend.clockOutLatitude.toString(),
+            //         unSyncedAttend.clockOutLongitude.toString(),
+            //         unSyncedAttend.clockOutLocation.toString(),
+            //         unSyncedAttend.durationWorked.toString(),
+            //         unSyncedAttend.noOfHours.toString(),
+            //     unSyncedAttend.comments.toString()
+            // )
+            //      .then((value) async {
+            //
+            // })
+
+            // ---------------
+          }
+      });
+
+
+
+
+    } catch (e) {
+      // The catch block executes incase firebase database encounters an error thereby only saving the data in the google sheet for the analytics before chahing the sync status on Mobile App to "Synced"
+      log("Sync Error Skipping firebase DB = ${e.toString()}");
+      // List<AttendanceModel> getAttendanceForPartialUnSynced =
+      //     await widget.service.getAttendanceForPartialUnSynced();
+      Fluttertoast.showToast(
+        msg: "Sync Error: ${e.toString()}",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
+
+      //await _updateEmptyClockInAndOutLocation().then((value) async => {
+      //Iterate through each queried loop
+      // for (var unSyncedAttend in getAttendanceForPartialUnSynced) {
+      //   await _updateGoogleSheet(
+      //           state,
+      //           project,
+      //           firstName,
+      //           lastName,
+      //           designation,
+      //           department,
+      //           location,
+      //           staffCategory,
+      //           mobile,
+      //           unSyncedAttend.date.toString(),
+      //           emailAddress,
+      //           unSyncedAttend.clockIn.toString(),
+      //           unSyncedAttend.clockInLatitude.toString(),
+      //           unSyncedAttend.clockInLongitude.toString(),
+      //           unSyncedAttend.clockInLocation.toString(),
+      //           unSyncedAttend.clockOut.toString(),
+      //           unSyncedAttend.clockOutLatitude.toString(),
+      //           unSyncedAttend.clockOutLongitude.toString(),
+      //           unSyncedAttend.clockOutLocation.toString(),
+      //           unSyncedAttend.durationWorked.toString(),
+      //           unSyncedAttend.noOfHours.toString(),
+      //           unSyncedAttend.comments.toString(),
+      //   )
+      //       .then((value) async {
+      //     widget.service
+      //         .updateSyncStatus(unSyncedAttend.id, AttendanceModel(), true);
+      //   });
+      // }
+      // });
+    }
   }
 
   _showDeleteConfirmationDialog(BuildContext context, int id) {

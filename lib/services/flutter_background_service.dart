@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
@@ -9,68 +10,67 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:isar/isar.dart';
+// Import a compatibility library for older devices if needed
+import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart'
+if (dart.library.html) 'package:flutter_local_notifications_web/flutter_local_notifications_web.dart' as impl;
+
 import '../model/attendancemodel.dart';
 import '../model/track_location_model.dart';
 import 'isar_service.dart';
 import 'location_tracking_service.dart';
 import 'notification_services.dart';
-import 'package:isar/isar.dart';
 
 Future<void> trackLocation() async {
-// Request location permission if needed
-bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-if (!serviceEnabled) {
-return Future.error('Location services are disabled.');
-}
+  // Request location permission if needed
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return Future.error('Location services are disabled.');
+  }
 
-LocationPermission permission = await Geolocator.checkPermission();
-if (permission == LocationPermission.denied) {
-permission = await Geolocator.requestPermission();
-if (permission == LocationPermission.denied) {
-return Future.error('Location permissions are denied');
-}
-}
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return Future.error('Location permissions are denied');
+    }
+  }
 
-if (permission == LocationPermission.deniedForever) {
-return Future.error(
-'Location permissions are permanently denied, we cannot request permissions.');
-}
+  if (permission == LocationPermission.deniedForever) {
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
 
-// Get current position
-Position position = await Geolocator.getCurrentPosition(
-desiredAccuracy: LocationAccuracy.high);
+  // Get current position
+  Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high);
 
-print("New Position LocationTrackingService ==== ${position}");
+  print("New Position LocationTrackingService ==== ${position}");
 
   try {
     final lastTimeStampBy12 = await IsarService().getLastLocationFor12();
-    //DateTime lastTimeStamp = lastTimeStampBy12 as DateTime;
 
-    print("Printed lastTimeStampBy12 == ${DateFormat('dd-MMMM-yyyy').format(lastTimeStampBy12!.timestamp!)}");
-
-    if (DateFormat('dd-MMMM-yyyy').format(lastTimeStampBy12!.timestamp!) != DateFormat('dd-MMMM-yyyy').format(DateTime.now())) {
-
-// Store in Isar Database
-// Assuming you have a model for location data and a method to save it in Isar
+    if (lastTimeStampBy12 != null &&
+        DateFormat('dd-MMMM-yyyy').format(lastTimeStampBy12.timestamp!) !=
+            DateFormat('dd-MMMM-yyyy').format(DateTime.now())) {
+      // Store in Isar Database
       final locationData = TrackLocationModel()
-        ..latitude= position.latitude
-        ..longitude= position.longitude
-        ..timestamp= DateTime.now()
+        ..latitude = position.latitude
+        ..longitude = position.longitude
+        ..timestamp = DateTime.now()
         ..isSynched = false
         ..locationName = "";
 
-
-
       await IsarService().saveLocationData(locationData);
-    }  else {
+    } else {
       print("Already Captured location by 12PM");
     }
   } catch (e) {
     log("Attendance clockInandOut Error ====== ${e.toString()}");
-
   }
-
 }
+
+
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -82,7 +82,8 @@ Future<void> initializeService() async {
     importance: Importance.high,
   );
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
 
   if (Platform.isIOS || Platform.isAndroid) {
     await flutterLocalNotificationsPlugin.initialize(
@@ -94,7 +95,8 @@ Future<void> initializeService() async {
   }
 
   await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+      .resolvePlatformSpecificImplementation<
+      AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
   await service.configure(
@@ -114,6 +116,7 @@ Future<void> initializeService() async {
     ),
   );
 }
+
 
 @pragma('vm:entry-point')
 Future<bool> onIosBackground(ServiceInstance service) async {
@@ -135,7 +138,8 @@ void onStart(ServiceInstance service) async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   await preferences.setString("hello", "world");
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
 
   if (service is AndroidServiceInstance) {
     service.on('setAsForeground').listen((event) {
@@ -1090,18 +1094,20 @@ void backgroundTaskIsolate(ServiceInstance service) async {
   notifyHelper.initializeNotification();
 
   // Schedule notifications only if it's a weekday
-  if (DateTime.now().weekday >= 1 && DateTime.now().weekday <= 5) {
-    notifyHelper.scheduleDailyNotifications(
-        1, 'Good Morning!', 'Have a productive day!', 8, 0);
-    notifyHelper.scheduleDailyNotifications(
-        2, 'Good Evening!', 'Time to unwind!', 17, 0);
+  if (DateTime.now().weekday >= DateTime.monday &&
+      DateTime.now().weekday <= DateTime.friday) {
+    // notifyHelper.scheduleDailyNotifications(
+    //     1, 'Good Morning!', 'Have a productive day!', 8, 0);
+    // notifyHelper.scheduleDailyNotifications(
+    //     2, 'Good Evening!', 'Time to unwind!', 17, 0);
   }
 
   Timer.periodic(const Duration(minutes: 1), (timer) async {
     final now = DateTime.now();
 
     // Check if it's a weekday (Monday - Friday)
-    if (now.weekday >= 1 && now.weekday <= 5) {
+    if (now.weekday >= DateTime.monday &&
+        now.weekday <= DateTime.friday) {
       if (now.hour == 12 && now.minute == 00) {
         LocationTrackingService.trackLocation();
       }
