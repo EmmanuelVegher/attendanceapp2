@@ -19,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import '../../model/appversion.dart';
+import '../../model/bio_model.dart';
 import '../../model/departmentmodel.dart';
 import '../../model/designationmodel.dart';
 import '../../model/last_update_date.dart';
@@ -27,6 +28,7 @@ import '../../model/projectmodel.dart';
 import '../../model/reasonfordaysoff.dart';
 import '../../model/staffcategory.dart';
 import '../../model/statemodel.dart';
+import '../../model/supervisor_model.dart';
 import '../../model/user_model.dart';
 import '../../services/location_services.dart';
 import '../../services/notification_services.dart';
@@ -777,6 +779,10 @@ class _UserDashBoardState extends State<UserDashBoard> {
   }
 
   _checkForUpdates() async {
+
+    try{}catch(e){}
+;
+
     Fluttertoast.showToast(
       msg: "Checking For updates..",
       toastLength: Toast.LENGTH_LONG,
@@ -786,37 +792,224 @@ class _UserDashBoardState extends State<UserDashBoard> {
       textColor: Colors.white,
       fontSize: 16.0,
     );
-    await IsarService().cleanLocationCollection().then((_) async {
-     await IsarService().cleanStateCollection().then((_) async {
-       await IsarService().cleanStaffCategoryCollection().then((_) async {
-         await IsarService().cleanReasonsForDayOffCollection().then((_) async {
-           await IsarService().cleanDesignationCollection().then((_) async {
-             await IsarService().cleanDepartmentCollection().then((_) async {
-               await IsarService().cleanLastUpdateDateCollection();
-               await IsarService().cleanProjectCollection();
-               fetchDataAndInsertIntoIsar();
-               fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
-               //fetchProjectAndInsertIntoIsar(IsarService());
-               fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
-               fetchStaffCategoryAndInsertIntoIsar(IsarService());
-               await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
-               await fetchProjectAndInsertIntoIsar(IsarService());
-               await fetchAppVersionAndInsertIntoIsar(IsarService());
-               Fluttertoast.showToast(
-                 msg: "Updates on Database Completed",
-                 toastLength: Toast.LENGTH_LONG,
-                 backgroundColor: Colors.black54,
-                 gravity: ToastGravity.BOTTOM,
-                 timeInSecForIosWeb: 1,
-                 textColor: Colors.white,
-                 fontSize: 16.0,
-               );
-             });
-           });
-         });
-       });
-     });
-    });
+
+
+
+    final firestore = FirebaseFirestore.instance;
+    List<LastUpdateDateModel> getlastUpdateDate =
+    await widget.service.getLastUpdateDate();
+
+    List<BioModel> getAttendanceForBio =
+    await IsarService().getBioInfoWithUserBio();
+
+    QuerySnapshot snap = await firestore
+        .collection("Staff")
+        .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
+        .get();
+
+    final lastUpdateDateDoc = await firestore
+        .collection('LastUpdateDate')
+        .doc('LastUpdateDate')
+        .get();
+
+    final lastUpdateDatebio = await firestore
+        .collection('Staff')
+        .doc(snap.docs[0].id)
+        .get();
+
+
+    if (lastUpdateDateDoc.exists) {
+      // Get the data from the document
+      final data = lastUpdateDateDoc.data();
+
+
+      if (data != null && data.containsKey('LastUpdateDate')) {
+        // Safely extract the timestamp and convert to DateTime
+        final timestamp = data['LastUpdateDate'] as Timestamp;
+        final LastUpdateDate = timestamp.toDate();
+
+        print("appVersionDate ====${LastUpdateDate}");
+
+        if (LastUpdateDate.isAfter(
+            getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
+          Fluttertoast.showToast(
+            msg: "Updating Local Database!",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          await IsarService().cleanLocationCollection().then((_) async {
+            await IsarService().cleanStateCollection().then((_) async {
+              await IsarService().cleanStaffCategoryCollection().then((_) async {
+                await IsarService().cleanReasonsForDayOffCollection().then((_) async {
+                  await IsarService().cleanDesignationCollection().then((_) async {
+                    await IsarService().cleanDepartmentCollection().then((_) async {
+                      await IsarService().cleanLastUpdateDateCollection().then((_) async {
+                        await IsarService().cleanProjectCollection().then((_) async {
+                          await IsarService().cleanSupervisorCollection().then((_) async {
+                            fetchDataAndInsertIntoIsar();
+                            fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
+                            fetchSupervisorAndInsertIntoIsar(IsarService());
+                            fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
+                            fetchStaffCategoryAndInsertIntoIsar(IsarService());
+                            await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
+                            await fetchProjectAndInsertIntoIsar(IsarService());
+                            await fetchAppVersionAndInsertIntoIsar(IsarService());
+                            Fluttertoast.showToast(
+                              msg: "Updates on Database Completed",
+                              toastLength: Toast.LENGTH_LONG,
+                              backgroundColor: Colors.black54,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+          Fluttertoast.showToast(
+            msg: "Updating Local Database Completed!",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }else{
+          Fluttertoast.showToast(
+            msg: "No Recent updates..",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+        // print("Last appVersionDate saved: $appVersionDate");
+      } else {
+        print("Document does not contain 'LastUpdateDate' field.");
+      }
+    } else {
+      print("Document 'LastUpdateDate' not found.");
+    }
+
+    if (lastUpdateDatebio.exists) {
+      // Get the data from the document
+      final data = lastUpdateDatebio.data();
+
+
+      if (data != null && data.containsKey('lastUpdateDate')) {
+        // Safely extract the timestamp and convert to DateTime
+        final timestamp = data['lastUpdateDate'] as Timestamp;
+        final LastUpdateDate = timestamp.toDate();
+        final isRemoteDelete = data['isRemoteDelete'];
+
+
+        if (LastUpdateDate.isAfter(getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
+          Fluttertoast.showToast(
+            msg: "Updating Local Database!",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          await IsarService().cleanLocationCollection().then((_) async {
+            await IsarService().cleanStateCollection().then((_) async {
+              await IsarService().cleanStaffCategoryCollection().then((_) async {
+                await IsarService().cleanReasonsForDayOffCollection().then((_) async {
+                  await IsarService().cleanDesignationCollection().then((_) async {
+                    await IsarService().cleanDepartmentCollection().then((_) async {
+                      await IsarService().cleanLastUpdateDateCollection().then((_) async {
+                        await IsarService().cleanProjectCollection().then((_) async {
+                          await IsarService().cleanSupervisorCollection().then((_) async {
+                            await IsarService().cleanAttendanceCollection().then((_) async {
+                              await _autoFirebaseDBUpdate(IsarService(), snap.docs[0].id);
+                              fetchDataAndInsertIntoIsar();
+                              fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
+                              fetchSupervisorAndInsertIntoIsar(IsarService());
+                              fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
+                              fetchStaffCategoryAndInsertIntoIsar(IsarService());
+                              await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
+                              await fetchProjectAndInsertIntoIsar(IsarService());
+                              await fetchAppVersionAndInsertIntoIsar(IsarService());
+                              Fluttertoast.showToast(
+                                msg: "Updates on Database Completed",
+                                toastLength: Toast.LENGTH_LONG,
+                                backgroundColor: Colors.black54,
+                                gravity: ToastGravity.BOTTOM,
+                                timeInSecForIosWeb: 1,
+                                textColor: Colors.white,
+                                fontSize: 16.0,
+                              );
+
+                            });
+
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+          Fluttertoast.showToast(
+            msg: "Updating Local Database Completed!",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+        else{
+          Fluttertoast.showToast(
+            msg: "No Recent updates..",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+
+        // Remote Delete once there is internet);
+        if(isRemoteDelete == true){
+          Fluttertoast.showToast(
+            msg: "Clearing Database..",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          await IsarService().cleanDB();
+        }
+
+      } else {
+        print("Document does not contain 'lastUpdateDate' field.");
+      }
+    } else {
+      print("Document 'LastUpdateDate' not found.");
+    }
+
+
   }
 
   Future<void> fetchLastUpdateDateAndInsertIntoIsar(IsarService service) async {
@@ -872,6 +1065,103 @@ class _UserDashBoardState extends State<UserDashBoard> {
     }
   }
 
+  Future<void> _autoFirebaseDBUpdate(IsarService service, String fireBaseIdNew) async {
+    final allAttendance = await service.getAllAttendance();
+    if (allAttendance.isEmpty) {
+      await IsarService().removeAllAttendance(AttendanceModel());
+      final CollectionReference snap3 = FirebaseFirestore.instance
+          .collection('Staff')
+          .doc(fireBaseIdNew)
+          .collection("Record");
+      print("snap3 ====$snap3");
+
+      List data = [];
+      List<AttendanceModel> allAttendance = [];
+
+      await snap3.get().then((QuerySnapshot value) {
+        for (var element in value.docs) {
+          data.add(element.data());
+        }
+      });
+
+      for (var document in data) {
+        allAttendance.add(AttendanceModel.fromJson(document));
+      }
+
+      print("data ====$data");
+      print("allAttendance ====$allAttendance");
+
+      for (var attendanceHistory in allAttendance) {
+        final attendnce = AttendanceModel()
+          ..clockIn = attendanceHistory.clockIn
+          ..date = attendanceHistory.date
+          ..clockInLatitude = attendanceHistory.clockInLatitude
+          ..clockInLocation = attendanceHistory.clockInLocation
+          ..clockInLongitude = attendanceHistory.clockInLongitude
+          ..clockOut = attendanceHistory.clockOut
+          ..clockOutLatitude = attendanceHistory.clockOutLatitude
+          ..clockOutLocation = attendanceHistory.clockOutLocation
+          ..clockOutLongitude = attendanceHistory.clockOutLongitude
+          ..isSynced = attendanceHistory.isSynced
+          ..voided = attendanceHistory.voided
+          ..isUpdated = attendanceHistory.isUpdated
+          ..offDay = attendanceHistory.offDay
+          ..durationWorked = attendanceHistory.durationWorked
+          ..noOfHours = attendanceHistory.noOfHours
+          ..comments = attendanceHistory.comments
+          ..month = attendanceHistory.month
+
+        ;
+
+        service.saveAttendance(attendnce);
+      }
+      //print("FirebaseID ====$firebaseAuthId");
+      Fluttertoast.showToast(
+          msg: "Authenticating account..",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
+  }
+
+  void fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final designationCollection = await firestore.collection('Designation').get();
+
+    for (final departmentDoc in designationCollection.docs) {
+      final department = departmentDoc.id;
+      //print("stateSnap====${state}");
+      final departmentSave = DepartmentModel()..departmentName = department;
+
+      service.saveDepartment(departmentSave);
+
+      final designationCollectionRef = await firestore
+          .collection('Designation')
+          .doc(department)
+          .collection(department)
+          .get();
+
+      for (final designationDoc in designationCollectionRef.docs) {
+        final designation = designationDoc.id;
+        // print("lgaSnap====${lga}");
+        final data = designationDoc.data() as Map<String, dynamic>;
+        //print("data====${data}");
+
+        final designationSave = DesignationModel()
+          ..departmentName = department
+          ..designationName = data['designationName']
+          ..category = data['category']
+
+        ;
+
+        service.saveDesignation(designationSave);
+      }
+    }
+  }
+
   Future<void> fetchVersion(IsarService service) async {
     final getAppVersion = await service.getAppVersionInfo();
     versionNumber =  getAppVersion[0].appVersion;
@@ -917,37 +1207,32 @@ class _UserDashBoardState extends State<UserDashBoard> {
     }
   }
 
-  void fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService service) async {
+  void fetchSupervisorAndInsertIntoIsar(IsarService service) async {
     final firestore = FirebaseFirestore.instance;
-    final designationCollection = await firestore.collection('Designation').get();
+    final supervisorCollection = await firestore.collection('Supervisors').get();
 
-    for (final departmentDoc in designationCollection.docs) {
-      final department = departmentDoc.id;
-      //print("stateSnap====${state}");
-      final departmentSave = DepartmentModel()..departmentName = department;
+    for (final stateDoc in supervisorCollection.docs) {
+      final state = stateDoc.id;
 
-      service.saveDepartment(departmentSave);
-
-      final designationCollectionRef = await firestore
-          .collection('Designation')
-          .doc(department)
-          .collection(department)
+      final supervisorCollectionRef = await firestore
+          .collection('Supervisors')
+          .doc(state)
+          .collection(state)
           .get();
 
-      for (final designationDoc in designationCollectionRef.docs) {
-        final designation = designationDoc.id;
-        // print("lgaSnap====${lga}");
-        final data = designationDoc.data() as Map<String, dynamic>;
-        //print("data====${data}");
+      for (final supervisorDoc in supervisorCollectionRef.docs) {
+        final supervisor = supervisorDoc.id;
+        final data = supervisorDoc.data() as Map<String, dynamic>;
 
-        final designationSave = DesignationModel()
-          ..departmentName = department
-          ..designationName = data['designationName']
-          ..category = data['category']
+        final supervisorSave = SupervisorModel()
+          ..department = data['department']
+          ..email = data['email']
+          ..state = state
+          ..supervisor = data['supervisor']
 
         ;
 
-        service.saveDesignation(designationSave);
+        service.saveSupervisor(supervisorSave);
       }
     }
   }

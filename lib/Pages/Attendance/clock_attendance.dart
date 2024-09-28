@@ -62,6 +62,7 @@ class GeofenceModel {
 class ClockAttendance extends StatelessWidget {
   final IsarService service;
 
+
   ClockAttendance(IsarService isarService, {Key? key, required this.service, required controller})
       : super(key: key);
 
@@ -73,6 +74,8 @@ class ClockAttendance extends StatelessWidget {
 
     final ClockAttendanceController controller =
     Get.put(ClockAttendanceController(service)); // Initialize the controller here
+    UserModel.lat = controller.lati.value;
+    UserModel.long = controller.longi.value;
 
     return Scaffold(
       drawer: Obx(
@@ -96,6 +99,7 @@ class ClockAttendance extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+
                     Expanded(
                       child: Text(
                         "Welcome",
@@ -155,6 +159,7 @@ class ClockAttendance extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                  //  Text("Text Lat and long = ${UserModel.lat} and ${UserModel.long}"),
                     Text(
                       "Today's Status:",
                       style: TextStyle(
@@ -337,7 +342,7 @@ class ClockAttendance extends StatelessWidget {
                                     innerColor: Colors.red,
                                     key: key,
                                     onSubmit: () async {
-                                      await controller.handleClockInOut(context, key);
+                                      await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
                                       //await controller._clockIn(isInternetConnected.value);
                                     },
                                   );
@@ -443,7 +448,8 @@ class ClockAttendance extends StatelessWidget {
                             ),
                           ]
                       );
-                    }if (lastAttendance?.clockIn != "--/--" && lastAttendance?.clockOut != "--/--"){
+                    }
+                    if (lastAttendance?.clockIn != "--/--" && lastAttendance?.clockOut != "--/--"){
                       return Column(
                           children:[
                             Container(
@@ -860,7 +866,7 @@ class ClockAttendance extends StatelessWidget {
                                 innerColor: Colors.red,
                                 key: key,
                                 onSubmit: () async {
-                                  await controller.handleClockInOut(context, key);
+                                  await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
                                 },
                               );
                             },
@@ -874,13 +880,59 @@ class ClockAttendance extends StatelessWidget {
                             if (snapshot.hasData) {
                               return SizedBox.shrink();
                             } else {
-                              return MyButton(
-                                label: "Out Of Office? CLICK HERE",
-                                onTap: () {
-                                  //controller.showBottomSheet3(context);
-                                  Get.off(() => DaysOffPage(service: service));
-                                },
-                              ); // Default value while waiting for data
+                              return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                  child: GestureDetector(
+                                    onTap: (){
+                                      Get.off(() => DaysOffPage(service: service));
+                                    },
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width * 0.70,
+                                      height: MediaQuery.of(context).size.height * 0.05,
+                                      padding: EdgeInsets.only(left: 20.0, bottom: 0.0),
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.red,
+                                            Colors.black,
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(20),
+                                        ),
+                                      ),
+                                      child: const Row(
+                                        children:[
+                                          Text(
+                                            "Out Of Office? CLICK HERE",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16),
+                                          ),
+                                          SizedBox(width:10),
+                                          Icon(
+                                            Icons.arrow_forward,
+                                            size: 20,
+                                            color: Colors.white,
+                                          ),
+
+
+                                        ]),
+                                    ),
+                                  )
+                              );
+
+                              //   MyButton(
+                              //   label: "Out Of Office? CLICK HERE",
+                              //   onTap: () {
+                              //     //controller.showBottomSheet3(context);
+                              //     Get.off(() => DaysOffPage(service: service));
+                              //   },
+                              // );
+
+
+                              // Default value while waiting for data
                             }
                           },
                         ),
@@ -1022,6 +1074,9 @@ class ClockAttendance extends StatelessWidget {
                       ),): SizedBox.shrink(),
                     controller.comments.value == "No Comment"?const SizedBox(height:10):const SizedBox(height:0),
                     controller.clockOut.value  != "--/--"?
+                    Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20.0),
+                        child:
                     GestureDetector(
                       onTap: () => handleAddComments(context,commentsController.text),
                       child: Container(
@@ -1038,7 +1093,8 @@ class ClockAttendance extends StatelessWidget {
                             Radius.circular(20),
                           ),
                         ),
-                        child: Center(
+                        child:
+                        Center(
                           child: Text(
                             "Add Comment",
                             style: TextStyle(
@@ -1047,8 +1103,10 @@ class ClockAttendance extends StatelessWidget {
                                 fontSize: 16),
                           ),
                         ),
+
                       ),
-                    ):const SizedBox(height:0),
+                    ))
+                        :const SizedBox(height:0),
                   ],
                 ),
               ):SizedBox.shrink(),
@@ -1313,8 +1371,8 @@ class ClockAttendanceController extends GetxController {
     } catch (e) {
       if (e.toString() ==
           "RangeError (index): Invalid value: Valid value range is empty: 0") {
-        log(
-            "getAttendance Summary method error ====== Staff Yet to clock in as Last saved date != Current Date");
+        // log(
+        //     "getAttendance Summary method error ====== Staff Yet to clock in as Last saved date != Current Date");
       } else {
         log(e.toString());
       }
@@ -1557,7 +1615,7 @@ print("_getLocation2 hereeeee");
   }
 
   Future<void> handleClockInOut(
-      BuildContext context, GlobalKey<SlideActionState> key) async {
+      BuildContext context, GlobalKey<SlideActionState> key,newlatitude,newlongitude,newlocation) async {
 
     try {
       final lastAttend = await service.getLastAttendance(
@@ -1565,7 +1623,7 @@ print("_getLocation2 hereeeee");
 
       if (lastAttend?.date != currentDate) {
         // Clock In
-        await _clockIn(isInternetConnected.value);
+        await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
       } else if (lastAttend?.date == currentDate) {
         // Clock Out
         List<AttendanceModel> attendanceResult = await service
@@ -1573,33 +1631,33 @@ print("_getLocation2 hereeeee");
             DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
         final bioInfoForUser = await service.getBioInfoWithFirebaseAuth();
         await _clockOut(
-            attendanceResult[0].id, bioInfoForUser, attendanceResult);
+            attendanceResult[0].id, bioInfoForUser, attendanceResult,newlatitude,newlongitude,newlocation);
       } else if (lastAttend?.date == null) {
         // No previous record, clock in
-        await _clockIn(isInternetConnected.value);
+        await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
       }
     } catch (e) {
       log("Attendance clockInandOut Error ====== ${e.toString()}");
-      await _clockIn(isInternetConnected.value);
+      await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
     }
 
     key.currentState!.reset();
   }
 
-  Future<void> _clockIn(bool isDeviceConnected) async {
+  Future<void> _clockIn(bool isDeviceConnected,double newlatitude,double newlongitude,String newlocation) async {
     final time = isDeviceConnected
         ? DateTime.now().add(Duration(
         milliseconds: await NTP.getNtpOffset(
             localTime: DateTime.now(), lookUpAddress: "time.google.com")))
         : DateTime.now();
 
-    if(UserModel.lat != 0.0) {
+    if(newlatitude != 0.0) {
       final attendance = AttendanceModel()
         ..clockIn = DateFormat('hh:mm a').format(time)
         ..date = DateFormat('dd-MMMM-yyyy').format(time)
-        ..clockInLatitude = UserModel.lat
-        ..clockInLocation = location.value
-        ..clockInLongitude = UserModel.long
+        ..clockInLatitude = newlatitude
+        ..clockInLocation = newlocation
+        ..clockInLongitude = newlongitude
         ..clockOut = "--/--"
         ..clockOutLatitude = 0.0
         ..clockOutLocation = null
@@ -1644,7 +1702,9 @@ print("_getLocation2 hereeeee");
   Future<void> _clockOut(
       int attendanceId,
       BioModel? bioInfoForUser,
-      List<AttendanceModel> attendanceResult) async {
+      List<AttendanceModel> attendanceResult,
+      double newlatitude,double newlongitude,String newlocation
+      ) async {
 
     final time = isDeviceConnected
         ? DateTime.now().add(Duration(
@@ -1657,9 +1717,9 @@ print("_getLocation2 hereeeee");
         attendanceId,
         AttendanceModel(),
         DateFormat('hh:mm a').format(time),
-        UserModel.lat,
-        UserModel.long,
-        location.value,
+        newlatitude,
+        newlongitude,
+        newlocation,
         false,
         true,
         _diffClockInOut(

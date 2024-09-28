@@ -17,6 +17,13 @@ class BioModel {
   String? department;
   String? mobile;
   String? project;
+  bool? isSynced ;
+  String? supervisor;
+  String? supervisorEmail;
+  String? version;
+  bool? isRemoteDelete;
+  bool? isRemoteUpdate;
+  DateTime? lastUpdateDate;
 
   BioModel({
     this.firstName,
@@ -32,6 +39,13 @@ class BioModel {
     this.department,
     this.mobile,
     this.project,
+    this.isSynced,
+    this.supervisor,
+    this.supervisorEmail,
+    this.version,
+    this.isRemoteDelete,
+    this.isRemoteUpdate,
+    this.lastUpdateDate,
   });
 
   factory BioModel.fromJson(json) {
@@ -49,6 +63,13 @@ class BioModel {
       department: json['department'],
       mobile: json['mobile'],
       project: json['project'],
+        isSynced:json['isSynced'],
+        supervisor:json['supervisor'],
+        supervisorEmail:json['supervisorEmail'],
+      version:json['version'],
+      isRemoteDelete:json['isRemoteDelete'],
+      isRemoteUpdate:json['isRemoteUpdate'],
+      lastUpdateDate:json['lastUpdateDate'],
     );
   }
 
@@ -68,6 +89,13 @@ class BioModel {
       'department': department,
       'mobile': mobile,
       'project': project,
+      'isSynced':isSynced,
+      'supervisor':supervisor,
+      'supervisorEmail':supervisorEmail,
+      'version':version,
+      'isRemoteDelete':isRemoteDelete,
+      'isRemoteUpdate':isRemoteUpdate,
+      'lastUpdateDate':lastUpdateDate,
     };
   }
 

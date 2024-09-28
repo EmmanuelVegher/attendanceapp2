@@ -40,6 +40,7 @@ import '../model/designationmodel.dart';
 import '../model/projectmodel.dart';
 import '../model/reasonfordaysoff.dart';
 import '../model/staffcategory.dart';
+import '../model/supervisor_model.dart';
 // ignore_for_file: avoid_print
 
 class LoginPage extends StatelessWidget {
@@ -54,31 +55,22 @@ class LoginPage extends StatelessWidget {
           await IsarService().cleanStaffCategoryCollection().then((_) async {
             await IsarService().cleanReasonsForDayOffCollection().then((_) async {
               await IsarService().cleanDesignationCollection().then((_) async {
-                await IsarService().cleanDepartmentCollection().then((_){
-                  fetchDataAndInsertIntoIsar();
-                  fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
-                  fetchProjectAndInsertIntoIsar(IsarService());
-                  fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
-                  fetchStaffCategoryAndInsertIntoIsar(IsarService());
-
+                await IsarService().cleanDepartmentCollection().then((_) async {
+                  await IsarService().cleanSupervisorCollection().then((_){
+                    fetchDataAndInsertIntoIsar();
+                    fetchSupervisorAndInsertIntoIsar();
+                    fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
+                    fetchProjectAndInsertIntoIsar(IsarService());
+                    fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
+                    fetchStaffCategoryAndInsertIntoIsar(IsarService());
+                  });
                 });
               });
             });
           });
         });
       });
-      //     .then((_){
-      // Get.off(() => RegistrationPageUpdated());
-      // Fluttertoast.showToast(
-      //   msg: "Registration Page..",
-      //   toastLength: Toast.LENGTH_LONG,
-      //   backgroundColor: Colors.black54,
-      //   gravity: ToastGravity.BOTTOM,
-      //   timeInSecForIosWeb: 1,
-      //   textColor: Colors.white,
-      //   fontSize: 16.0,
-      // );
-      // });
+
     }catch(e){
       Fluttertoast.showToast(
         msg: "Error: $e",
@@ -127,6 +119,36 @@ class LoginPage extends StatelessWidget {
           ..radius = double.parse(data['Radius'].toString());
 
         IsarService().saveLocation(locationSave);
+      }
+    }
+  }
+
+  void fetchSupervisorAndInsertIntoIsar() async {
+    final firestore = FirebaseFirestore.instance;
+    final supervisorCollection = await firestore.collection('Supervisors').get();
+
+    for (final stateDoc in supervisorCollection.docs) {
+      final state = stateDoc.id;
+
+      final superviseCollectionRef = await firestore
+          .collection('Supervisors')
+          .doc(state)
+          .collection(state)
+          .get();
+
+      for (final supervisorDoc in superviseCollectionRef.docs) {
+        final lga = supervisorDoc.id;
+        // print("lgaSnap====${lga}");
+        final data = supervisorDoc.data() as Map<String, dynamic>;
+        //print("data====${data}");
+
+        final supervisorSave = SupervisorModel()
+          ..state = state
+          ..supervisor = data['supervisor']
+          ..email = data['email']
+          ..department =  data['department'];
+
+        IsarService().saveSupervisor(supervisorSave);
       }
     }
   }

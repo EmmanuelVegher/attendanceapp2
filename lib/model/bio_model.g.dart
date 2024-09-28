@@ -42,44 +42,79 @@ const BioModelSchema = CollectionSchema(
       name: r'firstName',
       type: IsarType.string,
     ),
-    r'lastName': PropertySchema(
+    r'isRemoteDelete': PropertySchema(
       id: 5,
+      name: r'isRemoteDelete',
+      type: IsarType.bool,
+    ),
+    r'isRemoteUpdate': PropertySchema(
+      id: 6,
+      name: r'isRemoteUpdate',
+      type: IsarType.bool,
+    ),
+    r'isSynced': PropertySchema(
+      id: 7,
+      name: r'isSynced',
+      type: IsarType.bool,
+    ),
+    r'lastName': PropertySchema(
+      id: 8,
       name: r'lastName',
       type: IsarType.string,
     ),
+    r'lastUpdateDate': PropertySchema(
+      id: 9,
+      name: r'lastUpdateDate',
+      type: IsarType.dateTime,
+    ),
     r'location': PropertySchema(
-      id: 6,
+      id: 10,
       name: r'location',
       type: IsarType.string,
     ),
     r'mobile': PropertySchema(
-      id: 7,
+      id: 11,
       name: r'mobile',
       type: IsarType.string,
     ),
     r'password': PropertySchema(
-      id: 8,
+      id: 12,
       name: r'password',
       type: IsarType.string,
     ),
     r'project': PropertySchema(
-      id: 9,
+      id: 13,
       name: r'project',
       type: IsarType.string,
     ),
     r'role': PropertySchema(
-      id: 10,
+      id: 14,
       name: r'role',
       type: IsarType.string,
     ),
     r'staffCategory': PropertySchema(
-      id: 11,
+      id: 15,
       name: r'staffCategory',
       type: IsarType.string,
     ),
     r'state': PropertySchema(
-      id: 12,
+      id: 16,
       name: r'state',
+      type: IsarType.string,
+    ),
+    r'supervisor': PropertySchema(
+      id: 17,
+      name: r'supervisor',
+      type: IsarType.string,
+    ),
+    r'supervisorEmail': PropertySchema(
+      id: 18,
+      name: r'supervisorEmail',
+      type: IsarType.string,
+    ),
+    r'version': PropertySchema(
+      id: 19,
+      name: r'version',
       type: IsarType.string,
     )
   },
@@ -181,6 +216,24 @@ int _bioModelEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.supervisor;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.supervisorEmail;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.version;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -195,14 +248,21 @@ void _bioModelSerialize(
   writer.writeString(offsets[2], object.emailAddress);
   writer.writeString(offsets[3], object.firebaseAuthId);
   writer.writeString(offsets[4], object.firstName);
-  writer.writeString(offsets[5], object.lastName);
-  writer.writeString(offsets[6], object.location);
-  writer.writeString(offsets[7], object.mobile);
-  writer.writeString(offsets[8], object.password);
-  writer.writeString(offsets[9], object.project);
-  writer.writeString(offsets[10], object.role);
-  writer.writeString(offsets[11], object.staffCategory);
-  writer.writeString(offsets[12], object.state);
+  writer.writeBool(offsets[5], object.isRemoteDelete);
+  writer.writeBool(offsets[6], object.isRemoteUpdate);
+  writer.writeBool(offsets[7], object.isSynced);
+  writer.writeString(offsets[8], object.lastName);
+  writer.writeDateTime(offsets[9], object.lastUpdateDate);
+  writer.writeString(offsets[10], object.location);
+  writer.writeString(offsets[11], object.mobile);
+  writer.writeString(offsets[12], object.password);
+  writer.writeString(offsets[13], object.project);
+  writer.writeString(offsets[14], object.role);
+  writer.writeString(offsets[15], object.staffCategory);
+  writer.writeString(offsets[16], object.state);
+  writer.writeString(offsets[17], object.supervisor);
+  writer.writeString(offsets[18], object.supervisorEmail);
+  writer.writeString(offsets[19], object.version);
 }
 
 BioModel _bioModelDeserialize(
@@ -217,14 +277,21 @@ BioModel _bioModelDeserialize(
     emailAddress: reader.readStringOrNull(offsets[2]),
     firebaseAuthId: reader.readStringOrNull(offsets[3]),
     firstName: reader.readStringOrNull(offsets[4]),
-    lastName: reader.readStringOrNull(offsets[5]),
-    location: reader.readStringOrNull(offsets[6]),
-    mobile: reader.readStringOrNull(offsets[7]),
-    password: reader.readStringOrNull(offsets[8]),
-    project: reader.readStringOrNull(offsets[9]),
-    role: reader.readStringOrNull(offsets[10]),
-    staffCategory: reader.readStringOrNull(offsets[11]),
-    state: reader.readStringOrNull(offsets[12]),
+    isRemoteDelete: reader.readBoolOrNull(offsets[5]),
+    isRemoteUpdate: reader.readBoolOrNull(offsets[6]),
+    isSynced: reader.readBoolOrNull(offsets[7]),
+    lastName: reader.readStringOrNull(offsets[8]),
+    lastUpdateDate: reader.readDateTimeOrNull(offsets[9]),
+    location: reader.readStringOrNull(offsets[10]),
+    mobile: reader.readStringOrNull(offsets[11]),
+    password: reader.readStringOrNull(offsets[12]),
+    project: reader.readStringOrNull(offsets[13]),
+    role: reader.readStringOrNull(offsets[14]),
+    staffCategory: reader.readStringOrNull(offsets[15]),
+    state: reader.readStringOrNull(offsets[16]),
+    supervisor: reader.readStringOrNull(offsets[17]),
+    supervisorEmail: reader.readStringOrNull(offsets[18]),
+    version: reader.readStringOrNull(offsets[19]),
   );
   object.id = id;
   return object;
@@ -248,20 +315,34 @@ P _bioModelDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 7:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 8:
       return (reader.readStringOrNull(offset)) as P;
     case 9:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 10:
       return (reader.readStringOrNull(offset)) as P;
     case 11:
       return (reader.readStringOrNull(offset)) as P;
     case 12:
+      return (reader.readStringOrNull(offset)) as P;
+    case 13:
+      return (reader.readStringOrNull(offset)) as P;
+    case 14:
+      return (reader.readStringOrNull(offset)) as P;
+    case 15:
+      return (reader.readStringOrNull(offset)) as P;
+    case 16:
+      return (reader.readStringOrNull(offset)) as P;
+    case 17:
+      return (reader.readStringOrNull(offset)) as P;
+    case 18:
+      return (reader.readStringOrNull(offset)) as P;
+    case 19:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1157,6 +1238,88 @@ extension BioModelQueryFilter
     });
   }
 
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      isRemoteDeleteIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'isRemoteDelete',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      isRemoteDeleteIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'isRemoteDelete',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> isRemoteDeleteEqualTo(
+      bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isRemoteDelete',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      isRemoteUpdateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'isRemoteUpdate',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      isRemoteUpdateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'isRemoteUpdate',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> isRemoteUpdateEqualTo(
+      bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isRemoteUpdate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> isSyncedIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'isSynced',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> isSyncedIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'isSynced',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> isSyncedEqualTo(
+      bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isSynced',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<BioModel, BioModel, QAfterFilterCondition> lastNameIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1299,6 +1462,79 @@ extension BioModelQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'lastName',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      lastUpdateDateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lastUpdateDate',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      lastUpdateDateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lastUpdateDate',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> lastUpdateDateEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lastUpdateDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      lastUpdateDateGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lastUpdateDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      lastUpdateDateLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lastUpdateDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> lastUpdateDateBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lastUpdateDate',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -2330,6 +2566,454 @@ extension BioModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'supervisor',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'supervisor',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'supervisor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'supervisor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'supervisor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'supervisor',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'supervisor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'supervisor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'supervisor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'supervisor',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> supervisorIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'supervisor',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'supervisor',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'supervisorEmail',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'supervisorEmail',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'supervisorEmail',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'supervisorEmail',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'supervisorEmail',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'supervisorEmail',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'supervisorEmail',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'supervisorEmail',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'supervisorEmail',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'supervisorEmail',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'supervisorEmail',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition>
+      supervisorEmailIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'supervisorEmail',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'version',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'version',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'version',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'version',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'version',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'version',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'version',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'version',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'version',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'version',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'version',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterFilterCondition> versionIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'version',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension BioModelQueryObject
@@ -2399,6 +3083,42 @@ extension BioModelQuerySortBy on QueryBuilder<BioModel, BioModel, QSortBy> {
     });
   }
 
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByIsRemoteDelete() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRemoteDelete', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByIsRemoteDeleteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRemoteDelete', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByIsRemoteUpdate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRemoteUpdate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByIsRemoteUpdateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRemoteUpdate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
+    });
+  }
+
   QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByLastName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastName', Sort.asc);
@@ -2408,6 +3128,18 @@ extension BioModelQuerySortBy on QueryBuilder<BioModel, BioModel, QSortBy> {
   QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByLastNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByLastUpdateDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastUpdateDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByLastUpdateDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastUpdateDate', Sort.desc);
     });
   }
 
@@ -2494,6 +3226,42 @@ extension BioModelQuerySortBy on QueryBuilder<BioModel, BioModel, QSortBy> {
       return query.addSortBy(r'state', Sort.desc);
     });
   }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortBySupervisor() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'supervisor', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortBySupervisorDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'supervisor', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortBySupervisorEmail() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'supervisorEmail', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortBySupervisorEmailDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'supervisorEmail', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'version', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> sortByVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'version', Sort.desc);
+    });
+  }
 }
 
 extension BioModelQuerySortThenBy
@@ -2570,6 +3338,42 @@ extension BioModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByIsRemoteDelete() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRemoteDelete', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByIsRemoteDeleteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRemoteDelete', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByIsRemoteUpdate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRemoteUpdate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByIsRemoteUpdateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRemoteUpdate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
+    });
+  }
+
   QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByLastName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastName', Sort.asc);
@@ -2579,6 +3383,18 @@ extension BioModelQuerySortThenBy
   QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByLastNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByLastUpdateDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastUpdateDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByLastUpdateDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastUpdateDate', Sort.desc);
     });
   }
 
@@ -2665,6 +3481,42 @@ extension BioModelQuerySortThenBy
       return query.addSortBy(r'state', Sort.desc);
     });
   }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenBySupervisor() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'supervisor', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenBySupervisorDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'supervisor', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenBySupervisorEmail() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'supervisorEmail', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenBySupervisorEmailDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'supervisorEmail', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'version', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QAfterSortBy> thenByVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'version', Sort.desc);
+    });
+  }
 }
 
 extension BioModelQueryWhereDistinct
@@ -2705,10 +3557,34 @@ extension BioModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<BioModel, BioModel, QDistinct> distinctByIsRemoteDelete() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isRemoteDelete');
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QDistinct> distinctByIsRemoteUpdate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isRemoteUpdate');
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QDistinct> distinctByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isSynced');
+    });
+  }
+
   QueryBuilder<BioModel, BioModel, QDistinct> distinctByLastName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastName', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QDistinct> distinctByLastUpdateDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lastUpdateDate');
     });
   }
 
@@ -2761,6 +3637,28 @@ extension BioModelQueryWhereDistinct
       return query.addDistinctBy(r'state', caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<BioModel, BioModel, QDistinct> distinctBySupervisor(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'supervisor', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QDistinct> distinctBySupervisorEmail(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'supervisorEmail',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<BioModel, BioModel, QDistinct> distinctByVersion(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'version', caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension BioModelQueryProperty
@@ -2801,9 +3699,33 @@ extension BioModelQueryProperty
     });
   }
 
+  QueryBuilder<BioModel, bool?, QQueryOperations> isRemoteDeleteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isRemoteDelete');
+    });
+  }
+
+  QueryBuilder<BioModel, bool?, QQueryOperations> isRemoteUpdateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isRemoteUpdate');
+    });
+  }
+
+  QueryBuilder<BioModel, bool?, QQueryOperations> isSyncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isSynced');
+    });
+  }
+
   QueryBuilder<BioModel, String?, QQueryOperations> lastNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastName');
+    });
+  }
+
+  QueryBuilder<BioModel, DateTime?, QQueryOperations> lastUpdateDateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lastUpdateDate');
     });
   }
 
@@ -2846,6 +3768,24 @@ extension BioModelQueryProperty
   QueryBuilder<BioModel, String?, QQueryOperations> stateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'state');
+    });
+  }
+
+  QueryBuilder<BioModel, String?, QQueryOperations> supervisorProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'supervisor');
+    });
+  }
+
+  QueryBuilder<BioModel, String?, QQueryOperations> supervisorEmailProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'supervisorEmail');
+    });
+  }
+
+  QueryBuilder<BioModel, String?, QQueryOperations> versionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'version');
     });
   }
 }

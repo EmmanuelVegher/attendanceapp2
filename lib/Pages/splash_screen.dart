@@ -39,7 +39,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _checkInternet();
+    //_checkInternet();
+    _init();
   }
 
   Future<void> _checkInternet() async {
@@ -78,13 +79,12 @@ class _SplashScreenState extends State<SplashScreen> {
       try {
         _insertVersion();
         fetchLastUpdateDateAndInsertIntoIsar(IsarService());
-        _syncCompleteData().then((_) {
-          progress.value = 1.0;
-          Timer(const Duration(seconds: 1), () => Get.off(() => AuthCheck(service: widget.service)));
-        });
+        _syncCompleteData();
+        progress.value = 1.0;
+        Timer(const Duration(seconds: 1), () => Get.off(() => AuthCheck(service: widget.service)));
       } catch (e) {
         // Error handling for Firebase Authentication
-        log("Firebase Authentication Error: ${e.toString()}");
+        log("Error: ${e.toString()}");
         // You can display a user-friendly error message here
         // ...
         Fluttertoast.showToast(
@@ -106,8 +106,9 @@ class _SplashScreenState extends State<SplashScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body:
-      _hasInternet
-          ? SizedBox(
+      // _hasInternet
+      //     ?
+      SizedBox(
         width: screenWidth,
         height: screenHeight,
         child: Column(
@@ -146,12 +147,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     fontSize: screenWidth * 0.05,
                     fontWeight: FontWeight.bold)),
             SizedBox(height: screenHeight * 0.05),
-            Text("2024-09-17",
-                style: TextStyle(
-                    color: const Color.fromARGB(255, 97, 9, 9),
-                    fontSize: screenWidth * 0.05,
-                    fontWeight: FontWeight.bold)),
-            SizedBox(height: screenHeight * 0.05),
             Text("| Powered By:CARITAS Nigeria |",
                 style: TextStyle(
                     color: const Color.fromARGB(255, 97, 9, 9),
@@ -167,23 +162,23 @@ class _SplashScreenState extends State<SplashScreen> {
           ],
         ),
       )
-          : Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('No Internet Connection',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                )),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _checkInternet,
-              child: Text('Retry'),
-            ),
-          ],
-        ),
-      ),
+      //     : Center(
+      //   child: Column(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: [
+      //       Text('No Internet Connection',
+      //           style: TextStyle(
+      //             fontSize: 20,
+      //             fontWeight: FontWeight.bold,
+      //           )),
+      //       SizedBox(height: 20),
+      //       ElevatedButton(
+      //         onPressed: _checkInternet,
+      //         child: Text('Retry'),
+      //       ),
+      //     ],
+      //   ),
+      // ),
     );
   }
 
@@ -345,19 +340,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (bioInfoForSuperUser.length == 0) {
       final bioData = BioModel()
-        ..emailAddress = emailAddress
-        ..password = password
-        ..role = role
-        ..department = department
-        ..designation = designation
-        ..firstName = firstName
-        ..lastName = lastName
-        ..location = location
-        ..mobile = mobile
-        ..project = project
-        ..staffCategory = staffCategory
-        ..state = state
-        ..firebaseAuthId = firebaseAuthId;
+        ..emailAddress = emailAddressConstant
+        ..password = passwordConstant
+        ..role = roleConstant
+        ..department = departmentConstant
+        ..designation = designationConstant
+        ..firstName = firstNameConstant
+        ..lastName = lastNameConstant
+        ..location = locationConstant
+        ..mobile = mobileConstant
+        ..project = projectConstant
+        ..staffCategory = staffCategoryConstant
+        ..state = stateConstant
+        ..firebaseAuthId = firebaseAuthIdConstant;
 
       await widget.service.saveBioData(bioData);
     }
@@ -369,7 +364,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (getAppVersion.length == 0) {
       final appVersion = AppVersionModel()
         ..appVersion = appVersionConstant
-      ..latestVersion = ifLatestVersion;
+      ..latestVersion = ifLatestVersionConstant;
 
       await widget.service.saveAppVersionData(appVersion);
     }

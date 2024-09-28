@@ -28,6 +28,7 @@ import '../model/last_update_date.dart';
 import '../model/projectmodel.dart';
 import '../model/reasonfordaysoff.dart';
 import '../model/staffcategory.dart';
+import '../model/supervisor_model.dart';
 import '../widgets/constants.dart';
 import '../widgets/show_error_dialog.dart';
 
@@ -39,6 +40,7 @@ class LoginController extends GetxController {
   final passwordController = TextEditingController();
   RxBool isObscure = true.obs;
   DatabaseAdapter adapter = HiveService();
+  var getAppVersion1;
 
   @override
   void onInit() {
@@ -62,50 +64,57 @@ class LoginController extends GetxController {
     final getAppVersion = await service.getAppVersionInfo();
     if (formKey.currentState!.validate()) {
       try {
-        Get.dialog(const Center(child: CircularProgressIndicator()),
-            barrierDismissible: false);
+        Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: email, password: password);
+        await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
 
         final user = FirebaseAuth.instance.currentUser;
+        QuerySnapshot snap = await firestore.collection("Staff").where('emailAddress', isEqualTo: email).get();
 
-        QuerySnapshot snap = await FirebaseFirestore.instance
-            .collection("Staff")
-            .where('emailAddress', isEqualTo: email)
-            .get();
+        await firestore.collection("Staff").doc(snap.docs[0].id).update({'isVerified': user?.emailVerified});
 
-        await FirebaseFirestore.instance
-            .collection("Staff")
-            .doc(snap.docs[0].id)
-            .update({'isVerified': user?.emailVerified});
+        final lastUpdateDateDoc = await firestore.collection('AppVersion').doc('AppVersion').get();
+
+        if (lastUpdateDateDoc.exists) {
+          final data = lastUpdateDateDoc.data();
+          if (data != null && data.containsKey('appVersionDate')) {
+            final timestamp = data['appVersionDate'] as Timestamp;
+            final appVersionDate = timestamp.toDate();
+            final versionNumber = data['appVersion'];
+
+            if (getAppVersion[0].appVersion == versionNumber) {
+              await service.updateAppVersion1(1, AppVersionModel(), appVersionDate, DateTime.now(), true);
+            } else {
+              await service.updateAppVersion2(1, AppVersionModel(), DateTime.now(), false);
+            }
+          }
+        }
 
         var box = await Hive.openBox('imageBox');
         await box.clear().then((value) async {
           await service.cleanDB().then((value) async {
-            await _insertSuperUser(service); // Pass service to _insertSuperUser
+            await _insertSuperUser(service);
             await _insertVersion();
           }).then((value) async {
-            await _autoFirebaseDBUpdate(service, snap.docs[0].id);  // Pass service to _autoFirebaseDBUpdate
+            await _autoFirebaseDBUpdate(service, snap.docs[0].id);
           }).then((value) async {
-            await fetchDataAndInsertIntoIsar(service); // Pass service to fetchDataAndInsertIntoIsar
+            await fetchDataAndInsertIntoIsar(service);
             await fetchDepartmentAndDesignationAndInsertIntoIsar(service);
             fetchStaffCategoryAndInsertIntoIsar(service);
             fetchReasonsForDaysOffAndInsertIntoIsar(service);
             fetchLastUpdateDateAndInsertIntoIsar(service);
             fetchProjectAndInsertIntoIsar(service);
             fetchAppVersionAndInsertIntoIsar(service);
-
+            fetchSupervisorAndInsertIntoIsar(service);
+            getAppVersion1 = await service.getAppVersionInfo();
           });
         });
 
-        try{
+        try {
           _pickImageFromFirebase(snap.docs[0]['photoUrl']);
-        }catch(e){
-          print("_pickImageFromFirebase error: ${e}");
+        } catch (e) {
+          print("_pickImageFromFirebase error: $e");
         }
-
-
 
         final bioData = BioModel()
           ..emailAddress = email
@@ -120,55 +129,15 @@ class LoginController extends GetxController {
           ..project = snap.docs[0]['project']
           ..staffCategory = snap.docs[0]['staffCategory']
           ..state = snap.docs[0]['state']
-          ..firebaseAuthId = snap.docs[0]['id'];
+          ..firebaseAuthId = snap.docs[0]['id']
+          ..isSynced = true
+          ..supervisor = snap.docs[0]['supervisor']
+          ..supervisorEmail = snap.docs[0]['supervisorEmail'];
 
-        try{
-          final lastUpdateDateDoc = await firestore
-              .collection('AppVersion')
-              .doc('AppVersion')
-              .get();
+        await service.saveBioData(bioData);
 
-          if (lastUpdateDateDoc.exists) {
-            // Get the data from the document
-            final data = lastUpdateDateDoc.data();
-
-
-            if (data != null && data.containsKey('appVersionDate')) {
-              // Safely extract the timestamp and convert to DateTime
-              final timestamp = data['appVersionDate'] as Timestamp;
-              final appVersionDate = timestamp.toDate();
-              final versionNumber = data['appVersion'];
-
-              print("appVersionDate ====${appVersionDate}");
-              print("versionNumber ====${versionNumber}");
-
-              if(getAppVersion[0].appVersion == versionNumber){
-                await service.updateAppVersion1(1,AppVersionModel(),appVersionDate,DateTime.now(),true);
-              }else{
-                await service.updateAppVersion2(1,AppVersionModel(),DateTime.now(),false);
-              }
-              print("Last appVersionDate saved: $appVersionDate");
-            } else {
-              print("Document does not contain 'appVersionDate' field.");
-            }
-          } else {
-            print("Document 'appVersionDate' not found.");
-          }
-
-        }catch(e){
-          print("appVersionDate compare error: $e");
-        }
-
-
-        await service.saveBioData(bioData)
-            .then((value) async {
-          // Save the current date after successful login
-          final appUsage = AppUsageModel()
-            ..lastUsedDate = DateTime.now() ;
-          await service.saveLastUsedDate(appUsage); // Call the method
-        });
-
-        final getAppVersion1 = await service.getAppVersionInfo();
+        final appUsage = AppUsageModel()..lastUsedDate = DateTime.now();
+        await service.saveLastUsedDate(appUsage);
 
         if (getAppVersion1[0].latestVersion == false) {
           Fluttertoast.showToast(
@@ -180,11 +149,22 @@ class LoginController extends GetxController {
             textColor: Colors.white,
             fontSize: 16.0,
           );
-        }else
-          if (context.mounted ) {
-          Get.off(() => HomePage(
-            //  service: service
-          ));
+        } else {
+          if (context.mounted) {
+          // Get.off(() => HomePage());
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => HomePage()),
+                  (Route<dynamic> route) => false,
+            );
+          Fluttertoast.showToast(
+            msg: "Logging In..",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );}
         }
       } on UserNotFoundAuthException {
         showErrorDialog(context, "User not Found");
@@ -220,31 +200,19 @@ class LoginController extends GetxController {
           fontSize: 16.0,
         );
       } catch (e) {
-        String error = "";
-        if (e.toString() ==
-            "RangeError (index): Invalid value: Valid value range is empty: 0") {
+        String error = "Error occurred: $e";
+        if (e.toString() == "RangeError (index): Invalid value: Valid value range is empty: 0") {
           error = "Staff Email Address does not exist!!!";
-          Fluttertoast.showToast(
-            msg: "Staff Email Address does not exist!!!",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-        } else {
-          error = "Error occurred!!!";
-          Fluttertoast.showToast(
-            msg: "Error occurred!!!",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
         }
+        Fluttertoast.showToast(
+          msg: error,
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
         showErrorDialog(context, error);
       } finally {
         if (Get.isDialogOpen!) {
@@ -253,6 +221,9 @@ class LoginController extends GetxController {
       }
     }
   }
+
+
+
 
   Future<void> _insertVersion() async {
     final getAppVersion = await service.getAppVersionInfo();
@@ -344,9 +315,9 @@ class LoginController extends GetxController {
 
         service.saveAttendance(attendnce);
       }
-      print("FirebaseID ====$firebaseAuthId");
+      //print("FirebaseID ====$firebaseAuthId");
       Fluttertoast.showToast(
-          msg: "Logging In..",
+          msg: "Authenticating account..",
           toastLength: Toast.LENGTH_LONG,
           backgroundColor: Colors.black54,
           gravity: ToastGravity.BOTTOM,
@@ -392,6 +363,42 @@ class LoginController extends GetxController {
     }
   }
 
+  void fetchSupervisorAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final supervisorCollection = await firestore.collection('Supervisors').get();
+
+    print("supervisorCollection == $supervisorCollection");
+
+    for (final stateDoc in supervisorCollection.docs) {
+      final state = stateDoc.id;
+      print("supervisorCollectionstate == $state");
+
+
+      final supervisorCollectionRef = await firestore
+          .collection('Supervisors')
+          .doc(state)
+          .collection(state)
+          .get();
+
+      for (final supervisorDoc in supervisorCollectionRef.docs) {
+        final supervisor = supervisorDoc.id;
+        print("supervisorCollectionstatesupervisor == $supervisor");
+        final data = supervisorDoc.data() as Map<String, dynamic>;
+
+        print("supervisorCollectionstatesupervisorData == $data");
+
+        final supervisorSave = SupervisorModel()
+          ..department = data['department']
+          ..email = data['email']
+          ..state = state
+          ..supervisor = data['supervisor']
+
+        ;
+
+        service.saveSupervisor(supervisorSave);
+      }
+    }
+  }
 
   Future<void> fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService service) async {
     final firestore = FirebaseFirestore.instance;
@@ -558,19 +565,22 @@ class LoginController extends GetxController {
 
     if (bioInfoForSuperUser.isEmpty) {
       final bioData = BioModel()
-        ..emailAddress = emailAddress
-        ..password = password
-        ..role = role
-        ..department = department
-        ..designation = designation
-        ..firstName = firstName
-        ..lastName = lastName
-        ..location = location
-        ..mobile = mobile
-        ..project = project
-        ..staffCategory = staffCategory
-        ..state = state
-        ..firebaseAuthId = firebaseAuthId;
+        ..emailAddress = emailAddressConstant
+        ..password = passwordConstant
+        ..role = roleConstant
+        ..department = departmentConstant
+        ..designation = designationConstant
+        ..firstName = firstNameConstant
+        ..lastName = lastNameConstant
+        ..location = locationConstant
+        ..mobile = mobileConstant
+        ..project = projectConstant
+        ..staffCategory = staffCategoryConstant
+        ..state = stateConstant
+        ..firebaseAuthId = firebaseAuthIdConstant
+        ..isSynced = isSyncedConstant
+        ..supervisor = supervisorConstant
+        ..supervisorEmail = supervisorEmailConstant;
 
       await service.saveBioData(bioData);
     }

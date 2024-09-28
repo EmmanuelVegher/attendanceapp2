@@ -260,12 +260,12 @@ class _DaysOffPageState extends State<DaysOffPage> {
                     }
 
                     return MyInputField(
-                      title: "Reasons For Days Off",
+                      title: "Reasons For Been out of office",
                       hint: "",
                       widget: Container(
-                        width: MediaQuery.of(context).size.width*0.81,
-                        //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                        //color:Colors.red,
+                        width: MediaQuery.of(context).size.width*0.89,
+                        // height: MediaQuery.of(context).size.height * 1,// Set your desired width
+                        // color:Colors.red,
                         child: SizedBox(
                             child:SizedBox(
                                 child:
@@ -284,12 +284,13 @@ class _DaysOffPageState extends State<DaysOffPage> {
                                   ),
                                   value: selectedReasons,
                                   icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                  dropdownColor: Colors.white,
+                                 dropdownColor: Colors.white,
                                   elevation: 4,
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 16,
                                     fontFamily: "NexaBold",
+                                    fontWeight: FontWeight.bold,
                                   ),
                                   items: snapshot.data!.map((item) => DropdownMenuItem<String>(
                                     value: item.value,

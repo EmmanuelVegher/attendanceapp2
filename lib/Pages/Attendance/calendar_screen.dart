@@ -848,6 +848,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       List<AttendanceModel> getAttendanceForPartialUnSynced =
       await widget.service.getAttendanceForId(id);
 
+      List<BioModel> getBioForPartialUnSynced =
+      await IsarService().getBioForId();
+
       List<TrackLocationModel> getTracklocationForPartialUnSynced =
       await widget.service.getTracklocationForPartialUnSynced();
 
@@ -967,6 +970,70 @@ class _CalendarScreenState extends State<CalendarScreen> {
             // ---------------
           }
       });
+
+      for (var unSyncedBio in getBioForPartialUnSynced)
+      {
+
+        await FirebaseFirestore.instance
+            .collection("Staff")
+            .doc(snap.docs[0].id)
+            .set({
+          "department": unSyncedBio.department,
+          'designation': unSyncedBio.designation,
+          'emailAddress': unSyncedBio.emailAddress,
+          'firstName': unSyncedBio.firstName,
+          'id': snap.docs[0].id,
+          'lastName': unSyncedBio.lastName,
+          'location': unSyncedBio.location,
+          'mobile': unSyncedBio.mobile,
+          'project': unSyncedBio.project,
+          'staffCategory': unSyncedBio.staffCategory,
+          'state': unSyncedBio.state,
+          'supervisor': unSyncedBio.supervisor,
+          'supervisorEmail': unSyncedBio.supervisorEmail,
+          'version':appVersionConstant,
+          'isRemoteDelete':false,
+          'isRemoteUpdate':false,
+          'lastUpdateDate':DateTime.now(),
+        }).then((value) {
+          Fluttertoast.showToast(
+            msg: "Syncing BioData to Server...",
+            toastLength: Toast.LENGTH_SHORT,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          IsarService().updateSyncStatusForBio(
+              unSyncedBio.id, BioModel(), true).then((_){
+            Fluttertoast.showToast(
+              msg: "Syncing Completed...",
+              toastLength: Toast.LENGTH_SHORT,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }); // Update Isar
+
+
+
+        })
+            .catchError((error) {
+          Fluttertoast.showToast(
+            msg: "Server Write Error: ${error.toString()}",
+            toastLength: Toast.LENGTH_SHORT,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        });
+
+      }
 
 
 
@@ -1089,37 +1156,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                 ),
                 Spacer(),
-                // _bottomSheetButton(
-                //   label: "Update Attendance",
-                //   onTap: () async {
-                //     final attendanceUpdate =
-                //     await widget.service.getSpecificAttendance(id);
-                //     final attendanceList =
-                //     await widget.service.getListSpecificAttendance(id);
-                //     Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //             builder: (context) => UpdateAttendance(
-                //               service: IsarService(),
-                //               attendanceUpdate: attendanceUpdate,
-                //               //  feedbackList:feedbackList,
-                //               passedId: id,
-                //             )));
-                //     Fluttertoast.showToast(
-                //         msg: "Attendance Updated",
-                //         toastLength: Toast.LENGTH_LONG,
-                //         backgroundColor: Colors.black54,
-                //         gravity: ToastGravity.BOTTOM,
-                //         timeInSecForIosWeb: 1,
-                //         textColor: Colors.white,
-                //         fontSize: 16.0);
-                //     //_updateFeedback(context, id);
-                //     //_taskController.markTaskCompleted(task.id!);
-                //     //Navigator.of(context).pop();
-                //   },
-                //   clr: Colors.red,
-                //   context: context,
-                // ),
+
                 _bottomSheetButton(
                   label: "Delete Attendance",
                   onTap: () async {

@@ -66,16 +66,20 @@ class AuthCheck extends StatelessWidget {
     //print("getAppVersion[0].latestVersion ====${getAppVersion[0].latestVersion }");
     try{
 
-
-      if(lastUsedDate == null){
-        print("lastUsedDate || lastUpdateDate == null");
-        return true;
-      }else if (getAppVersion == false && getAppVersionCheckDate != null && getAppVersionDate != null &&
+      if (getAppVersion == false && getAppVersionCheckDate != null && getAppVersionDate != null &&
           getAppVersionCheckDate.difference(getAppVersionDate).inDays > 15) {
         return true;
       }
 
-      else if(lastUsedDate != null && currentDate.difference(lastUsedDate).inDays > 30){
+
+      // if(lastUsedDate == null){
+      //   print("lastUsedDate || lastUpdateDate == null");
+      //   return true;
+      // }
+      //
+      //
+      // else
+        if(lastUsedDate != null && currentDate.difference(lastUsedDate).inDays > 30){
         print("lastUsedDate != null && currentDate.difference(lastUsedDate).inDays > 30");
         return true;
       }

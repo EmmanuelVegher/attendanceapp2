@@ -138,7 +138,7 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
 
         widget.service.saveAttendance(attendnce);
       }
-      print("FirebaseID ====$firebaseAuthId");
+      //print("FirebaseID ====$firebaseAuthId");
       CircularProgressIndicator(value: 0.0);
       Fluttertoast.showToast(
           msg: "Logging In..",

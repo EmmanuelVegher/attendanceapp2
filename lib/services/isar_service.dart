@@ -18,6 +18,7 @@ import '../model/last_update_date.dart';
 import '../model/projectmodel.dart';
 import '../model/reasonfordaysoff.dart';
 import '../model/staffcategory.dart';
+import '../model/supervisor_model.dart';
 import '../model/track_location_model.dart';
 
 class IsarService extends DatabaseAdapter {
@@ -51,11 +52,46 @@ class IsarService extends DatabaseAdapter {
 
   }
 
+  Future<void> saveAllAttendance(List<AttendanceModel> attendances) async {
+    final isar = await db;
+
+    await isar
+        .writeTxn(() => isar.attendanceModels.putAll(attendances));
+    // await isar.writeTxn((isar) async {
+    //   await isar.attendanceModels.putAll(attendances);
+    // } );
+  }
+
+  Future<void> saveAllBioData(List<BioModel> bioInfoList) async {
+    final isar = await db;
+    await isar
+        .writeTxn(() => isar.bioModels.putAll(bioInfoList));
+    // await isar.writeTxn((isar) async {
+    //   await isar.bioModels.putAll(bioInfoList);
+    // } as Future Function());
+  }
+
 
   Future<void> saveState(StateModel newstate) async {
     final isar = await db;
     try {
       await isar.writeTxnSync<int>(() => isar.stateModels.putSync(newstate));
+    } catch (e) {
+      if (e is IsarError && e.message.contains("Unique index violated")) {
+        // Handle unique index violation
+        print("Error saving state: Unique index violated. State likely already exists.");
+        // You can either update the existing state or handle the error differently
+      } else {
+        // Handle other Isar errors
+        print("Error saving state: $e");
+      }
+    }
+  }
+
+  Future<void> saveSupervisor(SupervisorModel newsupervisor) async {
+    final isar = await db;
+    try {
+      await isar.writeTxnSync<int>(() => isar.supervisorModels.putSync(newsupervisor));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -99,6 +135,8 @@ class IsarService extends DatabaseAdapter {
       }
     }
   }
+
+
 
   Future<void> saveProject(ProjectModel newproject) async {
     final isar = await db;
@@ -357,17 +395,29 @@ class IsarService extends DatabaseAdapter {
     return departmentModels.map((model) => model.departmentName).toList();
   }
 
+  Future<List<String?>> getStaffCategoryFromIsar() async {
+    final isar = await db;
+    final staffCategoryModels = await isar.staffCategoryModels.where().findAll();
+    return staffCategoryModels.map((model) => model.staffCategory).toList();
+  }
+
   Future<List<String?>> getDesignationsFromIsar(String? department,String? category) async {
     final isar = await db;
     final designationModels = await isar.designationModels.filter().departmentNameEqualTo(department).categoryEqualTo(category).findAll();
     return designationModels.map((model) => model.designationName).toList();
   }
 
-  Future<List<String?>> getStaffCategoryFromIsar() async {
+  Future<List<String?>> getSupervisorsFromIsar(String? department, String? state) async {
     final isar = await db;
-    final staffCategoryModels = await isar.staffCategoryModels.where().findAll();
-    return staffCategoryModels.map((model) => model.staffCategory).toList();
+    final supervisorModels = await isar.supervisorModels.filter().departmentEqualTo(department).stateEqualTo(state).findAll();
+    return supervisorModels.map((model) => model.supervisor).toList();
   }
+  Future<List<String?>> getSupervisorEmailFromIsar(String? department,String? nameofsupervisor) async {
+    final isar = await db;
+    final supervisorModels = await isar.supervisorModels.filter().departmentEqualTo(department).supervisorEqualTo(nameofsupervisor).findAll();
+    return supervisorModels.map((model) => model.email).toList();
+  }
+
 
   Future<List<String?>> getReasonsForDaysOffFromIsar() async {
     final isar = await db;
@@ -380,6 +430,21 @@ class IsarService extends DatabaseAdapter {
     final projectModels = await isar.projectModels.where().findAll();
     return projectModels.map((model) => model.project).toList();
   }
+
+  Future<List<String?>> getAllStatesFromIsar() async {
+    final isar = await db;
+    final stateModels = await isar.stateModels.where().findAll();
+    return stateModels.map((model) => model.stateName).toList();
+  }
+
+  Future<List<String?>> getAllStatesFromIsarForFCT() async {
+    final isar = await db;
+    final stateModels = await isar.stateModels.filter().stateNameEqualTo("Federal Capital Territory").findAll();
+    return stateModels.map((model) => model.stateName).toList();
+  }
+
+
+
 
   Future<List<LocationModel>> getLocationsByState(String? state) async {
     final isar = await db;
@@ -518,7 +583,8 @@ class IsarService extends DatabaseAdapter {
         AppVersionModelSchema,
         ReasonForDaysOffModelSchema,
         StaffCategoryModelSchema,
-        LastUpdateDateModelSchema
+        LastUpdateDateModelSchema,
+        SupervisorModelSchema
       ], inspector: true, directory: directory.path);
     }
     return Future.value(Isar.getInstance());
@@ -545,6 +611,16 @@ class IsarService extends DatabaseAdapter {
     final isar = await db;
     await isar.writeTxn(() => isar.departmentModels.clear()); // Truncate collection
   }
+  Future<void> cleanSupervisorCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.supervisorModels.clear()); // Truncate collection
+  }
+
+  Future<void> cleanAttendanceCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.attendanceModels.clear()); // Truncate collection
+  }
+
   Future<void> cleanDesignationCollection() async {
     final isar = await db;
     await isar.writeTxn(() => isar.designationModels.clear()); // Truncate collection
@@ -573,6 +649,11 @@ class IsarService extends DatabaseAdapter {
   Future<void> cleanProjectCollection() async {
     final isar = await db;
     await isar.writeTxn(() => isar.projectModels.clear()); // Truncate collection
+  }
+
+  Future<void> cleanBioCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.bioModels.clear()); // Truncate collection
   }
 
   Future<List<AttendanceModel>> getAttendanceFor(
@@ -742,6 +823,17 @@ class IsarService extends DatabaseAdapter {
     return await isar.attendanceModels
         .filter()
         .idEqualTo(id)
+        .isUpdatedEqualTo(true)
+        .findAll();
+    // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
+  }
+
+  Future<List<BioModel>> getBioForId() async {
+    final isar = await db;
+    return await isar.bioModels
+        .filter()
+        .idEqualTo(2)
+        .isSyncedEqualTo(false)
         .findAll();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
   }
@@ -832,6 +924,178 @@ class IsarService extends DatabaseAdapter {
       await isar.attendanceModels.put(attendanceUpdate);
     });
   }
+
+  Future<void> updateBioLocation(
+      int id,
+      BioModel bioModels,
+      String location,
+      bool isSynced) async {
+    final isar = await db;
+    final bioLocationUpdate = await isar.bioModels.get(id);
+
+    bioLocationUpdate!
+      ..location = location
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioLocationUpdate);
+    });
+  }
+
+  Future<void> updateStaffCategoryLocation(
+      int id,
+      BioModel bioModels,
+      String staffCategory,
+      bool isSynced) async {
+    final isar = await db;
+    final bioLocationUpdate = await isar.bioModels.get(id);
+
+    bioLocationUpdate!
+      ..staffCategory = staffCategory
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioLocationUpdate);
+    });
+  }
+
+  Future<void> updateBioDesignation(
+      int id,
+      BioModel bioModels,
+      String designation,
+      bool isSynced) async {
+    final isar = await db;
+    final bioUpdate = await isar.bioModels.get(id);
+
+    bioUpdate!
+      ..designation = designation
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioUpdate);
+    });
+  }
+
+  Future<void> updateBioProject(
+      int id,
+      BioModel bioModels,
+      String project,
+      bool isSynced) async {
+    final isar = await db;
+    final bioUpdate = await isar.bioModels.get(id);
+
+    bioUpdate!
+      ..project = project
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioUpdate);
+    });
+  }
+
+  Future<void> updateStateProject(
+      int id,
+      BioModel bioModels,
+      String state,
+      bool isSynced) async {
+    final isar = await db;
+    final bioUpdate = await isar.bioModels.get(id);
+
+    bioUpdate!
+      ..state = state
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioUpdate);
+    });
+  }
+
+  Future<void> updateBioSupervisor(
+      int id,
+      BioModel bioModels,
+      String supervisor,
+      bool isSynced) async {
+    final isar = await db;
+    final bioUpdate = await isar.bioModels.get(id);
+
+    bioUpdate!
+      ..supervisor = supervisor
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioUpdate);
+    });
+  }
+
+  Future<void> updateBioSupervisorEmail(
+      int id,
+      BioModel bioModels,
+      String supervisorEmail,
+      bool isSynced) async {
+    final isar = await db;
+    final bioUpdate = await isar.bioModels.get(id);
+
+    bioUpdate!
+      ..supervisorEmail = supervisorEmail
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioUpdate);
+    });
+  }
+
+  Future<void> updateBioEmail(
+      int id,
+      BioModel bioModels,
+      String emailAddress,
+      bool isSynced) async {
+    final isar = await db;
+    final bioEmailUpdate = await isar.bioModels.get(id);
+
+    bioEmailUpdate!
+      ..emailAddress = emailAddress
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioEmailUpdate);
+    });
+  }
+
+  Future<void> updateBioPhone(
+      int id,
+      BioModel bioModels,
+      String mobile,
+      bool isSynced) async {
+    final isar = await db;
+    final bioModelUpdate = await isar.bioModels.get(id);
+
+    bioModelUpdate!
+      ..mobile = mobile
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioModelUpdate);
+    });
+  }
+
+
+  Future<void> updateBioDepartment(
+      int id,
+      BioModel bioModels,
+      String department,
+      bool isSynced) async {
+    final isar = await db;
+    final bioModelUpdate = await isar.bioModels.get(id);
+
+    bioModelUpdate!
+      ..department = department
+      ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioModelUpdate);
+    });
+  }
+
 
   Future<void> updateAttendanceWithComment(
       int id,
@@ -957,6 +1221,38 @@ class IsarService extends DatabaseAdapter {
     }
   }
 
+
+
+  Stream<List<BioModel>> listenToBiometric1({String? search}) async* {
+
+    final isar = await db;
+    final query = isar.bioModels
+        .where()
+        .filter()
+        .idEqualTo(2)
+        .build();
+
+    await for (final results in query.watch(fireImmediately: true)) {
+      if (results.isNotEmpty) {
+        print("BioModel from stream: $results");
+        yield results;
+      }
+    }
+  }
+
+// In your IsarService class:
+  Stream<BioModel?> listenToBiometric() async* {
+    final isar = await db;
+    await for (final changes in isar.bioModels.watchLazy()) {
+      // Get the first result asynchronously
+      final bioModel = await isar.bioModels.filter().idEqualTo(2).findFirst();
+      print("BioModel from stream: $bioModel"); // Add this print statement
+
+      yield bioModel;
+    }
+  }
+
+
   // Stream<List<DaysOffModel>> searchAllDaysOff({String? search}) async* {
   //   print(search);
   //   final isar = await db;
@@ -1024,6 +1320,21 @@ class IsarService extends DatabaseAdapter {
 
     await isar.writeTxn(() async {
       await isar.attendanceModels.put(updateSyncStatus);
+    });
+  }
+
+  Future<void> updateSyncStatusForBio(
+      int id,
+      BioModel bioModels,
+      bool isSynced,
+      ) async {
+    final isar = await db;
+    final updateSyncStatus = await isar.bioModels.get(id);
+
+    updateSyncStatus!..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(updateSyncStatus);
     });
   }
 

@@ -153,7 +153,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
     } catch (e) {
       if (e.toString() ==
           "RangeError (index): Invalid value: Valid value range is empty: 0") {
-        log("getAttendance Summary method error ====== Staff Yet to clock in as Last saved date != Current Date");
+        // log("getAttendance Summary method error ====== Staff Yet to clock in as Last saved date != Current Date");
       } else {
         log(e.toString());
       }

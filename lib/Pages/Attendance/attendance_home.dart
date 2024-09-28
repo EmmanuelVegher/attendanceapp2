@@ -46,6 +46,7 @@ import '../../model/projectmodel.dart';
 import '../../model/reasonfordaysoff.dart';
 import '../../model/staffcategory.dart';
 import '../../model/statemodel.dart';
+import '../../model/supervisor_model.dart';
 import '../../model/track_location_model.dart';
 import '../../services/notification_services.dart';
 import '../../widgets/constants.dart';
@@ -274,7 +275,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
             content: Text(
                 '''Kindly Note that this overides all data stored locally and restores all data from the chosen restore preference.
                 
-Warning!!!
+ Warning!!!
 
 1) Any Record not synced would be cleared off if you decide to "Restore from server".
 2) Only Choose the "Local DB Restore" if the Local Database is up-to-date.               
@@ -848,176 +849,157 @@ Warning!!!
       print("Permission is granted");
       final dir = await getApplicationDocumentsDirectory();
       print("Download Directory = $dir");
-      // print("Download Directory2 = $dir2");
-      String saveDirectory =
-          ('$dir/attendancebackup'.replaceAll(RegExp('[^A-Za-z0-9/.]'), ''))
-              .replaceAll("Directory", "");
-      String savePath2 = ('$saveDirectory/attendancebackup.json'
-              .replaceAll(RegExp('[^A-Za-z0-9/.]'), ''))
-          .replaceAll("Directory", "");
 
-      String savePathBioInfo = ('$saveDirectory/bioInfoBackup.json'
-              .replaceAll(RegExp('[^A-Za-z0-9/.]'), ''))
-          .replaceAll("Directory", "");
-      List<AttendanceModel> list;
-      List<BioModel> list2;
-      String saveDirect = "/storage/emulated/0/Download/attendancebackup";
-      String savePath =
-          "/storage/emulated/0/Download/attendancebackup/attendancebackup.json";
-      final File file = File(savePath2);
-      final File file2 = File(savePathBioInfo);
+      String saveDirectory = ('$dir/attendancebackup'.replaceAll(RegExp('[^A-Za-z0-9/.]'), '')).replaceAll("Directory", "");
+      String savePath2 = ('$saveDirectory/attendancebackup.json'.replaceAll(RegExp('[^A-Za-z0-9/.]'), '')).replaceAll("Directory", "");
+      String savePathBioInfo = ('$saveDirectory/bioInfoBackup.json'.replaceAll(RegExp('[^A-Za-z0-9/.]'), '')).replaceAll("Directory", "");
 
-      //clear DB
-      widget.service.cleanDB();
+      List<AttendanceModel> attendanceList = [];
+      List<BioModel> bioList = [];
 
+
+      // Ensure backup files exist
       if (await Directory(saveDirectory).exists()) {
-        //Restore Attendance
-        if (await File(savePath2).exists()) {
+
+        await File(savePath2).exists().then((_) async {
+          if (await File(savePath2).exists()) {
           try {
-            final file = await _localFile;
-            // Read the file
-            final contents = await file.readAsString();
-            var data = json.decode(contents);
-            var rest = data['Attendance'] as List;
+          final file = File(savePath2);
+          final contents = await file.readAsString();
+          var data = json.decode(contents);
+          var attendanceData = data['Attendance'] as List;
 
-            //await widget.service.importAllAttendance(contents['Attendance']);
-            print(rest);
-            list = rest
-                .map<AttendanceModel>((json) => AttendanceModel.fromJson(json))
-                .toList();
-            print("list ==============${list[0].durationWorked}");
+          attendanceList = attendanceData.map<AttendanceModel>((json) => AttendanceModel.fromJson(json)).toList();
 
-            for (var restoreBackup in list) {
-              final attendnce = AttendanceModel()
-                ..clockIn = restoreBackup.clockIn
-                ..date = restoreBackup.date
-                ..clockInLatitude = restoreBackup.clockInLatitude
-                ..clockInLocation = restoreBackup.clockInLocation
-                ..clockInLongitude = restoreBackup.clockInLongitude
-                ..clockOut = restoreBackup.clockOut
-                ..clockOutLatitude = restoreBackup.clockOutLatitude
-                ..clockOutLocation = restoreBackup.clockOutLocation
-                ..clockOutLongitude = restoreBackup.clockOutLongitude
-                ..isSynced = restoreBackup.isSynced
-                ..voided = restoreBackup.voided
-                ..isUpdated = restoreBackup.isUpdated
-                ..durationWorked = restoreBackup.durationWorked
-                ..noOfHours = restoreBackup.noOfHours
-                ..offDay = restoreBackup.offDay
-                ..month = restoreBackup.month;
+          print("attendanceList=== $attendanceList");
 
-              widget.service.saveAttendance(attendnce);
-              Fluttertoast.showToast(
-                  msg: "Restore Complete",
-                  toastLength: Toast.LENGTH_LONG,
-                  backgroundColor: Colors.black54,
-                  gravity: ToastGravity.BOTTOM,
-                  timeInSecForIosWeb: 1,
-                  textColor: Colors.white,
-                  fontSize: 16.0);
-            }
+          if (attendanceList.isNotEmpty) {
+          // Only clean cleanAttendanceCollection after successful retrieval
+          widget.service.cleanAttendanceCollection();
+          await widget.service.saveAllAttendance(attendanceList); // Batch insert attendance
+          Fluttertoast.showToast(msg: "Attendance Restore Complete");
 
-            //widget.service.importAllAttendance(list);
 
-            //return int.parse(contents);
-          } catch (e) {
-            Fluttertoast.showToast(
-                msg: "Error: $e",
-                toastLength: Toast.LENGTH_LONG,
-                backgroundColor: Colors.black54,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                textColor: Colors.white,
-                fontSize: 16.0);
-            // If encountering an error, return 0
-            // return 0;
-          }
-        } else {
           Fluttertoast.showToast(
-              msg: "Attendance Backup does not exist. Kindly backup",
-              toastLength: Toast.LENGTH_LONG,
-              backgroundColor: Colors.black54,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              textColor: Colors.white,
-              fontSize: 16.0);
-        }
-
-        if (await File(savePathBioInfo).exists()) {
+          msg: "Attendance Restore Complete",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          );
+          } else {
+          Fluttertoast.showToast(
+          msg: "No attendance data to restore",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          );
+          }
+          } catch (e) {
+          Fluttertoast.showToast(
+          msg: "Error reading attendance backup: $e",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          );
+          }
+          } else {
+          Fluttertoast.showToast(
+          msg: "Attendance Backup does not exist. Kindly backup.",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          );
+          }
+        }).then((_) async {
+          // Restore BioInfo
+          if (await File(savePathBioInfo).exists()) {
           try {
-            final file2 = await _localFile2;
-            // Read the file
-            final contents2 = await file2.readAsString();
-            var data2 = json.decode(contents2);
-            var rest2 = data2['BioInfo'] as List;
+          final file2 = File(savePathBioInfo);
+          final contents2 = await file2.readAsString();
+          var data2 = json.decode(contents2);
+          var bioData = data2['BioInfo'] as List;
 
-            //await widget.service.importAllAttendance(contents['Attendance']);
-            print(rest2);
-            list2 =
-                rest2.map<BioModel>((json) => BioModel.fromJson(json)).toList();
-            //print("list ==============${list[0].durationWorked}");
+          bioList = bioData.map<BioModel>((json) => BioModel.fromJson(json)).toList();
 
-            for (var restoreBackup2 in list2) {
-              final bioInfo = BioModel()
-                ..department = restoreBackup2.department
-                ..designation = restoreBackup2.designation
-                ..emailAddress = restoreBackup2.emailAddress
-                ..firebaseAuthId = restoreBackup2.firebaseAuthId
-                ..firstName = restoreBackup2.firstName
-                ..lastName = restoreBackup2.lastName
-                ..location = restoreBackup2.location
-                ..mobile = restoreBackup2.mobile
-                ..password = restoreBackup2.password
-                ..project = restoreBackup2.project
-                ..role = restoreBackup2.role
-                ..staffCategory = restoreBackup2.staffCategory
-                ..state = restoreBackup2.state;
+          if (bioList.isNotEmpty) {
+            widget.service.cleanBioCollection();
+            // Wrap saveAllBioData in an anonymous function
+            await Future.delayed(const Duration(milliseconds: 200)).then((_) async{
+              await widget.service.saveAllBioData(bioList);
+            });
+            Fluttertoast.showToast(msg: "BioInfo Restore Complete");
 
-              widget.service.saveBioData(bioInfo);
-              Fluttertoast.showToast(
-                  msg: "Restore Complete",
-                  toastLength: Toast.LENGTH_LONG,
-                  backgroundColor: Colors.black54,
-                  gravity: ToastGravity.BOTTOM,
-                  timeInSecForIosWeb: 1,
-                  textColor: Colors.white,
-                  fontSize: 16.0);
-            }
 
-            //widget.service.importAllAttendance(list);
-
-            //return int.parse(contents);
-          } catch (e) {
-            Fluttertoast.showToast(
-                msg: "Error: $e",
-                toastLength: Toast.LENGTH_LONG,
-                backgroundColor: Colors.black54,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                textColor: Colors.white,
-                fontSize: 16.0);
-            // If encountering an error, return 0
-            // return 0;
-          }
-        } else {
           Fluttertoast.showToast(
-              msg: "BioInfo Backup does not exist. Kindly backup",
-              toastLength: Toast.LENGTH_LONG,
-              backgroundColor: Colors.black54,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              textColor: Colors.white,
-              fontSize: 16.0);
-        }
+          msg: "BioInfo Restore Complete",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          );
+          } else {
+          Fluttertoast.showToast(
+          msg: "No BioInfo data to restore",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          );
+          }
+          } catch (e) {
+            print("Error reading BioInfo backup: $e");
+          Fluttertoast.showToast(
+          msg: "Error reading BioInfo backup: $e",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          );
+          }
+          } else {
+          Fluttertoast.showToast(
+          msg: "BioInfo Backup does not exist. Kindly backup.",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          );
+          }
+        });
+        // Restore Attendance
+
+
+
       } else {
         Fluttertoast.showToast(
-            msg: "Directory does not exist. Kindly backup",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0);
+          msg: "Backup Directory does not exist. Kindly backup.",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
       }
     } else if (await status.isDenied) {
       if (await Permission.storage.request().isGranted) {
@@ -1025,6 +1007,7 @@ Warning!!!
       }
     }
   }
+
 
   Future<void> localFile() async {
     localFileSave = [];
@@ -1041,115 +1024,34 @@ Warning!!!
   }
 
   Future<void> saveLocalFile() async {
-    var status = Permission.storage.status;
+    // Request permission to access storage
+    var status = await Permission.storage.status;
 
-    if (await status.isGranted) {
+    if (status.isGranted) {
       log("Permission is granted");
-      //moveFile(file2, saveDirect);
-      // final dir = await getExternalStorageDirectory();
+
+      // Get the application's document directory
       final dir = await getApplicationDocumentsDirectory();
-      print("Download Directory = $dir");
-      // print("Download Directory2 = $dir2");
-      String saveDirect =
-          ('$dir/attendancebackup'.replaceAll(RegExp('[^A-Za-z0-9/.]'), ''))
-              .replaceAll("Directory", "");
-      String savePath = ('$saveDirect/attendancebackup.json'
-              .replaceAll(RegExp('[^A-Za-z0-9/.]'), ''))
-          .replaceAll("Directory", "");
-      String savePathBio = ('$saveDirect/bioInfoBackup.json'
-              .replaceAll(RegExp('[^A-Za-z0-9/.]'), ''))
+      String saveDirect = ('$dir/attendancebackup')
+          .replaceAll(RegExp('[^A-Za-z0-9/.]'), '')
           .replaceAll("Directory", "");
 
-      print("saveDirect ============== $saveDirect");
-      print("savePath ========== $savePath");
+      String savePath = ('$saveDirect/attendancebackup.json')
+          .replaceAll(RegExp('[^A-Za-z0-9/.]'), '')
+          .replaceAll("Directory", "");
 
-      String saveDirectory = "/storage/emulated/0/Download/attendancebackup";
-      String savePath2 =
-          "/storage/emulated/0/Download/attendancebackup/attendancebackup.json";
+      String savePathBio = ('$saveDirect/bioInfoBackup.json')
+          .replaceAll(RegExp('[^A-Za-z0-9/.]'), '')
+          .replaceAll("Directory", "");
 
-      print("savePath File = $savePath");
-      //final File file2 = File(savePath2);
-      final File file = File(savePath);
-      final File file2 = File(savePathBio);
       final attendanceModel = await widget.service.exportAllAttendance();
       final bioModel = await widget.service.exportAllBioInfo();
 
-      if (await Directory(saveDirect).exists()) {
-        if (await File(savePath).exists()) {
-          log("Attendance File exists");
-          // print(attendanceFor1990);
-          await file.delete(recursive: true);
-
-
-
-          file.writeAsStringSync(json.encode(attendanceModel));
-
-          Fluttertoast.showToast(
-              msg: "Replacing Existing Backup..",
-              toastLength: Toast.LENGTH_LONG,
-              backgroundColor: Colors.black54,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              textColor: Colors.white,
-              fontSize: 16.0);
-          //});
-        } else {
-          print("File don't exists");
-          Fluttertoast.showToast(
-              msg: "Creating New Backup..",
-              toastLength: Toast.LENGTH_LONG,
-              backgroundColor: Colors.black54,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              textColor: Colors.white,
-              fontSize: 16.0);
-          new File(savePath).create(recursive: true).then((File file) async {
-            // Stuff to do after file has been created...
-            //await attendanceModel.then((value) {
-            file.writeAsStringSync(json.encode(attendanceModel));
-            //});
-            // print("AttendanceModel File = $attendanceModel");
-          });
-        }
-        //BioInfo Save
-
-        if (await File(savePathBio).exists()) {
-          //print("File exists");
-          log("Bio File exists");
-          await file2.delete(recursive: true);
-
-
-          file2.writeAsStringSync(json.encode(bioModel));
-          Fluttertoast.showToast(
-              msg: "Replacing Existing Backup..",
-              toastLength: Toast.LENGTH_LONG,
-              backgroundColor: Colors.black54,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              textColor: Colors.white,
-              fontSize: 16.0);
-          //});
-        } else {
-          log("Bio File does exists");
-          Fluttertoast.showToast(
-              msg: "Creating New Backup..",
-              toastLength: Toast.LENGTH_LONG,
-              backgroundColor: Colors.black54,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              textColor: Colors.white,
-              fontSize: 16.0);
-          new File(savePathBio)
-              .create(recursive: true)
-              .then((File file2) async {
-            // Stuff to do after file has been created...
-            //await attendanceModel.then((value) {
-            file2.writeAsStringSync(json.encode(bioModel));
-            //});
-            // print("AttendanceModel File = $attendanceModel");
-          });
-        }
-      } else {
+      // Ensure the backup directory exists, create if not
+      final backupDir = Directory(saveDirect);
+      if (!await backupDir.exists()) {
+        await backupDir.create(recursive: true);
+        log("Created backup directory: $saveDirect");
         Fluttertoast.showToast(
             msg: "Creating Backup Folder.",
             toastLength: Toast.LENGTH_LONG,
@@ -1158,46 +1060,47 @@ Warning!!!
             timeInSecForIosWeb: 1,
             textColor: Colors.white,
             fontSize: 16.0);
-        print("Directory Doesnt exist");
-        new Directory(saveDirect)
-            .create(recursive: true)
-            .then((Directory directory) {
-          print(directory.path);
-        }).then((value) => {
-                  new File(savePath).create(recursive: true).then((File file) {
-                    Fluttertoast.showToast(
-                        msg: "Creating New Backup..",
-                        toastLength: Toast.LENGTH_LONG,
-                        backgroundColor: Colors.black54,
-                        gravity: ToastGravity.BOTTOM,
-                        timeInSecForIosWeb: 1,
-                        textColor: Colors.white,
-                        fontSize: 16.0);
-                    // Stuff to do after file has been created...
-                    file.writeAsStringSync(json.encode(attendanceModel));
-                    print("AttendanceModel File = $attendanceModel");
-                  }).then((value) => {
-                        new File(savePathBio)
-                            .create(recursive: true)
-                            .then((File file2) {
-                          Fluttertoast.showToast(
-                              msg: "Creating BioInfo Backup..",
-                              toastLength: Toast.LENGTH_LONG,
-                              backgroundColor: Colors.black54,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIosWeb: 1,
-                              textColor: Colors.white,
-                              fontSize: 16.0);
-                          // Stuff to do after file has been created...
-                          file2.writeAsStringSync(json.encode(bioModel));
-                          //print("AttendanceModel File = $attendanceModel");
-                        })
-                      })
-                });
       }
-    } else if (await status.isDenied) {
+
+      // Handle Attendance Backup
+      final attendanceFile = File(savePath);
+      if (await attendanceFile.exists()) {
+        log("Attendance File exists. Replacing backup...");
+        await attendanceFile.delete();
+      }
+      await attendanceFile.writeAsString(json.encode(attendanceModel));
+      Fluttertoast.showToast(
+          msg: "Attendance Backup Created Successfully.",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+      // Handle BioInfo Backup
+      final bioFile = File(savePathBio);
+      if (await bioFile.exists()) {
+        log("Bio File exists. Replacing backup...");
+        await bioFile.delete();
+      }
+      await bioFile.writeAsString(json.encode(bioModel));
+      Fluttertoast.showToast(
+          msg: "BioInfo Backup Created Successfully.",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+    } else if (status.isDenied) {
+      // Request permission if denied
       if (await Permission.storage.request().isGranted) {
-        print("Permission was granted");
+        log("Permission was granted");
+        await saveLocalFile();
+      } else {
+        log("Permission denied");
       }
     }
   }
@@ -1539,11 +1442,23 @@ Warning!!!
       List<LastUpdateDateModel> getlastUpdateDate =
       await widget.service.getLastUpdateDate();
 
+      List<BioModel> getAttendanceForBio =
+      await widget.service.getBioInfoWithUserBio();
+
       DateTime currentDate = DateTime.now();
       log("getAppVersion[0].appVersion== ${getAppVersion[0].appVersion}");
 
         if (getAppVersion[0].checkDate == null ||
             currentDate.difference(getAppVersion[0].checkDate!).inDays > 3) {
+
+
+
+          QuerySnapshot snap = await firestore
+              .collection("Staff")
+              .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
+              .get();
+
+
           final lastAppVersionDoc = await firestore
               .collection('AppVersion')
               .doc('AppVersion')
@@ -1553,6 +1468,13 @@ Warning!!!
               .collection('LastUpdateDate')
               .doc('LastUpdateDate')
               .get();
+
+          final lastUpdateDatebio = await firestore
+              .collection('Staff')
+              .doc(snap.docs[0].id)
+              .get();
+
+
 
           if (lastAppVersionDoc.exists) {
             // Get the data from the document
@@ -1621,7 +1543,7 @@ Warning!!!
               print("appVersionDate ====${LastUpdateDate}");
 
               if (LastUpdateDate.isAfter(
-                  getlastUpdateDate[0].lastUpdateDate!)) {
+                  getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
                 Fluttertoast.showToast(
                   msg: "Updating Local Database!",
                   toastLength: Toast.LENGTH_LONG,
@@ -1631,6 +1553,7 @@ Warning!!!
                   textColor: Colors.white,
                   fontSize: 16.0,
                 );
+
 
 
                 await IsarService().cleanLocationCollection().then((
@@ -1643,6 +1566,7 @@ Warning!!!
                   await IsarService().cleanStaffCategoryCollection();
                   await IsarService().cleanLastUpdateDateCollection();
                   await IsarService().cleanProjectCollection();
+                  await IsarService().cleanSupervisorCollection();
                 }).then((value) async {
                   await _insertSuperUser(
                       IsarService()); // Pass service to _insertSuperUser
@@ -1657,9 +1581,20 @@ Warning!!!
                   await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
                   await fetchProjectAndInsertIntoIsar(IsarService());
                   await fetchAppVersionAndInsertIntoIsar(IsarService());
+                  fetchSupervisorAndInsertIntoIsar(IsarService());
                 });
                 Fluttertoast.showToast(
                   msg: "Updating Local Database Completed!",
+                  toastLength: Toast.LENGTH_LONG,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              }else{
+                Fluttertoast.showToast(
+                  msg: "No Recent updates..",
                   toastLength: Toast.LENGTH_LONG,
                   backgroundColor: Colors.black54,
                   gravity: ToastGravity.BOTTOM,
@@ -1675,6 +1610,111 @@ Warning!!!
           } else {
             print("Document 'LastUpdateDate' not found.");
           }
+
+          if (lastUpdateDatebio.exists) {
+            // Get the data from the document
+            final data = lastUpdateDatebio.data();
+
+
+            if (data != null && data.containsKey('lastUpdateDate')) {
+              // Safely extract the timestamp and convert to DateTime
+              final timestamp = data['lastUpdateDate'] as Timestamp;
+              final isRemoteDelete = data['isRemoteDelete'];
+              final LastUpdateDate = timestamp.toDate();
+
+
+              if (LastUpdateDate.isAfter(getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
+                Fluttertoast.showToast(
+                  msg: "Updating Local Database!",
+                  toastLength: Toast.LENGTH_LONG,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                await IsarService().cleanLocationCollection().then((_) async {
+                  await IsarService().cleanStateCollection().then((_) async {
+                    await IsarService().cleanStaffCategoryCollection().then((_) async {
+                      await IsarService().cleanReasonsForDayOffCollection().then((_) async {
+                        await IsarService().cleanDesignationCollection().then((_) async {
+                          await IsarService().cleanDepartmentCollection().then((_) async {
+                            await IsarService().cleanLastUpdateDateCollection().then((_) async {
+                              await IsarService().cleanProjectCollection().then((_) async {
+                                await IsarService().cleanSupervisorCollection().then((_) async {
+                                  await IsarService().cleanAttendanceCollection().then((_) async {
+                                    await _autoFirebaseDBUpdate(IsarService(), snap.docs[0].id);
+                                    fetchDataAndInsertIntoIsar(IsarService());
+                                    fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
+                                    fetchSupervisorAndInsertIntoIsar(IsarService());
+                                    fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
+                                    fetchStaffCategoryAndInsertIntoIsar(IsarService());
+                                    await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
+                                    await fetchProjectAndInsertIntoIsar(IsarService());
+                                    await fetchAppVersionAndInsertIntoIsar(IsarService());
+                                    Fluttertoast.showToast(
+                                      msg: "Updates on Database Completed",
+                                      toastLength: Toast.LENGTH_LONG,
+                                      backgroundColor: Colors.black54,
+                                      gravity: ToastGravity.BOTTOM,
+                                      timeInSecForIosWeb: 1,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0,
+                                    );
+
+                                  });
+
+                                });
+                              });
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+                Fluttertoast.showToast(
+                  msg: "Updating Local Database Completed!",
+                  toastLength: Toast.LENGTH_LONG,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              }
+              else{
+                Fluttertoast.showToast(
+                  msg: "No Recent updates..",
+                  toastLength: Toast.LENGTH_LONG,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              }
+              // Remote Delete once there is internet);
+              if(isRemoteDelete == true){
+                Fluttertoast.showToast(
+                  msg: "Clearing Database..",
+                  toastLength: Toast.LENGTH_LONG,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                await IsarService().cleanDB();
+              }
+            } else {
+              print("Document does not contain 'lastUpdateDate' field.");
+            }
+          } else {
+            print("Document 'LastUpdateDate' not found.");
+          }
+
+
         }
 
 
@@ -1734,21 +1774,86 @@ Warning!!!
 
     if (bioInfoForSuperUser.isEmpty) {
       final bioData = BioModel()
-        ..emailAddress = "superuser@ccfng.org"
-        ..password = "Moderated@2023"
-        ..role = "Super-Admin"
-        ..department = "Software Development"
-        ..designation = "Software Developer"
-        ..firstName = "Super"
-        ..lastName = "User"
-        ..location = "Central Office"
-        ..mobile = "09020000000"
-        ..project = "CARITAS Nigeria"
-        ..staffCategory = "Team Lead"
-        ..state = "Abuja"
-        ..firebaseAuthId = firebaseAuthId;
+        ..emailAddress = emailAddressConstant
+        ..password = passwordConstant
+        ..role = roleConstant
+        ..department = departmentConstant
+        ..designation = designationConstant
+        ..firstName = firstNameConstant
+        ..lastName = lastNameConstant
+        ..location = locationConstant
+        ..mobile = mobileConstant
+        ..project = projectConstant
+        ..staffCategory = staffCategoryConstant
+        ..state = stateConstant
+        ..firebaseAuthId = firebaseAuthIdConstant
+        ..isSynced = isSyncedConstant
+        ..supervisor = supervisorConstant
+        ..supervisorEmail = supervisorEmailConstant;
 
       await service.saveBioData(bioData);
+    }
+  }
+
+  Future<void> _autoFirebaseDBUpdate(IsarService service, String fireBaseIdNew) async {
+    final allAttendance = await service.getAllAttendance();
+    if (allAttendance.isEmpty) {
+      await IsarService().removeAllAttendance(AttendanceModel());
+      final CollectionReference snap3 = FirebaseFirestore.instance
+          .collection('Staff')
+          .doc(fireBaseIdNew)
+          .collection("Record");
+      print("snap3 ====$snap3");
+
+      List data = [];
+      List<AttendanceModel> allAttendance = [];
+
+      await snap3.get().then((QuerySnapshot value) {
+        for (var element in value.docs) {
+          data.add(element.data());
+        }
+      });
+
+      for (var document in data) {
+        allAttendance.add(AttendanceModel.fromJson(document));
+      }
+
+      print("data ====$data");
+      print("allAttendance ====$allAttendance");
+
+      for (var attendanceHistory in allAttendance) {
+        final attendnce = AttendanceModel()
+          ..clockIn = attendanceHistory.clockIn
+          ..date = attendanceHistory.date
+          ..clockInLatitude = attendanceHistory.clockInLatitude
+          ..clockInLocation = attendanceHistory.clockInLocation
+          ..clockInLongitude = attendanceHistory.clockInLongitude
+          ..clockOut = attendanceHistory.clockOut
+          ..clockOutLatitude = attendanceHistory.clockOutLatitude
+          ..clockOutLocation = attendanceHistory.clockOutLocation
+          ..clockOutLongitude = attendanceHistory.clockOutLongitude
+          ..isSynced = attendanceHistory.isSynced
+          ..voided = attendanceHistory.voided
+          ..isUpdated = attendanceHistory.isUpdated
+          ..offDay = attendanceHistory.offDay
+          ..durationWorked = attendanceHistory.durationWorked
+          ..noOfHours = attendanceHistory.noOfHours
+          ..comments = attendanceHistory.comments
+          ..month = attendanceHistory.month
+
+        ;
+
+        service.saveAttendance(attendnce);
+      }
+      //print("FirebaseID ====$firebaseAuthId");
+      Fluttertoast.showToast(
+          msg: "Authenticating account..",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
   }
 
@@ -1850,6 +1955,36 @@ Warning!!!
     }
   }
 
+  void fetchSupervisorAndInsertIntoIsar(IsarService service) async {
+    final firestore = FirebaseFirestore.instance;
+    final supervisorCollection = await firestore.collection('Supervisors').get();
+
+    for (final stateDoc in supervisorCollection.docs) {
+      final state = stateDoc.id;
+
+      final supervisorCollectionRef = await firestore
+          .collection('Supervisors')
+          .doc(state)
+          .collection(state)
+          .get();
+
+      for (final supervisorDoc in supervisorCollectionRef.docs) {
+        final supervisor = supervisorDoc.id;
+        final data = supervisorDoc.data() as Map<String, dynamic>;
+
+        final supervisorSave = SupervisorModel()
+          ..department = data['department']
+          ..email = data['email']
+          ..state = state
+          ..supervisor = data['supervisor']
+
+        ;
+
+        service.saveSupervisor(supervisorSave);
+      }
+    }
+  }
+
   Future<void> fetchAppVersionAndInsertIntoIsar(IsarService service) async {
     final firestore = FirebaseFirestore.instance;
     final getAppVersion = await service.getAppVersionInfo();
@@ -1931,10 +2066,15 @@ Warning!!!
 
 
 
+
+
       QuerySnapshot snap = await FirebaseFirestore.instance
           .collection("Staff")
           .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
           .get();
+
+      List<BioModel> getBioForPartialUnSynced =
+      await IsarService().getBioForId();
 
 
 
@@ -2047,6 +2187,71 @@ Warning!!!
                 // ---------------
               }
           });
+
+      //Iterate through each queried loop
+      for (var unSyncedBio in getBioForPartialUnSynced)
+      {
+
+        await FirebaseFirestore.instance
+            .collection("Staff")
+            .doc(snap.docs[0].id)
+            .set({
+          "department": unSyncedBio.department,
+          'designation': unSyncedBio.designation,
+          'emailAddress': unSyncedBio.emailAddress,
+          'firstName': unSyncedBio.firstName,
+          'id': snap.docs[0].id,
+          'lastName': unSyncedBio.lastName,
+          'location': unSyncedBio.location,
+          'mobile': unSyncedBio.mobile,
+          'project': unSyncedBio.project,
+          'staffCategory': unSyncedBio.staffCategory,
+          'state': unSyncedBio.state,
+          'supervisor': unSyncedBio.supervisor,
+          'supervisorEmail': unSyncedBio.supervisorEmail,
+          'version':appVersionConstant,
+          'isRemoteDelete':false,
+          'isRemoteUpdate':false,
+          'lastUpdateDate':DateTime.now(),
+        }).then((value) {
+          Fluttertoast.showToast(
+            msg: "Syncing BioData to Server...",
+            toastLength: Toast.LENGTH_SHORT,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          IsarService().updateSyncStatusForBio(
+              unSyncedBio.id, BioModel(), true).then((_){
+            Fluttertoast.showToast(
+              msg: "Syncing Completed...",
+              toastLength: Toast.LENGTH_SHORT,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }); // Update Isar
+
+
+
+        })
+            .catchError((error) {
+          Fluttertoast.showToast(
+            msg: "Server Write Error: ${error.toString()}",
+            toastLength: Toast.LENGTH_SHORT,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        });
+
+      }
 
 
 
