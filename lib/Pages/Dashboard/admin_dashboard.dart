@@ -78,13 +78,13 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
   void _checkTimeAndTriggerNotification() {
     final now = DateTime.now();
     print("Current Time === ${now}");
-    if (now.hour == 8 && now.minute == 0) {
-      notifyHelper.displayNotification(
-          title: "Clock In Notification", body: "It's 8 AM, don't forget to clock in!");
-    } else if (now.hour == 16 && now.minute == 45) {
-      notifyHelper.displayNotification(
-          title: "Clock Out Notification", body: "It's 5 PM, don't forget to clock out!");
-    }
+    // if (now.hour == 8 && now.minute == 0) {
+    //   notifyHelper.displayNotification(
+    //       title: "Clock In Notification", body: "It's 8 AM, don't forget to clock in!");
+    // } else if (now.hour == 16 && now.minute == 45) {
+    //   notifyHelper.displayNotification(
+    //       title: "Clock Out Notification", body: "It's 5 PM, don't forget to clock out!");
+    // }
   }
 
   List<FlSpot> getPlotPoints(List entireData) {

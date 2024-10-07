@@ -75,7 +75,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
   String value3 = "";
   String value4 = "";
   String value5 = "";
-  final _formKey = GlobalKey<FormState>();
+  var _formKey ;
   bool checkedValue = false;
   bool checkboxValue = false;
   bool _isObscure3 = true;
@@ -96,6 +96,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
 
   @override
   void initState() {
+    _formKey = GlobalKey<FormState>();
     _firstNameControl = TextEditingController();
     _lastNameControl = TextEditingController();
     _emailAddressControl = TextEditingController();
@@ -683,9 +684,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                               return Text('Error: ${snapshot.error}');
                             } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                               // Check if facilityStateName is in the list of dropdown values
-                              String? selectedStaffCategory = snapshot.data!.any((item) => item.value == value5)
-                                  ? value5
-                                  : null;
+                              String? selectedStaffCategory =
+                              // snapshot.data!.any((item) => item.value == value5)
+                              //     ? value5
+                              //     :
+                              null;
 
                               // If there's no valid state selected, set the first item as the default
                               if (selectedStaffCategory == null) {
@@ -779,9 +782,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedState = snapshot.data!.any((item) => item.value == facilityStateName)
-                                          ? facilityStateName
-                                          : null;
+                                      String? selectedState =
+                                      // snapshot.data!.any((item) => item.value == facilityStateName)
+                                      //     ? facilityStateName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedState == null) {
@@ -859,9 +864,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedLocation = snapshot.data!.any((item) => item.value == facilityLocationName)
-                                          ? facilityLocationName
-                                          : null;
+                                      String? selectedLocation =
+                                      // snapshot.data!.any((item) => item.value == facilityLocationName)
+                                      //     ? facilityLocationName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedLocation == null) {
@@ -953,9 +960,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDepartment = snapshot.data!.any((item) => item.value == facilitydepartmentName)
-                                          ? facilitydepartmentName
-                                          : null;
+                                      String? selectedDepartment =
+                                      // snapshot.data!.any((item) => item.value == facilitydepartmentName)
+                                      //     ? facilitydepartmentName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDepartment == null) {
@@ -1036,9 +1045,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation = snapshot.data!.any((item) => item.value == facilitydesignationName)
-                                          ? facilitydesignationName
-                                          : null;
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == facilitydesignationName)
+                                      //     ? facilitydesignationName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDesignation == null) {
@@ -1136,9 +1147,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation = snapshot.data!.any((item) => item.value == supervisorName)
-                                          ? supervisorName
-                                          : null;
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == supervisorName)
+                                      //     ? supervisorName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDesignation == null) {
@@ -1234,9 +1247,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation = snapshot.data!.any((item) => item.value == supervisorEmail)
-                                          ? supervisorEmail
-                                          : null;
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == supervisorEmail)
+                                      //     ? supervisorEmail
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDesignation == null) {
@@ -1342,9 +1357,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedState = snapshot.data!.any((item) => item.value == facilityStateName)
-                                          ? facilityStateName
-                                          : null;
+                                      String? selectedState =
+                                      // snapshot.data!.any((item) => item.value == facilityStateName)
+                                      //     ? facilityStateName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedState == null) {
@@ -1422,9 +1439,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedLocation = snapshot.data!.any((item) => item.value == locationName)
-                                          ? locationName
-                                          : null;
+                                      String? selectedLocation =
+                                      // snapshot.data!.any((item) => item.value == locationName)
+                                      //     ? locationName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedLocation == null) {
@@ -1516,9 +1535,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDepartment = snapshot.data!.any((item) => item.value == facilitydepartmentName)
-                                          ? facilitydepartmentName
-                                          : null;
+                                      String? selectedDepartment =
+                                      // snapshot.data!.any((item) => item.value == facilitydepartmentName)
+                                      //     ? facilitydepartmentName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDepartment == null) {
@@ -1599,9 +1620,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation = snapshot.data!.any((item) => item.value == facilitydesignationName)
-                                          ? facilitydesignationName
-                                          : null;
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == facilitydesignationName)
+                                      //     ? facilitydesignationName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDesignation == null) {
@@ -1698,9 +1721,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation = snapshot.data!.any((item) => item.value == supervisorName)
-                                          ? supervisorName
-                                          : null;
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == supervisorName)
+                                      //     ? supervisorName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDesignation == null) {
@@ -1796,9 +1821,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation = snapshot.data!.any((item) => item.value == supervisorEmail)
-                                          ? supervisorEmail
-                                          : null;
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == supervisorEmail)
+                                      //     ? supervisorEmail
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDesignation == null) {
@@ -1903,9 +1930,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedState = snapshot.data!.any((item) => item.value == locationName)
-                                          ? locationName
-                                          : null;
+                                      String? selectedState =
+                                      // snapshot.data!.any((item) => item.value == locationName)
+                                      //     ? locationName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedState == null) {
@@ -1983,9 +2012,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedLocation = snapshot.data!.any((item) => item.value == facilityLocationName)
-                                          ? facilityLocationName
-                                          : null;
+                                      String? selectedLocation =
+                                      // snapshot.data!.any((item) => item.value == facilityLocationName)
+                                      //     ? facilityLocationName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedLocation == null) {
@@ -2077,9 +2108,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDepartment = snapshot.data!.any((item) => item.value == facilitydepartmentName)
-                                          ? facilitydepartmentName
-                                          : null;
+                                      String? selectedDepartment =
+                                      // snapshot.data!.any((item) => item.value == facilitydepartmentName)
+                                      //     ? facilitydepartmentName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDepartment == null) {
@@ -2160,9 +2193,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation = snapshot.data!.any((item) => item.value == facilitydesignationName)
-                                          ? facilitydesignationName
-                                          : null;
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == facilitydesignationName)
+                                      //     ? facilitydesignationName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDesignation == null) {
@@ -2260,9 +2295,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation = snapshot.data!.any((item) => item.value == supervisorName)
-                                          ? supervisorName
-                                          : null;
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == supervisorName)
+                                      //     ? supervisorName
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDesignation == null) {
@@ -2358,9 +2395,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation = snapshot.data!.any((item) => item.value == supervisorEmail)
-                                          ? supervisorEmail
-                                          : null;
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == supervisorEmail)
+                                      //     ? supervisorEmail
+                                      //     :
+                                      null;
 
                                       // If there's no valid state selected, set the first item as the default
                                       if (selectedDesignation == null) {
@@ -2433,7 +2472,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   },
                                 )
                                     :const MyInputField(
-                                  title: "  Email of Supervisor",
+                                  title: "Email of Supervisor",
                                   hint: "",
                                   widget: Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
@@ -2463,9 +2502,11 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                               return Text('Error: ${snapshot.error}');
                             } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                               // Check if facilityStateName is in the list of dropdown values
-                              String? selectedProject = snapshot.data!.any((item) => item.value == project)
-                                  ? project
-                                  : null;
+                              String? selectedProject =
+                              // snapshot.data!.any((item) => item.value == project)
+                              //     ? project
+                              //     :
+                              null;
 
                               // If there's no valid state selected, set the first item as the default
                               if (selectedProject == null) {
@@ -2682,7 +2723,8 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                               ),
                             ),
                             onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
+                              // if (_formKey.currentState!.validate())
+                              // {
                                 final email = _emailAddressControl.text;
                                 final password = _passwordControl.text;
                                 // Retrieve images
@@ -2708,98 +2750,130 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   String supervsorName = supervisorName;
                                   String supervsorEmail = supervisorEmail;
 
-                                  showDialog(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      builder: (BuildContext context) {
-                                        return ProgressDialog(
-                                          message: "Please wait...",
+                                  if(firstName == "" ||lastName == "" ||emailAddress == "" ||mobile == "" ||staffCategory == "" ||state == "" ||location == "" ||department == "" ||designatn == "" ||project == "" ||role == "" ||password == "" ||supervsorName == "" ||supervsorEmail == ""){
+                                    Fluttertoast.showToast(
+                                      msg: "Kindly fill all missing fields",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      backgroundColor: Colors.black54,
+                                      gravity: ToastGravity.BOTTOM,
+                                      timeInSecForIosWeb: 1,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0,
+                                    );
+
+                                  }else{
+                                    showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (BuildContext context) {
+                                          return ProgressDialog(
+                                            message: "Please wait...",
+                                          );
+                                        });
+                                    //Create a user email and password in Firebase Authentication
+                                    await FirebaseAuth.instance
+                                        .createUserWithEmailAndPassword(
+                                        email: email, password: password);
+
+                                    //Check to see if there is a collection created and input the records
+                                    final User? user =
+                                        FirebaseAuth.instance.currentUser;
+                                    final isVeriffied = user?.emailVerified;
+                                    final CollectionReference<
+                                        Map<String, dynamic>> usersRef =
+                                    FirebaseFirestore.instance
+                                        .collection('Staff');
+                                    usersRef.doc(user?.uid).set({
+                                      'id': user?.uid,
+                                      'firstName': firstName,
+                                      'lastName': lastName,
+                                      'photoUrl': user?.photoURL,
+                                      'emailAddress': emailAddress,
+                                      'password': password,
+                                      'mobile': mobile,
+                                      'staffCategory': staffCategory,
+                                      'state': state,
+                                      'location': location,
+                                      'department': department,
+                                      'designation': designatn,
+                                      'project': project,
+                                      'role': role,
+                                      'isVerified': isVeriffied,
+                                      'supervisor':supervsorName,
+                                      'supervisorEmail':supervsorEmail,
+                                      'version':appVersionConstant,
+                                      'isRemoteDelete':false,
+                                      'isRemoteUpdate':false,
+                                      'lastUpdateDate':DateTime.now(),
+                                    }).then((value) async {
+
+                                      try{}catch(e){}
+                                      // Replace "your-bucket-name" with your actual Google Cloud Storage bucket name
+                                      //String bucketName = "AttendanceApp";
+                                      String bucketName = "attendanceapp-a6853.appspot.com";
+
+                                      // Specify the path where you want to store the image in the bucket
+                                      //String storagePath = "profile_pics/${DateTime.now().millisecondsSinceEpoch}.jpg";
+                                      String storagePath =
+                                          "profile_pics/${firstName.toLowerCase()}_${lastName.toLowerCase()}_${user?.uid}_profilepic.jpg";
+
+
+                                      if (images.isNotEmpty) {
+                                        await firebase_storage
+                                            .FirebaseStorage.instance
+                                            .ref('$bucketName/$storagePath')
+                                            .putData(images.first)
+                                            .then((value) async {
+                                          String downloadURL =
+                                          await firebase_storage
+                                              .FirebaseStorage.instance
+                                              .ref('$bucketName/$storagePath')
+                                              .getDownloadURL();
+                                          //Save Profile Pic link to firebase
+                                          await FirebaseFirestore.instance
+                                              .collection("Staff")
+                                              .doc(user?.uid)
+                                              .update({
+                                            "photoUrl": downloadURL,
+                                          });
+                                        });
+
+                                      } else{
+                                        // Handle the case where no image is selected (e.g., skip image upload)
+                                        print("No image selected. Skipping image upload.");
+                                        Fluttertoast.showToast(
+                                          msg: "No image selected. Skipping image upload.",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          backgroundColor: Colors.black54,
+                                          gravity: ToastGravity.BOTTOM,
+                                          timeInSecForIosWeb: 1,
+                                          textColor: Colors.white,
+                                          fontSize: 16.0,
                                         );
-                                      });
-                                  //Create a user email and password in Firebase Authentication
-                                  await FirebaseAuth.instance
-                                      .createUserWithEmailAndPassword(
-                                      email: email, password: password);
+                                      }
 
-                                  //Check to see if there is a collection created and input the records
-                                  final User? user =
-                                      FirebaseAuth.instance.currentUser;
-                                  final isVeriffied = user?.emailVerified;
-                                  final CollectionReference<
-                                      Map<String, dynamic>> usersRef =
-                                  FirebaseFirestore.instance
-                                      .collection('Staff');
-                                  usersRef.doc(user?.uid).set({
-                                    'id': user?.uid,
-                                    'firstName': firstName,
-                                    'lastName': lastName,
-                                    'photoUrl': user?.photoURL,
-                                    'emailAddress': emailAddress,
-                                    'password': password,
-                                    'mobile': mobile,
-                                    'staffCategory': staffCategory,
-                                    'state': state,
-                                    'location': location,
-                                    'department': department,
-                                    'designation': designatn,
-                                    'project': project,
-                                    'role': role,
-                                    'isVerified': isVeriffied,
-                                    'supervisor':supervsorName,
-                                    'supervisorEmail':supervsorEmail,
-                                    'version':appVersionConstant,
-                                    'isRemoteDelete':false,
-                                    'isRemoteUpdate':false,
-                                    'lastUpdateDate':DateTime.now(),
-                                  }).then((value) async {
-
-                                    try{}catch(e){}
-                                    // Replace "your-bucket-name" with your actual Google Cloud Storage bucket name
-                                    //String bucketName = "AttendanceApp";
-                                    String bucketName = "attendanceapp-a6853.appspot.com";
-
-                                    // Specify the path where you want to store the image in the bucket
-                                    //String storagePath = "profile_pics/${DateTime.now().millisecondsSinceEpoch}.jpg";
-                                    String storagePath =
-                                        "profile_pics/${firstName.toLowerCase()}_${lastName.toLowerCase()}_${user?.uid}_profilepic.jpg";
-
-                                    await firebase_storage
-                                        .FirebaseStorage.instance
-                                        .ref('$bucketName/$storagePath')
-                                        .putData(images.first)
-                                        .then((value) async {
-                                      String downloadURL =
-                                      await firebase_storage
-                                          .FirebaseStorage.instance
-                                          .ref('$bucketName/$storagePath')
-                                          .getDownloadURL();
-                                      //Save Profile Pic link to firebase
-                                      await FirebaseFirestore.instance
-                                          .collection("Staff")
-                                          .doc(user?.uid)
-                                          .update({
-                                        "photoUrl": downloadURL,
-                                      });
                                     });
-                                  });
-                                  // Clear images in Hive box
-                                  await hiveService.clearImages();
+                                    // Clear images in Hive box
+                                    await hiveService.clearImages();
 
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                      MaterialPageRoute(
-                                          builder: (context) => LoginPage(
-                                              service: IsarService())),
-                                          (Route<dynamic> route) => false);
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                        MaterialPageRoute(
+                                            builder: (context) => LoginPage(
+                                                service: IsarService())),
+                                            (Route<dynamic> route) => false);
 
-                                  Fluttertoast.showToast(
-                                    msg: "Registration Completed",
-                                    toastLength: Toast.LENGTH_LONG,
-                                    backgroundColor: Colors.black54,
-                                    gravity: ToastGravity.BOTTOM,
-                                    timeInSecForIosWeb: 1,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0,
-                                  );
+                                    Fluttertoast.showToast(
+                                      msg: "Registration Completed",
+                                      toastLength: Toast.LENGTH_LONG,
+                                      backgroundColor: Colors.black54,
+                                      gravity: ToastGravity.BOTTOM,
+                                      timeInSecForIosWeb: 1,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0,
+                                    );
+                                  }
+
+
                                 } on EmailAlreadyInUseAuthException {
                                   await showErrorDialog(
                                       context, "Email Already in Use");
@@ -2860,7 +2934,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                     fontSize: 16.0,
                                   );
                                 }
-                              }
+                             // }
                             },
                           ),
                         ),

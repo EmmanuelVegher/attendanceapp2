@@ -641,6 +641,11 @@ class IsarService extends DatabaseAdapter {
     await isar.writeTxn(() => isar.staffCategoryModels.clear()); // Truncate collection
   }
 
+  Future<void> cleanBioCollection() async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.bioModels.clear()); // Truncate collection
+  }
+
   Future<void> cleanLastUpdateDateCollection() async {
     final isar = await db;
     await isar.writeTxn(() => isar.lastUpdateDateModels.clear()); // Truncate collection
@@ -651,10 +656,7 @@ class IsarService extends DatabaseAdapter {
     await isar.writeTxn(() => isar.projectModels.clear()); // Truncate collection
   }
 
-  Future<void> cleanBioCollection() async {
-    final isar = await db;
-    await isar.writeTxn(() => isar.bioModels.clear()); // Truncate collection
-  }
+
 
   Future<List<AttendanceModel>> getAttendanceFor(
       AttendanceModel attendanceModel) async {
@@ -987,6 +989,28 @@ class IsarService extends DatabaseAdapter {
     bioUpdate!
       ..project = project
       ..isSynced = isSynced;
+
+    await isar.writeTxn(() async {
+      await isar.bioModels.put(bioUpdate);
+    });
+  }
+
+
+  Future<void> updateBioDetails(
+      int id,
+      BioModel bioModels,
+      bool isSynced,
+      String supervisor,
+      String supervisorEmail,
+      ) async {
+    final isar = await db;
+    final bioUpdate = await isar.bioModels.get(id);
+
+    bioUpdate!
+      ..isSynced = isSynced
+    ..supervisorEmail = supervisorEmail
+    ..supervisor = supervisor
+    ;
 
     await isar.writeTxn(() async {
       await isar.bioModels.put(bioUpdate);
@@ -1445,6 +1469,11 @@ class IsarService extends DatabaseAdapter {
   Future<List<AppVersionModel>> getAppVersion() async {
     final isar = await db;
     return await isar.appVersionModels.where().filter().appVersionIsNotNull().findAll();
+  }
+
+  Future<List<BioModel>> getisSyncedForBio() async {
+    final isar = await db;
+    return await isar.bioModels.where().filter().isSyncedIsNull().idEqualTo(2).findAll();
   }
 
   Future<List<LastUpdateDateModel>> getLastUpdateDate() async {

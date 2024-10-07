@@ -352,7 +352,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                 isSynced = false;
                                               });
                                             },
-                                            fetchStates: () => _fetchStatesFromIsar(newCategory),
+                                            fetchStates: () => _fetchStatesFromIsar(bioModel.staffCategory!),
                                           ):ListTile(
                                             leading: Icon(Icons.place),
                                             title: Text("State"),
@@ -360,10 +360,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                                 "${bioModel.state.toString()}"),
                                           ),
 
-                                          newState!= null?
+                                          bioModel.state!= null?
                                           EditableLocationTile(
                                             icon: Icons.my_location,
-                                            title: staffCategory == "Facility Staff"?"Facility Name":staffCategory == "State Office Staff"?"Office Name":"Office Name",
+                                            title: bioModel.staffCategory == "Facility Staff"?"Facility Name":bioModel.staffCategory == "State Office Staff"?"Office Name":"Office Name",
                                             initialValue: bioModel.location!,
                                             onSave: (newValue) {
                                               IsarService().updateBioLocation(
@@ -377,7 +377,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                 //newState = newValue;
                                               });
                                             },
-                                            fetchLocations: () => _fetchLocationsFromIsar(newState,newstaffCategory),
+                                            fetchLocations: () => _fetchLocationsFromIsar(bioModel.state!,bioModel.staffCategory!),
                                           ):ListTile(
                                             leading: Icon(Icons.my_location),
                                             title:
@@ -422,7 +422,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                 isSynced = false;
                                               });
                                             },
-                                            fetchDepartments: () => newstaffCategory == 'Facility'
+                                            fetchDepartments: () => bioModel.staffCategory == 'Facility Staff'
                                                 ? _fetchDepartmentsForFacilityFromIsar()
                                                 : _fetchDepartmentsFromIsar(),
                                           ),
@@ -443,7 +443,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                 isSynced = false;
                                               });
                                             },
-                                            fetchDesignations: () => _fetchDesignationsFromIsar(updatedDepartment, staffCategory),
+                                            fetchDesignations: () => _fetchDesignationsFromIsar(bioModel.department!, bioModel.staffCategory!),
                                           ):ListTile(
                                             leading: Icon(Icons.person),
                                             title: Text("Designation"),
@@ -477,7 +477,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             onSave: (newValue) async {
 
 
-                                              List<String?> supervisorsemail = await IsarService().getSupervisorEmailFromIsar(updatedDepartment,newValue);
+                                              List<String?> supervisorsemail = await IsarService().getSupervisorEmailFromIsar(bioModel.department,newValue);
                                               print("Edited supervisorsemail === $supervisorsemail");
 
                                               await IsarService().updateBioSupervisor(
@@ -502,7 +502,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
                                             },
-                                            fetchSupervisor: () => _fetchSupervisorsFromIsar(updatedDepartment,state),
+                                            fetchSupervisor: () => _fetchSupervisorsFromIsar(bioModel.department!,bioModel.state!),
                                           ):
                                           ListTile(
                                             leading: Icon(Icons.person),
@@ -740,16 +740,31 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<List<DropdownMenuItem<String>>> _fetchLocationsFromIsar(String state,String category) async {
     // Query Isar database for locations based on the selected state
 
-    List<String?> locations = await IsarService().getLocationsFromIsar(state,category);
-    print("_fetchLocationsFromIsar State ==$state");
-    print("_fetchLocationsFromIsar categorys ==$category");
-    print("_fetchLocationsFromIsar locations ==$locations");
+    if(category == "Facility Staff"){
 
-    // Convert the locations list to DropdownMenuItem list
-    return locations.map((location) => DropdownMenuItem<String>(
-      value: location,
-      child: Text(location!),
-    )).toList();
+      List<String?> locations = await IsarService().getLocationsFromIsar(state,"Facility");
+
+      // Convert the locations list to DropdownMenuItem list
+      return locations.map((location) => DropdownMenuItem<String>(
+        value: location,
+        child: Text(location!),
+      )).toList();
+    }else if(category == "State Office Staff"){
+      List<String?> locations = await IsarService().getLocationsFromIsar(state,"State Office");
+      // Convert the locations list to DropdownMenuItem list
+      return locations.map((location) => DropdownMenuItem<String>(
+        value: location,
+        child: Text(location!),
+      )).toList();
+    } else{
+      List<String?> locations = await IsarService().getLocationsFromIsar(state,"HQ");
+      // Convert the locations list to DropdownMenuItem list
+      return locations.map((location) => DropdownMenuItem<String>(
+        value: location,
+        child: Text(location!),
+      )).toList();
+    }
+
   }
 
 
@@ -794,13 +809,26 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<List<DropdownMenuItem<String>>> _fetchDesignationsFromIsar(String department,String category) async {
     // Query Isar database for designations based on the selected department
-    List<String?> designations = await IsarService().getDesignationsFromIsar(department,category);
+    if(category == "Facility Staff"){
+      List<String?> designations = await IsarService().getDesignationsFromIsar(department,"Facility Staff");
 
-    // Convert the designations list to DropdownMenuItem list
-    return designations.map((designation) => DropdownMenuItem<String>(
-      value: designation,
-      child: Text(designation!),
-    )).toList();
+      // Convert the designations list to DropdownMenuItem list
+      return designations.map((designation) => DropdownMenuItem<String>(
+        value: designation,
+        child: Text(designation!),
+      )).toList();
+    }else{
+      List<String?> designations = await IsarService().getDesignationsFromIsar(department,"Office Staff");
+
+      // Convert the designations list to DropdownMenuItem list
+      return designations.map((designation) => DropdownMenuItem<String>(
+        value: designation,
+        child: Text(designation!),
+      )).toList();
+
+    }
+
+
   }
 
   Future<List<DropdownMenuItem<String>>> _fetchStatesFromIsar(String category) async {
@@ -839,6 +867,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<List<DropdownMenuItem<String>>> _fetchSupervisorsFromIsar(String department,String state) async {
     // Query Isar database for designations based on the selected department
+
     List<String?> supervisors = await IsarService().getSupervisorsFromIsar(department,state);
 
     // Convert the designations list to DropdownMenuItem list

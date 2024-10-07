@@ -132,7 +132,9 @@ class LoginController extends GetxController {
           ..firebaseAuthId = snap.docs[0]['id']
           ..isSynced = true
           ..supervisor = snap.docs[0]['supervisor']
-          ..supervisorEmail = snap.docs[0]['supervisorEmail'];
+          ..supervisorEmail = snap.docs[0]['supervisorEmail']
+
+        ;
 
         await service.saveBioData(bioData);
 

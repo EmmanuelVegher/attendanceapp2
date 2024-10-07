@@ -32,7 +32,9 @@ import '../../model/supervisor_model.dart';
 import '../../model/user_model.dart';
 import '../../services/location_services.dart';
 import '../../services/notification_services.dart';
+import '../../widgets/constants.dart';
 import '../../widgets/my_app.dart';
+import '../../widgets/progress_dialog.dart';
 
 class UserDashBoard extends StatefulWidget {
   final IsarService service;
@@ -65,6 +67,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    checkForIsSyncedForBio();
     fetchVersion(IsarService());
     _getUserDetail();
     tz.initializeTimeZones();
@@ -780,163 +783,75 @@ class _UserDashBoardState extends State<UserDashBoard> {
 
   _checkForUpdates() async {
 
-    try{}catch(e){}
-;
+    try{
 
-    Fluttertoast.showToast(
-      msg: "Checking For updates..",
-      toastLength: Toast.LENGTH_LONG,
-      backgroundColor: Colors.black54,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-
+      Fluttertoast.showToast(
+        msg: "Checking For updates..",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
 
 
-    final firestore = FirebaseFirestore.instance;
-    List<LastUpdateDateModel> getlastUpdateDate =
-    await widget.service.getLastUpdateDate();
 
-    List<BioModel> getAttendanceForBio =
-    await IsarService().getBioInfoWithUserBio();
+      final firestore = FirebaseFirestore.instance;
+      List<LastUpdateDateModel> getlastUpdateDate =
+      await widget.service.getLastUpdateDate();
 
-    QuerySnapshot snap = await firestore
-        .collection("Staff")
-        .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
-        .get();
+      List<BioModel> getAttendanceForBio =
+      await IsarService().getBioInfoWithUserBio();
 
-    final lastUpdateDateDoc = await firestore
-        .collection('LastUpdateDate')
-        .doc('LastUpdateDate')
-        .get();
+      QuerySnapshot snap = await firestore
+          .collection("Staff")
+          .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
+          .get();
 
-    final lastUpdateDatebio = await firestore
-        .collection('Staff')
-        .doc(snap.docs[0].id)
-        .get();
+      final lastUpdateDateDoc = await firestore
+          .collection('LastUpdateDate')
+          .doc('LastUpdateDate')
+          .get();
 
-
-    if (lastUpdateDateDoc.exists) {
-      // Get the data from the document
-      final data = lastUpdateDateDoc.data();
+      final lastUpdateDatebio = await firestore
+          .collection('Staff')
+          .doc(snap.docs[0].id)
+          .get();
 
 
-      if (data != null && data.containsKey('LastUpdateDate')) {
-        // Safely extract the timestamp and convert to DateTime
-        final timestamp = data['LastUpdateDate'] as Timestamp;
-        final LastUpdateDate = timestamp.toDate();
-
-        print("appVersionDate ====${LastUpdateDate}");
-
-        if (LastUpdateDate.isAfter(
-            getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
-          Fluttertoast.showToast(
-            msg: "Updating Local Database!",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-          await IsarService().cleanLocationCollection().then((_) async {
-            await IsarService().cleanStateCollection().then((_) async {
-              await IsarService().cleanStaffCategoryCollection().then((_) async {
-                await IsarService().cleanReasonsForDayOffCollection().then((_) async {
-                  await IsarService().cleanDesignationCollection().then((_) async {
-                    await IsarService().cleanDepartmentCollection().then((_) async {
-                      await IsarService().cleanLastUpdateDateCollection().then((_) async {
-                        await IsarService().cleanProjectCollection().then((_) async {
-                          await IsarService().cleanSupervisorCollection().then((_) async {
-                            fetchDataAndInsertIntoIsar();
-                            fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
-                            fetchSupervisorAndInsertIntoIsar(IsarService());
-                            fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
-                            fetchStaffCategoryAndInsertIntoIsar(IsarService());
-                            await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
-                            await fetchProjectAndInsertIntoIsar(IsarService());
-                            await fetchAppVersionAndInsertIntoIsar(IsarService());
-                            Fluttertoast.showToast(
-                              msg: "Updates on Database Completed",
-                              toastLength: Toast.LENGTH_LONG,
-                              backgroundColor: Colors.black54,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIosWeb: 1,
-                              textColor: Colors.white,
-                              fontSize: 16.0,
-                            );
-                          });
-                        });
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-          Fluttertoast.showToast(
-            msg: "Updating Local Database Completed!",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-        }else{
-          Fluttertoast.showToast(
-            msg: "No Recent updates..",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-        }
-        // print("Last appVersionDate saved: $appVersionDate");
-      } else {
-        print("Document does not contain 'LastUpdateDate' field.");
-      }
-    } else {
-      print("Document 'LastUpdateDate' not found.");
-    }
-
-    if (lastUpdateDatebio.exists) {
-      // Get the data from the document
-      final data = lastUpdateDatebio.data();
+      if (lastUpdateDateDoc.exists) {
+        // Get the data from the document
+        final data = lastUpdateDateDoc.data();
 
 
-      if (data != null && data.containsKey('lastUpdateDate')) {
-        // Safely extract the timestamp and convert to DateTime
-        final timestamp = data['lastUpdateDate'] as Timestamp;
-        final LastUpdateDate = timestamp.toDate();
-        final isRemoteDelete = data['isRemoteDelete'];
+        if (data != null && data.containsKey('LastUpdateDate')) {
+          // Safely extract the timestamp and convert to DateTime
+          final timestamp = data['LastUpdateDate'] as Timestamp;
+          final LastUpdateDate = timestamp.toDate();
 
+          print("appVersionDate ====${LastUpdateDate}");
 
-        if (LastUpdateDate.isAfter(getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
-          Fluttertoast.showToast(
-            msg: "Updating Local Database!",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-          await IsarService().cleanLocationCollection().then((_) async {
-            await IsarService().cleanStateCollection().then((_) async {
-              await IsarService().cleanStaffCategoryCollection().then((_) async {
-                await IsarService().cleanReasonsForDayOffCollection().then((_) async {
-                  await IsarService().cleanDesignationCollection().then((_) async {
-                    await IsarService().cleanDepartmentCollection().then((_) async {
-                      await IsarService().cleanLastUpdateDateCollection().then((_) async {
-                        await IsarService().cleanProjectCollection().then((_) async {
-                          await IsarService().cleanSupervisorCollection().then((_) async {
-                            await IsarService().cleanAttendanceCollection().then((_) async {
-                              await _autoFirebaseDBUpdate(IsarService(), snap.docs[0].id);
+          if (LastUpdateDate.isAfter(
+              getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
+            Fluttertoast.showToast(
+              msg: "Updating Local Database!",
+              toastLength: Toast.LENGTH_LONG,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+            await IsarService().cleanLocationCollection().then((_) async {
+              await IsarService().cleanStateCollection().then((_) async {
+                await IsarService().cleanStaffCategoryCollection().then((_) async {
+                  await IsarService().cleanReasonsForDayOffCollection().then((_) async {
+                    await IsarService().cleanDesignationCollection().then((_) async {
+                      await IsarService().cleanDepartmentCollection().then((_) async {
+                        await IsarService().cleanLastUpdateDateCollection().then((_) async {
+                          await IsarService().cleanProjectCollection().then((_) async {
+                            await IsarService().cleanSupervisorCollection().then((_) async {
                               fetchDataAndInsertIntoIsar();
                               fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
                               fetchSupervisorAndInsertIntoIsar(IsarService());
@@ -954,9 +869,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                 textColor: Colors.white,
                                 fontSize: 16.0,
                               );
-
                             });
-
                           });
                         });
                       });
@@ -965,49 +878,275 @@ class _UserDashBoardState extends State<UserDashBoard> {
                 });
               });
             });
-          });
-          Fluttertoast.showToast(
-            msg: "Updating Local Database Completed!",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
+            Fluttertoast.showToast(
+              msg: "Updating Local Database Completed!",
+              toastLength: Toast.LENGTH_LONG,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }else{
+            Fluttertoast.showToast(
+              msg: "No Recent updates..",
+              toastLength: Toast.LENGTH_LONG,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }
+          // print("Last appVersionDate saved: $appVersionDate");
+        } else {
+          print("Document does not contain 'LastUpdateDate' field.");
         }
-        else{
-          Fluttertoast.showToast(
-            msg: "No Recent updates..",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-        }
-
-        // Remote Delete once there is internet);
-        if(isRemoteDelete == true){
-          Fluttertoast.showToast(
-            msg: "Clearing Database..",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-          await IsarService().cleanDB();
-        }
-
       } else {
-        print("Document does not contain 'lastUpdateDate' field.");
+        print("Document 'LastUpdateDate' not found.");
       }
-    } else {
-      print("Document 'LastUpdateDate' not found.");
+
+      if (lastUpdateDatebio.exists) {
+        // Get the data from the document
+        final data = lastUpdateDatebio.data();
+
+
+        if (data != null && data.containsKey('lastUpdateDate')) {
+          // Safely extract the timestamp and convert to DateTime
+          final timestamp = data['lastUpdateDate'] as Timestamp;
+          final LastUpdateDate = timestamp.toDate();
+          final isRemoteDelete = data['isRemoteDelete'];
+
+
+          if (LastUpdateDate.isAfter(getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
+            Fluttertoast.showToast(
+              msg: "Updating Local Database!",
+              toastLength: Toast.LENGTH_LONG,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+            await IsarService().cleanLocationCollection().then((_) async {
+              await IsarService().cleanStateCollection().then((_) async {
+                await IsarService().cleanStaffCategoryCollection().then((_) async {
+                  await IsarService().cleanReasonsForDayOffCollection().then((_) async {
+                    await IsarService().cleanDesignationCollection().then((_) async {
+                      await IsarService().cleanDepartmentCollection().then((_) async {
+                        await IsarService().cleanLastUpdateDateCollection().then((_) async {
+                          await IsarService().cleanProjectCollection().then((_) async {
+                            await IsarService().cleanSupervisorCollection().then((_) async {
+                              await IsarService().cleanAttendanceCollection().then((_) async {
+                                await _autoFirebaseDBUpdate(IsarService(), snap.docs[0].id);
+                                fetchDataAndInsertIntoIsar();
+                                fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
+                                fetchSupervisorAndInsertIntoIsar(IsarService());
+                                fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
+                                fetchStaffCategoryAndInsertIntoIsar(IsarService());
+                                await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
+                                await fetchProjectAndInsertIntoIsar(IsarService());
+                                await fetchAppVersionAndInsertIntoIsar(IsarService());
+                                Fluttertoast.showToast(
+                                  msg: "Updates on Database Completed",
+                                  toastLength: Toast.LENGTH_LONG,
+                                  backgroundColor: Colors.black54,
+                                  gravity: ToastGravity.BOTTOM,
+                                  timeInSecForIosWeb: 1,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                );
+
+                              });
+
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+            Fluttertoast.showToast(
+              msg: "Updating Local Database Completed!",
+              toastLength: Toast.LENGTH_LONG,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }
+          else{
+            Fluttertoast.showToast(
+              msg: "No Recent updates..",
+              toastLength: Toast.LENGTH_LONG,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }
+
+          // Remote Delete once there is internet);
+          if(isRemoteDelete == true){
+            Fluttertoast.showToast(
+              msg: "Clearing Database..",
+              toastLength: Toast.LENGTH_LONG,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+            await IsarService().cleanDB();
+          }
+
+        } else {
+          print("Document does not contain 'lastUpdateDate' field.");
+        }
+      } else {
+        print("Document 'LastUpdateDate' not found.");
+      }
+
+    }catch(e){
+      print("Error checking for Updates: $e..");
+      Fluttertoast.showToast(
+        msg: "Error checking for Updates: $e..",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
     }
+
+
+
+
+  }
+
+  checkForIsSyncedForBio() async {
+
+    try {
+
+      List<BioModel> getisSyncedForBio =
+      await widget.service.getisSyncedForBio();
+
+      List<AppVersionModel> getAppVersion =
+      await widget.service.getAppVersion();
+
+      if (getisSyncedForBio[0].isSynced == null) {
+        // Ensure the widget is mounted before trying to show a dialog
+        if (!mounted) return;
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          // Prevent dismissing by tapping outside
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Update Available'),
+              content: Text(
+                  "The upgrade to version ${getAppVersion[0].appVersion} has been successfully completed. Please click the 'Complete Upgrade' button to finalize all pending updates. Ensure a stable internet connection during this process. After the upgrade is complete, kindly navigate to your Profile page to update your Bio Information, including Staff Category, State, Facility, Department, Designation, Supervisor, and Supervisor's Email."),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () async {
+                    ProgressDialog(message: 'Completing Upgrade...',);
+
+                    await updateBioData().then((_){
+                      _checkForUpdates;
+                    });
+
+
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: Text('Complete Upgrade'),
+                ),
+
+                // TextButton(
+                //   onPressed: () async {
+                //     // Close the first dialog and proceed with update
+                //     if (!mounted) return;
+                //     //Navigator.of(context).pop(); // Close "Update Available" dialog
+                //
+                //     // Ensure the widget is still mounted before showing the next dialog
+                //     // if (!mounted) return;
+                //     // showDialog(
+                //     //   context: context,
+                //     //   barrierDismissible: false, // Prevent dismissing by tapping outside
+                //     //   builder: (context) => WillPopScope( // Prevent dismissing using back button
+                //     //     onWillPop: () async => false,
+                //     //     child: AlertDialog(
+                //     //       content: Column(
+                //     //         mainAxisSize: MainAxisSize.min,
+                //     //         children: [
+                //     //           CircularProgressIndicator(),
+                //     //           SizedBox(height: 16),
+                //     //           Text('Completing Upgrade...'),
+                //     //         ],
+                //     //       ),
+                //     //     ),
+                //     //   ),
+                //     // );
+                //     ProgressDialog(message: 'Completing Upgrade...',);
+                //
+                //     // Perform the update check
+                //     await updateBioData().then((_){
+                //       _checkForUpdates;
+                //     });
+                //
+                //     Navigator.of(context).pop();
+                //   },
+                //   child: Text('Complete Upgrade'),
+                // ),
+
+
+              ],
+
+
+            );
+          },
+        );
+
+
+
+
+      }
+
+
+
+
+    } catch (e) {
+      print("isSynced For Bio Collection Check Error: ${e.toString()}");
+      // Fluttertoast.showToast(
+      //   msg: "${e.toString()}",
+      //   toastLength: Toast.LENGTH_SHORT,
+      //   backgroundColor: Colors.black54,
+      //   gravity: ToastGravity.BOTTOM,
+      //   timeInSecForIosWeb: 1,
+      //   textColor: Colors.white,
+      //   fontSize: 16.0,
+      // );
+    }
+  }
+
+
+  Future<void> updateBioData() async{
+    List<BioModel> getAttendanceForBio =
+    await widget.service.getBioInfoWithUserBio();
+
+
+    QuerySnapshot snap = await FirebaseFirestore.instance
+        .collection("Staff")
+        .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
+        .get();
+
+    await IsarService().updateBioDetails(2,BioModel(),true,snap.docs[0]['supervisor'],snap.docs[0]['supervisorEmail']);
 
 
   }
@@ -1047,6 +1186,40 @@ class _UserDashBoardState extends State<UserDashBoard> {
     } catch (e) {
       print("Error fetching last update date: $e");
       // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  }
+
+  Future<void> _insertSuperUser() async {
+    final bioInfoForSuperUser = await widget.service.getBioInfoForSuperUser();
+
+    if (bioInfoForSuperUser.length == 0) {
+      final bioData = BioModel()
+        ..emailAddress = emailAddressConstant
+        ..password = passwordConstant
+        ..role = roleConstant
+        ..department = departmentConstant
+        ..designation = designationConstant
+        ..firstName = firstNameConstant
+        ..lastName = lastNameConstant
+        ..location = locationConstant
+        ..mobile = mobileConstant
+        ..project = projectConstant
+        ..staffCategory = staffCategoryConstant
+        ..state = stateConstant
+        ..firebaseAuthId = firebaseAuthIdConstant
+        ..isRemoteDelete = false
+        ..isSynced = false
+      ..version = appVersionConstant
+      ..supervisor = supervisorConstant
+      ..supervisorEmail = supervisorEmailConstant
+      ..lastUpdateDate = DateTime.now();
+
+
+
+      ;
+
+
+      await widget.service.saveBioData(bioData);
     }
   }
 
