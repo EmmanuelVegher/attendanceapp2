@@ -81,7 +81,7 @@ class AuthCheck extends StatelessWidget {
       // else
         if(lastUsedDate != null && currentDate.difference(lastUsedDate).inDays > 30){
         print("lastUsedDate != null && currentDate.difference(lastUsedDate).inDays > 30");
-        return true;
+        return false;
       }
       else if(lastUsedDate != null && currentDate.difference(lastUsedDate).inDays < 30)  {
         print("lastUsedDate != null && currentDate.difference(lastUsedDate).inDays < 30");

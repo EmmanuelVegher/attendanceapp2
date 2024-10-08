@@ -1636,27 +1636,23 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                             await IsarService().cleanLastUpdateDateCollection().then((_) async {
                               await IsarService().cleanProjectCollection().then((_) async {
                                 await IsarService().cleanSupervisorCollection().then((_) async {
-                                  await IsarService().cleanAttendanceCollection().then((_) async {
-                                    await _autoFirebaseDBUpdate(IsarService(), snap.docs[0].id);
-                                    fetchDataAndInsertIntoIsar(IsarService());
-                                    fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
-                                    fetchSupervisorAndInsertIntoIsar(IsarService());
-                                    fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
-                                    fetchStaffCategoryAndInsertIntoIsar(IsarService());
-                                    await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
-                                    await fetchProjectAndInsertIntoIsar(IsarService());
-                                    await fetchAppVersionAndInsertIntoIsar(IsarService());
-                                    Fluttertoast.showToast(
-                                      msg: "Updates on Database Completed",
-                                      toastLength: Toast.LENGTH_LONG,
-                                      backgroundColor: Colors.black54,
-                                      gravity: ToastGravity.BOTTOM,
-                                      timeInSecForIosWeb: 1,
-                                      textColor: Colors.white,
-                                      fontSize: 16.0,
-                                    );
-
-                                  });
+                                  fetchDataAndInsertIntoIsar(IsarService());
+                                  fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
+                                  fetchSupervisorAndInsertIntoIsar(IsarService());
+                                  fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
+                                  fetchStaffCategoryAndInsertIntoIsar(IsarService());
+                                  await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
+                                  await fetchProjectAndInsertIntoIsar(IsarService());
+                                  await fetchAppVersionAndInsertIntoIsar(IsarService());
+                                  Fluttertoast.showToast(
+                                    msg: "Updates on Database Completed",
+                                    toastLength: Toast.LENGTH_LONG,
+                                    backgroundColor: Colors.black54,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  );
 
                                 });
                               });

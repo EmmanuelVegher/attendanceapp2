@@ -55,7 +55,7 @@ class GeofenceModel {
     required this.name,
     required this.latitude,
     required this.longitude,
-    required this.radius,
+    required this.radius,ge
   });
 }
 
@@ -168,34 +168,40 @@ class ClockAttendance extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 10), // Spacing between status and coordinates
-                    Obx(() => controller.lati.value != 0.0?
+                    Obx(() =>
+                    //controller.lati.value != 0.0?
                         Text(
                       "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
                       style: TextStyle(
                         fontFamily: "NexaBold",
                         fontSize: screenWidth / 23,
                       ),
-                    ):CircularProgressIndicator()
+                    )
+                        //:CircularProgressIndicator()
                     ),
                     SizedBox(height: 10),
-                    Obx(() => controller.administrativeArea.value != ""?
+                    Obx(() =>
+                   // controller.administrativeArea.value != ""?
                         Text(
                       "Current State: ${controller.administrativeArea.value}",
                       style: TextStyle(
                         fontFamily: "NexaBold",
                         fontSize: screenWidth / 23,
                       ),
-                    ):CircularProgressIndicator()
+                    )
+                        //:CircularProgressIndicator()
                     ),
                     SizedBox(height: 10),
-                    Obx(() => controller.location.value != ""?
+                    Obx(() =>
+                   // controller.location.value != ""?
                         Text(
                       "Current Location: ${controller.location.value}",
                       style: TextStyle(
                         fontFamily: "NexaBold",
                         fontSize: screenWidth / 23,
                       ),
-                    ):CircularProgressIndicator()
+                    )
+                        //:CircularProgressIndicator()
                     ),
                     // You can add your location name widget here, using Obx to make it reactive
                   ],
@@ -1294,6 +1300,7 @@ class ClockAttendanceController extends GetxController {
     await _loadNTPTime();
     await _getAttendanceSummary();
     await _getUserDetail();
+    _getUserLocation();
 
     await getLocationStatus().then((_) async {
       await getPermissionStatus().then((_) async {
@@ -1408,77 +1415,227 @@ class ClockAttendanceController extends GetxController {
 
   }
 
+  Future<Position?> getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
 
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled, handle this case.
+      // You could show a dialog asking the user to enable location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    // Check for location permission.
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, handle this case.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    // If the permission is denied forever, show a dialog to the user.
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
+  }
+
+  void _getUserLocation() async {
+    print("Geolocator Dependency here");
+    try {
+      Position? position = await getCurrentLocation();
+      if (position != null) {
+        print('Latitude: ${position.latitude}, Longitude: ${position.longitude}');
+        // Use the position data (latitude, longitude) as needed
+        lati.value = position.latitude;
+        longi.value = position.longitude;
+
+        // Update location based on new latitude and longitude
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+          // timeout: const Duration(seconds: 15),
+        );
+
+        // print("placemarksssssss==$placemarks");
+
+        if (placemarks.isNotEmpty) {
+          Placemark placemark = placemarks[0];
+          location.value =
+          "${placemark.street},${placemark.subLocality},${placemark.subAdministrativeArea},${placemark.locality},${placemark.administrativeArea},${placemark.postalCode},${placemark.country}";
+          administrativeArea.value = placemark.administrativeArea!; // Update state name
+
+          print("location.valuesssss==${location.value}");
+          print("placemark.administrativeArea==${placemark.administrativeArea}");
+          print("administrativeArea.value ==${administrativeArea.value}");
+
+        } else {
+          location.value = "Location not found";
+          administrativeArea.value = "";
+        }
+
+        // Geofencing logic
+        if (administrativeArea.value != '' && administrativeArea.value != null) {
+          // Query Isar database for locations with the same administrative area
+          List<LocationModel> isarLocations =
+          await service.getLocationsByState(administrativeArea.value);
+
+
+          // Convert Isar locations to GeofenceModel
+          List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
+            name: location.locationName!, // Use 'locationName'
+            latitude: location.latitude ?? 0.0,
+            longitude: location.longitude ?? 0.0,
+            radius: location.radius?.toDouble() ?? 0.0,
+          )).toList();
+
+          print("Officessss == ${offices}");
+
+          isInsideAnyGeofence.value = false;
+          for (GeofenceModel office in offices) {
+            double distance = GeoUtils.haversine(
+                position.latitude, position.longitude,office.latitude, office.longitude);
+
+            if (distance <= office.radius) {
+              print('Entered office: ${office.name}');
+
+              location.value = office.name;
+              isInsideAnyGeofence.value = true;
+             // isCircularProgressBarOn.value = false; // Update observable value
+              break;
+            }
+          }
+
+          if (!isInsideAnyGeofence.value) {
+            List<Placemark> placemark = await placemarkFromCoordinates(
+                position.latitude, position.longitude);
+
+            location.value =
+            "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+            print("Location from map === ${location.value}");
+           // isCircularProgressBarOn.value = false; // Update observable value
+          }
+        } else {
+          List<Placemark> placemark = await placemarkFromCoordinates(
+              position.latitude, position.longitude);
+
+          location.value =
+          "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+
+          print("Unable to get administrative area. Using default location.");
+
+        }
+
+      }
+
+    } catch (e) {
+      print('Error getting location: $e');
+      // Handle location errors (e.g., show an error message)
+    }
+  }
 
   Future<void> _getLocation2() async {
-print("_getLocation2 hereeeee");
+
     // Check for internet connection
     isInternetConnected.value = await InternetConnectionChecker().hasConnection;
-
-    if (!isInternetConnected.value) {
-      // Use Geolocator and request location updates using GPS
-      try {
-        print("There is nooooooo internet to get location data");
-        Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: geolocator.LocationAccuracy.best,
-          forceAndroidLocationManager: true, // Important for Android
-        );
-
-        Position? position1 = await Geolocator.getLastKnownPosition();
-
-        if (position != null) {
-
-          lati.value = position.latitude;
-          longi.value = position.longitude;
-          print("locationData.latitude == ${position.latitude}");
-          _updateLocation();
-        } else if (position1 != null){
-          // Store the latitude and longitude (e.g., in shared preferences, database, etc.)
-          print('Cached Latitude: ${position.latitude}');
-          print('Cached Longitude: ${position.longitude}');
-          lati.value = position1.latitude;
-          longi.value = position1.longitude;
-          _updateLocation();
-        }
-        else {
-          print('No last known location available.');
-        }
-
-
-
-
-        // locationService.onLocationChanged.listen((LocationData locationData) {
-        //   lati.value = locationData.latitude!;
-        //   longi.value = locationData.longitude!;
-        //   print("locationData.latitude == ${locationData.latitude}");
-        //   _updateLocation();
-        //   _getAttendanceSummary();
-        // });
-      } catch (e) {
-        log("Error getting GPS location: ${e.toString()}");
-        Fluttertoast.showToast(
-          msg:
-          "Error getting GPS location.",
-          toastLength: Toast.LENGTH_LONG,
-          backgroundColor: Colors.black54,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      }
-    } else {
-      // Continue using location package for updates
-      print("There is internet to get location data");
+    try{
+      print("_getLocation2 hereeeee");
       locationService.onLocationChanged.listen((LocationData locationData) {
         lati.value = locationData.latitude!;
         longi.value = locationData.longitude!;
-       // print("locationData.latitude! == ${locationData.latitude!}");
+        // print("locationData.latitude! == ${locationData.latitude!}");
         //print("locationData.longitude! == ${locationData.longitude!}");
         _updateLocation();
         _getAttendanceSummary();
       });
+    }catch(e){
+      print("_getLocation2 Error:$e");
+      Fluttertoast.showToast(
+        msg: "GeoCordinate Error: $e",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
     }
+
+    // if (!isInternetConnected.value) {
+    //   // Use Geolocator and request location updates using GPS
+    //   try {
+    //     print("There is nooooooo internet to get location data");
+    //     Position position = await Geolocator.getCurrentPosition(
+    //       desiredAccuracy: geolocator.LocationAccuracy.best,
+    //       forceAndroidLocationManager: true, // Important for Android
+    //     );
+    //
+    //     Position? position1 = await Geolocator.getLastKnownPosition();
+    //
+    //     if (position != null) {
+    //
+    //       lati.value = position.latitude;
+    //       longi.value = position.longitude;
+    //       print("locationData.latitude == ${position.latitude}");
+    //       _updateLocation();
+    //     } else if (position1 != null){
+    //       // Store the latitude and longitude (e.g., in shared preferences, database, etc.)
+    //       print('Cached Latitude: ${position.latitude}');
+    //       print('Cached Longitude: ${position.longitude}');
+    //       lati.value = position1.latitude;
+    //       longi.value = position1.longitude;
+    //       _updateLocation();
+    //     }
+    //     else {
+    //       print('No last known location available.');
+    //     }
+    //
+    //
+    //
+    //
+    //     // locationService.onLocationChanged.listen((LocationData locationData) {
+    //     //   lati.value = locationData.latitude!;
+    //     //   longi.value = locationData.longitude!;
+    //     //   print("locationData.latitude == ${locationData.latitude}");
+    //     //   _updateLocation();
+    //     //   _getAttendanceSummary();
+    //     // });
+    //   } catch (e) {
+    //     log("Error getting GPS location: ${e.toString()}");
+    //     Fluttertoast.showToast(
+    //       msg:
+    //       "Error getting GPS location.",
+    //       toastLength: Toast.LENGTH_LONG,
+    //       backgroundColor: Colors.black54,
+    //       gravity: ToastGravity.BOTTOM,
+    //       timeInSecForIosWeb: 1,
+    //       textColor: Colors.white,
+    //       fontSize: 16.0,
+    //     );
+    //   }
+    // } else {
+    //   // Continue using location package for updates
+    //   print("There is internet to get location data");
+    //   locationService.onLocationChanged.listen((LocationData locationData) {
+    //     lati.value = locationData.latitude!;
+    //     longi.value = locationData.longitude!;
+    //    // print("locationData.latitude! == ${locationData.latitude!}");
+    //     //print("locationData.longitude! == ${locationData.longitude!}");
+    //     _updateLocation();
+    //     _getAttendanceSummary();
+    //   });
+    // }
   }
 
   Future<void> _updateLocation() async {
@@ -1561,6 +1718,7 @@ print("_getLocation2 hereeeee");
       }
       
     }catch(e){
+      log("$e");
       Fluttertoast.showToast(
         msg: "Error: $e",
         toastLength: Toast.LENGTH_LONG,
@@ -1613,9 +1771,39 @@ print("_getLocation2 hereeeee");
       );
     }
   }
+  //
+  // Future<void> handleClockInOut(
+  //     BuildContext context, GlobalKey<SlideActionState> key,newlatitude,newlongitude,newlocation) async {
+  //
+  //   try {
+  //     final lastAttend = await service.getLastAttendance(
+  //         DateFormat("MMMM yyyy").format(DateTime.now()).toString());
+  //
+  //     if (lastAttend?.date != currentDate) {
+  //       // Clock In
+  //       await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
+  //     } else if (lastAttend?.date == currentDate) {
+  //       // Clock Out
+  //       List<AttendanceModel> attendanceResult = await service
+  //           .getAttendanceForDate(
+  //           DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
+  //       final bioInfoForUser = await service.getBioInfoWithFirebaseAuth();
+  //       await _clockOut(
+  //           attendanceResult[0].id, bioInfoForUser, attendanceResult,newlatitude,newlongitude,newlocation);
+  //     } else if (lastAttend?.date == null) {
+  //       // No previous record, clock in
+  //       await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
+  //     }
+  //   } catch (e) {
+  //     log("Attendance clockInandOut Error ====== ${e.toString()}");
+  //     await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
+  //   }
+  //
+  //   key.currentState!.reset();
+  // }
 
-  Future<void> handleClockInOut(
-      BuildContext context, GlobalKey<SlideActionState> key,newlatitude,newlongitude,newlocation) async {
+
+  Future<void> handleClockInOut(BuildContext context, GlobalKey<SlideActionState> key, newlatitude, newlongitude, newlocation) async {
 
     try {
       final lastAttend = await service.getLastAttendance(
@@ -1623,7 +1811,7 @@ print("_getLocation2 hereeeee");
 
       if (lastAttend?.date != currentDate) {
         // Clock In
-        await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
+        await _clockIn(isInternetConnected.value, newlatitude, newlongitude, newlocation);
       } else if (lastAttend?.date == currentDate) {
         // Clock Out
         List<AttendanceModel> attendanceResult = await service
@@ -1631,14 +1819,35 @@ print("_getLocation2 hereeeee");
             DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
         final bioInfoForUser = await service.getBioInfoWithFirebaseAuth();
         await _clockOut(
-            attendanceResult[0].id, bioInfoForUser, attendanceResult,newlatitude,newlongitude,newlocation);
-      } else if (lastAttend?.date == null) {
-        // No previous record, clock in
-        await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
+            attendanceResult[0].id, bioInfoForUser, attendanceResult, newlatitude, newlongitude, newlocation);
+      } else {
+        // No previous record OR potential error, prompt the user
+        // You might want to display a message or allow the user to retry.
+        print("Error determining clock in/out status. Please try again.");
+        Fluttertoast.showToast(
+          msg: "Error determining clock in/out status. Please try again.",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
       }
     } catch (e) {
       log("Attendance clockInandOut Error ====== ${e.toString()}");
-      await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
+      Fluttertoast.showToast(
+        msg: "Attendance clockInandOut Error ====== ${e.toString()}",
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      // Handle the error appropriately -  display an error message
+      //  and potentially allow the user to retry.
+      print("An error occurred. Please try again.");
     }
 
     key.currentState!.reset();
@@ -1651,7 +1860,7 @@ print("_getLocation2 hereeeee");
             localTime: DateTime.now(), lookUpAddress: "time.google.com")))
         : DateTime.now();
 
-    if(newlatitude != 0.0) {
+    if(UserModel.lat != 0.0) {
       final attendance = AttendanceModel()
         ..clockIn = DateFormat('hh:mm a').format(time)
         ..date = DateFormat('dd-MMMM-yyyy').format(time)
@@ -1712,7 +1921,7 @@ print("_getLocation2 hereeeee");
             localTime: DateTime.now(), lookUpAddress: "time.google.com")))
         : DateTime.now();
 
-    if(UserModel.lat != 0.0) {
+    if(newlatitude != 0.0) {
       await service.updateAttendance(
         attendanceId,
         AttendanceModel(),

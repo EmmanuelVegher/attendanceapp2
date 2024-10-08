@@ -489,7 +489,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
     final attendanceLast = await widget.service.getAttendanceForSpecificDate(
         DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
 
-    if (controller.lati.value == 0.0 && controller.longi.value == 0.0) {
+    if (controller.lati.value == 0.0) {
       Fluttertoast.showToast(
           msg: "Error: Latitude and Longitude Not gotten...Kindly wait",
           toastLength: Toast.LENGTH_LONG,
