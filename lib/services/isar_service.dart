@@ -1481,6 +1481,13 @@ class IsarService extends DatabaseAdapter {
     return await isar.lastUpdateDateModels.where().filter().lastUpdateDateIsNotNull().findAll();
   }
 
+  Future<LocationModel?> getLocationByName(var locationName) async {
+    //await Future.delayed(const Duration(seconds: 1));
+    final isar = await db;
+    return await isar.locationModels.filter().locationNameEqualTo(locationName).findFirst();
+
+  }
+
   Future<BioModel?> getBioInfoWithFirebaseAuth() async {
     //await Future.delayed(const Duration(seconds: 1));
     final isar = await db;

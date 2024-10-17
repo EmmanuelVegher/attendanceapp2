@@ -82,6 +82,8 @@ dependencies:
   #flutter_local_notifications: ^13.0.0
   #charts_flutter:
   permission_handler:
+  syncfusion_flutter_charts: ^27.1.50
+  gps_connectivity:
   refreshable_widget:
   #encrypt:
   #mapbox_gl: ^0.16.0
@@ -102,6 +104,8 @@ dependencies:
   firebase_crashlytics: ^3.5.7
   firebase_analytics: ^10.10.7
   firebase_app_check: ^0.2.2
+
+  #another_telephony:
   #bcrypt: ^1.1.3
 
  # background_locator:

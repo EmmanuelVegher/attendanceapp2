@@ -55,6 +55,8 @@ import '../profile_page.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'attendance_report.dart';
+
 class AttendanceHomeScreen extends StatefulWidget {
   final IsarService service;
   const AttendanceHomeScreen({Key? key, required this.service})
@@ -121,6 +123,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
   List<IconData> navigationIcons = [
     Icons.calendar_month_outlined,
     Icons.check,
+    Icons.report,
     Icons.verified_user,
   ];
 
@@ -491,13 +494,8 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           new ClockAttendance(
             IsarService(), service: IsarService(), controller: null,
           ),
-         // new AttendanceClock(IsarService()),
-          // Inside the IndexedStack children:
-          // new ClockAttendance(
-          //   IsarService(),
-          //   service: IsarService(),
-          //   controller: Get.put(ClockAttendanceController(IsarService()), permanent: true), // Make the controller permanent
-          // ),
+         new AttendanceReportPage(),
+
           new ProfilePage(
 
           ),
@@ -537,6 +535,8 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                           print("currentIndex == 1");
                           Get.find<ClockAttendanceController>().refreshClockAttendance();
                         }else if (i == 2) {
+                          print("currentIndex == 2");
+                        }else if (i == 3) {
                           print("currentIndex == 2");
                         }
 
