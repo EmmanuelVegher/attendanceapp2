@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:gps_connectivity/gps_connectivity.dart';
 import 'package:location/location.dart' as locationPkg;
 import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
 import 'package:attendanceapp/Pages/auth_exceptions.dart';
@@ -170,6 +173,18 @@ class ClockAttendance extends StatelessWidget {
                     SizedBox(height: 10), // Spacing between status and coordinates
                     Obx(() =>
                     //controller.lati.value != 0.0?
+                    Text(
+                      "GPS is: ${controller.isGpsEnabled.value ? 'On' : 'Off'}",
+                      style: TextStyle(
+                        fontFamily: "NexaBold",
+                        fontSize: screenWidth / 23,
+                      ),
+                    )
+                      //:CircularProgressIndicator()
+                    ),
+                    SizedBox(height: 10), // Spacing between status and coordinates
+                    Obx(() =>
+                    //controller.lati.value != 0.0?
                         Text(
                       "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
                       style: TextStyle(
@@ -178,6 +193,18 @@ class ClockAttendance extends StatelessWidget {
                       ),
                     )
                         //:CircularProgressIndicator()
+                    ),
+                    SizedBox(height: 10), // Spacing between status and coordinates
+                    Obx(() =>
+                    //controller.lati.value != 0.0?
+                    Text(
+                      "Coordinates Accuracy: ${controller.accuracy.value}, Altitude: ${controller.altitude.value} , Speed: ${controller.speed.value}, Speed Accuracy: ${controller.speedAccuracy.value}, Horizontal Travel of device: ${controller.heading.value}, Location Data Timestamp: ${controller.time.value}, Is Location Mocked?: ${controller.isMock.value}, Vertical Accuracy of Altitude: ${controller.verticalAccuracy.value}, Estimated Bearing Accuracy: ${controller.headingAccuracy.value}, Time of this Fix: ${controller.elapsedRealtimeNanos.value}, Number of satellite: ${controller.satelliteNumber.value}, Name of provider: ${controller.provider.value}",
+                      style: TextStyle(
+                        fontFamily: "NexaBold",
+                        fontSize: screenWidth / 23,
+                      ),
+                    )
+                      //:CircularProgressIndicator()
                     ),
                     SizedBox(height: 10),
                     Obx(() =>
@@ -1243,6 +1270,22 @@ class ClockAttendanceController extends GetxController {
   RxString firebaseAuthId = "".obs;
   RxDouble lati = 0.0.obs;
   RxDouble longi = 0.0.obs;
+  RxDouble accuracy = 0.0.obs;
+  RxDouble altitude = 0.0.obs;
+  RxDouble speed = 0.0.obs;
+  RxDouble speedAccuracy = 0.0.obs;
+  RxDouble heading = 0.0.obs;
+  RxDouble time = 0.0.obs;
+  RxBool isMock = false.obs;
+  RxDouble verticalAccuracy = 0.0.obs;
+  RxDouble headingAccuracy = 0.0.obs;
+  RxDouble elapsedRealtimeNanos = 0.0.obs;
+  RxDouble elapsedRealtimeUncertaintyNanos = 0.0.obs;
+  RxInt satelliteNumber = 0.obs;
+  RxString provider = "".obs;
+
+
+
   RxString administrativeArea = "".obs; // Added for state name
   RxBool isLocationTurnedOn = false.obs;
   Rx<LocationPermission> isLocationPermissionGranted =
@@ -1251,6 +1294,7 @@ class ClockAttendanceController extends GetxController {
   RxBool isAlertSet2 = false.obs;
   RxBool isInsideAnyGeofence = false.obs;
   RxBool isInternetConnected = false.obs;
+  RxBool isGpsEnabled = false.obs;
 
   String currentDate = DateFormat('dd-MMMM-yyyy').format(DateTime.now());
   DateTime ntpTime = DateTime.now();
@@ -1275,6 +1319,8 @@ class ClockAttendanceController extends GetxController {
  // Timer? _locationTimer;
   locationPkg.Location locationService = locationPkg.Location();
   // LocationService locationService = LocationService();
+  late StreamSubscription subscription;
+
 
   @override
   void onInit() {
@@ -1285,13 +1331,14 @@ class ClockAttendanceController extends GetxController {
   @override
   void onClose() {
     // Cancel the timer when the controller is closed
-    //_locationTimer?.cancel();
+    _locationTimer?.cancel();
    //_startLocationService().cancel();
     _clockInStreamController.close();
     _clockOutStreamController.close();
     _clockInLocationStreamController.close();
     _clockOutLocationStreamController.close();
     _fullNameStreamController.close();
+    subscription.cancel();
     super.onClose();
   }
 
@@ -1301,6 +1348,7 @@ class ClockAttendanceController extends GetxController {
     await _getAttendanceSummary();
     await _getUserDetail();
     _getUserLocation();
+    //_getLocationDetailsFromLocationModel();
 
     await getLocationStatus().then((_) async {
       await getPermissionStatus().then((_) async {
@@ -1309,6 +1357,28 @@ class ClockAttendanceController extends GetxController {
     });
 
     await checkInternetConnection();
+    // Get location details (with timeout)
+    // _locationTimer = Timer(const Duration(seconds: 10), () {
+    //   if (lati.value == 0.0 && longi.value == 0.0) {
+    //     print("Location not obtained within 10 seconds. Using default.");
+    //     _getLocationDetailsFromLocationModel();
+    //   }
+    // });
+
+    subscription =
+        GpsConnectivity().onGpsConnectivityChanged.listen((bool isGpsEnabled) {
+
+            this.isGpsEnabled.value = isGpsEnabled;
+
+        });
+
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      GpsConnectivity().checkGpsConnectivity().then((bool isGpsEnabled) {
+
+          this.isGpsEnabled.value = isGpsEnabled;
+
+      });
+    });
 
     // // Start the periodic location updates
     // _locationTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
@@ -1316,6 +1386,116 @@ class ClockAttendanceController extends GetxController {
     //   // _init();
     // });
   }
+
+  // Timer for location timeout
+  Timer? _locationTimer;
+
+  // Function to get location details from the LocationModel
+  Future<void> _getLocationDetailsFromLocationModel() async {
+    // 1. Get the location field from BioModel
+    final bioModel = await service.getBioInfoWithFirebaseAuth();
+    final locationFromBioModel = bioModel?.location;
+    print("locationFromBioModel === $locationFromBioModel");
+
+    if (locationFromBioModel == null) {
+      print("Location not found in BioModel");
+      return;
+    }
+
+    // 2. Query LocationModel using the location from BioModel
+    final locationModel = await service.getLocationByName(locationFromBioModel);
+   // print("locationModel.latitude === ${locationModel?.latitude}");
+   // print("locationModel.longitude === ${locationModel?.longitude}");
+   // print("locationModel.state === ${locationModel?.state}");
+   // print("locationModel.locationName === ${locationModel?.locationName}");
+
+    if (locationModel == null) {
+      print("No matching location found in LocationModel");
+      return;
+    }
+
+    // 3. Update the controller's variables with data from LocationModel
+    lati.value = locationModel.latitude ?? 0.0;
+    longi.value = locationModel.longitude ?? 0.0;
+    administrativeArea.value = locationModel.state ?? "";
+    location.value = locationModel.locationName ?? "";
+  }
+
+
+  // Function to update location details using geofencing
+  Future<void> _updateLocationUsingGeofencing() async {
+    // 1. Check if latitude is valid and location name is empty
+    if (lati.value != 0.0 && location.value == "") {
+      // 2. Get all locations from LocationModel
+      List<LocationModel> allLocations = await service.getAllLocations();
+      print("updateLocationUsingGeofencing for all location here");
+
+      // 3. Convert LocationModel objects to GeofenceModel for easier calculations
+      List<GeofenceModel> geofences = allLocations.map((location) => GeofenceModel(
+        name: location.locationName!,
+        latitude: location.latitude ?? 0.0,
+        longitude: location.longitude ?? 0.0,
+        radius: location.radius?.toDouble() ?? 0.0,
+      )).toList();
+
+      // 4. Iterate through each geofence to check if current location falls within
+      for (GeofenceModel geofence in geofences) {
+        double distance = GeoUtils.haversine(
+            lati.value, longi.value, geofence.latitude, geofence.longitude);
+
+        if (distance <= geofence.radius) {
+          // Found a matching geofence!
+          print('Using geofence location: ${geofence.name}');
+          location.value = geofence.name;
+          isInsideAnyGeofence.value = true;
+          isCircularProgressBarOn.value = false; // Update observable value
+          break; // Exit loop after finding a match
+        }
+      }
+
+      // If no geofence match is found, you can keep the location.value as ""
+      // or set a default value.
+    }
+  }
+
+  Future<void> _updateLocationUsingGeofencing2(double latitde, double longitde) async {
+    // 1. Check if latitude is valid and location name is empty
+    print("_updateLocationUsingGeofencing2 is here");
+
+      // 2. Get all locations from LocationModel
+      List<LocationModel> allLocations = await service.getAllLocations();
+      print("updateLocationUsingGeofencing for all location here");
+
+      // 3. Convert LocationModel objects to GeofenceModel for easier calculations
+      List<GeofenceModel> geofences = allLocations.map((location) => GeofenceModel(
+        name: location.locationName!,
+        latitude: location.latitude ?? 0.0,
+        longitude: location.longitude ?? 0.0,
+        radius: location.radius?.toDouble() ?? 0.0,
+      )).toList();
+
+      // 4. Iterate through each geofence to check if current location falls within
+      for (GeofenceModel geofence in geofences) {
+        double distance = GeoUtils.haversine(
+            latitde, longitde, geofence.latitude, geofence.longitude);
+
+        if (distance <= geofence.radius) {
+          // Found a matching geofence!
+          print('Using geofence location: ${geofence.name}');
+          location.value = geofence.name;
+          isInsideAnyGeofence.value = true;
+          isCircularProgressBarOn.value = false; // Update observable value
+          break; // Exit loop after finding a match
+        }
+      }
+
+  }
+
+
+
+
+
+
 
   Future<void> _loadNTPTime() async {
     try {
@@ -1415,6 +1595,80 @@ class ClockAttendanceController extends GetxController {
 
   }
 
+
+//   Future<Map<String, dynamic>> _getGPSData() async {
+//     // Check if location services are enabled
+//     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+//     if (!serviceEnabled) {
+//       return {'error': 'Location services are disabled.'};
+//     }
+//
+//     // Check location permissions
+//     LocationPermission permission = await Geolocator.checkPermission();
+//     if (permission == LocationPermission.denied) {
+//       permission = await Geolocator.requestPermission();
+//       if (permission == LocationPermission.denied) {
+//         return {'error': 'Location permissions are denied'};
+//       }
+//     }
+//
+//     if (permission == LocationPermission.deniedForever) {
+//       return {'error': 'Location permissions are permanently denied, we cannot request permissions.'};
+//     }
+//
+//     // Get the current position
+//     Position position = await Geolocator.getCurrentPosition(
+//       desiredAccuracy: geolocator.LocationAccuracy.high,
+//     );
+//
+//     List<double> signalStrengths = [];
+//
+//     // Android specific handling
+//     if (Platform.isAndroid) {
+//       LocationAccuracyStatus androidAccuracy = await Geolocator.getLocationAccuracy();
+//       if (androidAccuracy == LocationAccuracyStatus.precise) {
+//         // Correctly access serviceStatus from permission_handler
+//         PermissionStatus permission = await locationService.hasPermission();
+//         if (permission == PermissionStatus.denied) {
+//           permission = await locationService.requestPermission();
+//           if (permission != PermissionStatus.granted) {
+//             log("Location permission not granted");
+//           }
+//         }
+//
+//         // Check if location services are enabled
+//         if (permission ==PermissionStatus.granted) {
+//           // Add Android-specific GPS data retrieval logic (e.g., using additional plugin)
+//           // The following line is an example and may need platform-specific code to fetch GPS signals
+//           List<dynamic> rawData = await _getAndroidGPSData();  // Placeholder function
+//           for (var data in rawData) {
+//             if (data['provider'] == 'gps') {
+//               signalStrengths.add(data['extras']['satellites'] ?? 0.0);
+//             }
+//           }
+//         }
+//       }
+//     } else if (Platform.isIOS) {
+//       // Handle iOS-specific GPS data retrieval
+//       // Add logic here for iOS GPS signal data
+//     }
+//
+//     return {
+//       'latitude': position.latitude,
+//       'longitude': position.longitude,
+//       'accuracy': position.accuracy,
+//       'signalStrengths': signalStrengths, // List of signal strengths
+//     };
+//   }
+//
+// // Placeholder function for Android GPS data retrieval
+//   Future<List<dynamic>> _getAndroidGPSData() async {
+//     // Implement your logic for fetching Android-specific GPS data
+//     // This might involve platform channels or using an additional plugin
+//     return [];
+//   }
+
+
   Future<Position?> getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -1481,6 +1735,7 @@ class ClockAttendanceController extends GetxController {
         } else {
           location.value = "Location not found";
           administrativeArea.value = "";
+          await _updateLocationUsingGeofencing2(position.latitude,position.longitude);
         }
 
         // Geofencing logic
@@ -1525,7 +1780,13 @@ class ClockAttendanceController extends GetxController {
             print("Location from map === ${location.value}");
            // isCircularProgressBarOn.value = false; // Update observable value
           }
-        } else {
+        }
+        else if(administrativeArea.value == '' && location.value != 0.0){
+          // If we cant get the state, check the entire location name for geo fencing
+          print("administrativeArea.value1 == '' && location.value1 != 0.0");
+          await _updateLocationUsingGeofencing();
+        }
+        else {
           List<Placemark> placemark = await placemarkFromCoordinates(
               position.latitude, position.longitude);
 
@@ -1539,8 +1800,32 @@ class ClockAttendanceController extends GetxController {
       }
 
     } catch (e) {
-      print('Error getting location: $e');
+
       // Handle location errors (e.g., show an error message)
+      if(lati.value != 0.0 && administrativeArea.value == ''){
+        // If we cant get the state, check the entire location name for geo fencing
+        print("administrativeArea.value2 == '' && location.value2 != 0.0");
+        await _updateLocationUsingGeofencing();
+      }else if(lati.value == 0.0 && administrativeArea.value == '') {
+        Timer(const Duration(seconds: 10), () async {
+          if (lati.value == 0.0 && longi.value == 0.0) {
+            print("Location not obtained within 10 seconds. Using default1.");
+            _getLocationDetailsFromLocationModel();
+          }
+        });
+      }
+      else{
+
+        log('Error getting location: $e');
+        Fluttertoast.showToast(
+          msg: "Error getting location: $e",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );}
     }
   }
 
@@ -1550,9 +1835,24 @@ class ClockAttendanceController extends GetxController {
     isInternetConnected.value = await InternetConnectionChecker().hasConnection;
     try{
       print("_getLocation2 hereeeee");
-      locationService.onLocationChanged.listen((LocationData locationData) {
+      locationService.onLocationChanged.listen((LocationData locationData) async {
         lati.value = locationData.latitude!;
         longi.value = locationData.longitude!;
+        accuracy.value = locationData.accuracy!;
+        altitude.value = locationData.altitude!;
+        speed.value = locationData.speed!;
+        speedAccuracy.value = locationData.speedAccuracy!;
+        heading.value = locationData.heading!;
+        time.value = locationData.time!;
+        isMock.value = locationData.isMock!;
+        verticalAccuracy.value = locationData.verticalAccuracy!;
+        headingAccuracy.value = locationData.headingAccuracy!;
+        elapsedRealtimeNanos.value = locationData.elapsedRealtimeNanos!;
+        elapsedRealtimeUncertaintyNanos.value = locationData.elapsedRealtimeUncertaintyNanos!;
+        satelliteNumber.value = locationData.satelliteNumber!;
+        provider.value = locationData.provider!;
+
+
         // print("locationData.latitude! == ${locationData.latitude!}");
         //print("locationData.longitude! == ${locationData.longitude!}");
         _updateLocation();
@@ -1706,6 +2006,11 @@ class ClockAttendanceController extends GetxController {
           print("Location from map === ${location.value}");
           isCircularProgressBarOn.value = false; // Update observable value
         }
+      }
+      else if(administrativeArea.value == '' && location.value != 0.0){
+        // If we cant get the state, check the entire location name for geo fencing
+        print("_updateLocationUsingGeofencing2 here");
+        await _updateLocationUsingGeofencing();
       } else {
         List<Placemark> placemark = await placemarkFromCoordinates(
             lati.value, longi.value);
@@ -1718,6 +2023,20 @@ class ClockAttendanceController extends GetxController {
       }
       
     }catch(e){
+      if(lati.value != 0.0 && administrativeArea.value == ''){
+        // If we cant get the state, check the entire location name for geo fencing
+        await _updateLocationUsingGeofencing();
+        print("_updateLocationUsingGeofencing3 here");
+      }else if(lati.value == 0.0 && administrativeArea.value == '') {
+        print("Location not obtained within 10 seconds.");
+        Timer(const Duration(seconds: 10), () {
+          if (lati.value == 0.0 && longi.value == 0.0) {
+            print("Location not obtained within 10 seconds. Using default.");
+            _getLocationDetailsFromLocationModel();
+          }
+        });
+      }
+      else{
       log("$e");
       Fluttertoast.showToast(
         msg: "Error: $e",
@@ -1727,7 +2046,9 @@ class ClockAttendanceController extends GetxController {
         timeInSecForIosWeb: 1,
         textColor: Colors.white,
         fontSize: 16.0,
-      );
+      );}
+
+
     }
 
   }
