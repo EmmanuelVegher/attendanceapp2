@@ -24,6 +24,8 @@ import 'package:intl/intl.dart';
 import 'package:refreshable_widget/refreshable_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Pages/Timesheet/pending_timesheet.dart';
+import '../Pages/Timesheet/timesheet.dart';
 import 'my_app.dart';
 
 Widget drawer(
@@ -209,6 +211,55 @@ Widget drawer(
                     builder: (context) => DaysOffPage(
                           service: IsarService(),
                         )),
+              );
+            },
+          ),
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.access_time,
+              size: _drawerIconSize,
+              color: Colors.blue,
+            ),
+            title: Text(
+              'TimeSheet',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TimesheetScreen()),
+              );
+            },
+          ),
+
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.access_time,
+              size: _drawerIconSize,
+              color: Colors.blue,
+            ),
+            title: Text(
+              'Pending TimeSheet',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => PendingTimesheetsScreen()),
               );
             },
           ),

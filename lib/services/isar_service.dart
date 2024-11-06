@@ -51,6 +51,33 @@ class IsarService extends DatabaseAdapter {
     }
 
   }
+// Helper function to format DateTime as string
+  String _formatDate(DateTime date) {
+    final formatter = DateFormat('dd-MMMM-yyyy');
+    return formatter.format(date);
+  }
+
+
+  Stream<List<AttendanceModel>> searchAttendanceByDateRange(
+      DateTime startDate, DateTime endDate) async* {
+    final isar = await db;
+
+    final start = _formatDate(startDate); // Formatted start date
+    final end = _formatDate(endDate);   // Formatted end date
+
+    print("Querying Isar between: $start and $end");
+
+    final query = isar.attendanceModels
+        .where()
+        .filter()
+        .dateGreaterThan(start, include: true)  // String comparison
+        .and()
+        .dateLessThan(end, include: true);     // String comparison
+
+    print("Query Results: ${await query.findAll()}");
+
+    yield* query.watch(fireImmediately: true);
+  }
 
   Future<void> saveAllAttendance(List<AttendanceModel> attendances) async {
     final isar = await db;
@@ -367,6 +394,13 @@ class IsarService extends DatabaseAdapter {
     return await isar.attendanceModels.where().findAll();
   }
 
+  Future<BioModel?> getBioData() async {
+    final isar = await db;
+    return await isar.bioModels.filter().idEqualTo(2).findFirst();
+  }
+
+
+
   Future<List<LocationModel>> getAllLocation() async {
     final isar = await db;
     return await isar.locationModels.where().findAll();
@@ -416,6 +450,20 @@ class IsarService extends DatabaseAdapter {
     final isar = await db;
     final supervisorModels = await isar.supervisorModels.filter().departmentEqualTo(department).supervisorEqualTo(nameofsupervisor).findAll();
     return supervisorModels.map((model) => model.email).toList();
+  }
+
+  Stream<List<String?>> getSupervisorStream(String department, String state) {
+    final isar = Isar.getInstance(); // Make sure you have an Isar instance
+    if (isar != null) {
+      return isar.supervisorModels // Replace supervisorModels with your collection name
+          .filter()
+          .departmentEqualTo(department)
+          .stateEqualTo(state)
+          .watch(fireImmediately: true) // This creates the stream
+          .map((supervisorList) => supervisorList.map((supervisor) => supervisor.supervisor).toList()); // Map to email list
+    } else {
+      return Stream.value([]); // Return an empty stream if Isar is not initialized
+    }
   }
 
 
@@ -1245,7 +1293,23 @@ class IsarService extends DatabaseAdapter {
     }
   }
 
+  Stream<List<AttendanceModel>> searchAllAttendance1({String? search}) async* {
+    print(search);
+    final isar = await db; // Assuming 'db' is a Future<Isar> instance
+    final query = isar.attendanceModels
+        .where()
+        .filter() // This filter is currently empty. Add filtering logic if needed.
+        .voidedEqualTo(false)
+        .and()
+        .dateContains(search ?? '', caseSensitive: false)
+        .sortByDateDesc()
+        .limit(5) // Limit the results to the last 3 records
+        .build();
 
+    await for (final results in query.watch(fireImmediately: true)) {
+      yield results; // No need to check if results.isNotEmpty
+    }
+  }
 
   Stream<List<BioModel>> listenToBiometric1({String? search}) async* {
 
@@ -1494,5 +1558,17 @@ class IsarService extends DatabaseAdapter {
     return await isar.bioModels.filter().firebaseAuthIdIsNotNull().findFirst();
     //where().sortByDateDesc().findFirst();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
+  }
+
+  @override
+  Future<List<Uint8List>> getSignatureImages() {
+    // TODO: implement getSignatureImages
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> storeSignatureImage(Uint8List imageBytes) {
+    // TODO: implement storeSignatureImage
+    throw UnimplementedError();
   }
 }

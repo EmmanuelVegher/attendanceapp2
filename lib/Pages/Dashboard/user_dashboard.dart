@@ -249,7 +249,8 @@ class _UserDashBoardState extends State<UserDashBoard> {
                       children: [
                         Icon(Icons.info_outline, color: Colors.red,),
                         SizedBox(width: 8),
-                        Text('$versionNumber Updated'),
+                        //Text('$versionNumber Updated'),
+                        Text('Version 1.6(Pre-Release)'),
                       ],
                     ),
                   ),

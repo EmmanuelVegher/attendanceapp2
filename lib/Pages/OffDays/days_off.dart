@@ -487,7 +487,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
   _addDaysOffToDb() async {
     // _getLocation();
     final attendanceLast = await widget.service.getAttendanceForSpecificDate(
-        DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
+        DateFormat('dd-MMMM-yyyy').format(_selectedDate));
 
     if (controller.lati.value == 0.0) {
       Fluttertoast.showToast(
@@ -519,7 +519,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
         ..month = DateFormat('MMMM yyyy').format(_selectedDate);
 
       await widget.service.saveAttendance(attendnce);
-    } else {
+    } else  if (attendanceLast.length > 0) {
       Fluttertoast.showToast(
           msg: "Error: Attendance with same date already exist",
           toastLength: Toast.LENGTH_LONG,

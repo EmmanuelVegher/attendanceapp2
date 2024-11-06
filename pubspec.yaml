@@ -41,6 +41,11 @@ dependencies:
   #flutter_native_timezone:
   #workmanager: ^0.5.2
   #android_alarm_manager_plus: ^4.0.3
+  syncfusion_flutter_xlsio:
+  excel:
+  pdf:
+  synchronized:
+  syncfusion_flutter_datepicker:
   flutter_background_service: ^5.0.6
   device_info_plus: ^10.1.0
   cupertino_icons: ^1.0.2
@@ -104,6 +109,10 @@ dependencies:
   firebase_crashlytics: ^3.5.7
   firebase_analytics: ^10.10.7
   firebase_app_check: ^0.2.2
+  action_slider: ^0.7.0
+  syncfusion_flutter_pdf:
+  #open_file:
+  open_filex:
 
   #another_telephony:
   #bcrypt: ^1.1.3

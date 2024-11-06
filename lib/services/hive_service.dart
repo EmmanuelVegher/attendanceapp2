@@ -34,4 +34,37 @@ class HiveService extends DatabaseAdapter {
     var box = await Hive.openBox('imageBox');
     await box.delete('images');
   }
+
+  // Store Signature Images
+
+  @override
+  Future<List<Uint8List>> getSignatureImages() async {
+    var box = await Hive.openBox('imageSignatureBox');
+
+    List<dynamic>? result = box.get('imagesSignature');
+    if (result != null) {
+      return result.cast<Uint8List>();
+    } else {
+      return [];
+    }
+  }
+
+  @override
+  Future<void> storeSignatureImage(Uint8List imageBytes) async {
+    List<Uint8List> imagesSignature = [];
+    var box = await Hive.openBox('imageSignatureBox');
+    List<dynamic>? allImages = box.get("imagesSignature");
+    if (allImages != null) {
+      imagesSignature.addAll(allImages.cast<Uint8List>());
+    }
+    imagesSignature.clear();
+    imagesSignature.add(imageBytes);
+    print("imagesSignature ==== $imagesSignature");
+    box.put("imagesSignature", imagesSignature);
+  }
+
+  Future<void> clearSignatureImages() async {
+    var box = await Hive.openBox('imageSignatureBox');
+    await box.delete('imagesSignature');
+  }
 }

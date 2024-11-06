@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:action_slider/action_slider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gps_connectivity/gps_connectivity.dart';
@@ -32,6 +33,7 @@ import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
 import 'package:path/path.dart';
 import 'package:slide_to_act/slide_to_act.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../../Pages/Dashboard/admin_dashboard.dart';
 import '../../Pages/Dashboard/user_dashboard.dart';
@@ -43,6 +45,7 @@ import '../../widgets/drawer2.dart';
 import '../../widgets/geo_utils.dart';
 import '../../widgets/header_widget.dart';
 import '../../widgets/input_field.dart';
+import '../../widgets/my_slider_widget.dart';
 import '../../widgets/show_error_dialog.dart';
 import '../OffDays/days_off.dart';
 import '../OffDays/update_attendance.dart';
@@ -172,64 +175,92 @@ class ClockAttendance extends StatelessWidget {
                     ),
                     SizedBox(height: 10), // Spacing between status and coordinates
                     Obx(() =>
-                    //controller.lati.value != 0.0?
-                    Text(
-                      "GPS is: ${controller.isGpsEnabled.value ? 'On' : 'Off'}",
-                      style: TextStyle(
-                        fontFamily: "NexaBold",
-                        fontSize: screenWidth / 23,
-                      ),
-                    )
-                      //:CircularProgressIndicator()
+                        Card(
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.red.shade100, // Light red at the top
+                                  Colors.white,        // White in the middle
+                                  Colors.black12,      // Very dark gray at the bottom
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Geo-Cordinates Information:",
+                                  style: TextStyle(
+                                    fontFamily: "NexaBold",
+                                    fontSize: screenWidth / 20,
+                                    color: Colors.blueGrey, // Change color to blueGrey
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                // ... Add other location-related Obx Text widgets here ...
+
+                                Text(
+                                  "GPS is: ${controller.isGpsEnabled.value ? 'On' : 'Off'}",
+                                  style: TextStyle(
+                                    fontFamily: "NexaBold",
+                                    fontSize: screenWidth / 23,
+                                  ),
+                                ),
+                                SizedBox(height: 10), // Spacing between status and coordinates
+
+                                Text(
+                                  "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
+                                  style: TextStyle(
+                                    fontFamily: "NexaBold",
+                                    fontSize: screenWidth / 23,
+                                  ),
+                                ),
+                                SizedBox(height: 10), // Spacing between status and coordinates
+
+                                Text(
+                                  "Coordinates Accuracy: ${controller.accuracy.value}, Altitude: ${controller.altitude.value} , Speed: ${controller.speed.value}, Speed Accuracy: ${controller.speedAccuracy.value}, Location Data Timestamp: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(controller.time.value.toInt()))} , Is Location Mocked?: ${controller.isMock.value}",
+                                  style: TextStyle(
+                                    fontFamily: "NexaBold",
+                                    fontSize: screenWidth / 23,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+
+                                Text(
+                                  "Current State: ${controller.administrativeArea.value}",
+                                  style: TextStyle(
+                                    fontFamily: "NexaBold",
+                                    fontSize: screenWidth / 23,
+                                  ),
+                                ),
+
+                                SizedBox(height: 10),
+
+                            Obx(() => Text(
+                                  "Current Location: ${controller.location.value}",
+                                  style: TextStyle(
+                                    fontFamily: "NexaBold",
+                                    fontSize: screenWidth / 23,
+                                  ),
+                                ),),
+                                  //:CircularProgressIndicator()
+
+
+                              ],
+                            ),
+                          ),),
+                        ),
                     ),
-                    SizedBox(height: 10), // Spacing between status and coordinates
-                    Obx(() =>
-                    //controller.lati.value != 0.0?
-                        Text(
-                      "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
-                      style: TextStyle(
-                        fontFamily: "NexaBold",
-                        fontSize: screenWidth / 23,
-                      ),
-                    )
-                        //:CircularProgressIndicator()
-                    ),
-                    SizedBox(height: 10), // Spacing between status and coordinates
-                    Obx(() =>
-                    //controller.lati.value != 0.0?
-                    Text(
-                      "Coordinates Accuracy: ${controller.accuracy.value}, Altitude: ${controller.altitude.value} , Speed: ${controller.speed.value}, Speed Accuracy: ${controller.speedAccuracy.value}, Horizontal Travel of device: ${controller.heading.value}, Location Data Timestamp: ${controller.time.value}, Is Location Mocked?: ${controller.isMock.value}, Vertical Accuracy of Altitude: ${controller.verticalAccuracy.value}, Estimated Bearing Accuracy: ${controller.headingAccuracy.value}, Time of this Fix: ${controller.elapsedRealtimeNanos.value}, Number of satellite: ${controller.satelliteNumber.value}, Name of provider: ${controller.provider.value}",
-                      style: TextStyle(
-                        fontFamily: "NexaBold",
-                        fontSize: screenWidth / 23,
-                      ),
-                    )
-                      //:CircularProgressIndicator()
-                    ),
-                    SizedBox(height: 10),
-                    Obx(() =>
-                   // controller.administrativeArea.value != ""?
-                        Text(
-                      "Current State: ${controller.administrativeArea.value}",
-                      style: TextStyle(
-                        fontFamily: "NexaBold",
-                        fontSize: screenWidth / 23,
-                      ),
-                    )
-                        //:CircularProgressIndicator()
-                    ),
-                    SizedBox(height: 10),
-                    Obx(() =>
-                   // controller.location.value != ""?
-                        Text(
-                      "Current Location: ${controller.location.value}",
-                      style: TextStyle(
-                        fontFamily: "NexaBold",
-                        fontSize: screenWidth / 23,
-                      ),
-                    )
-                        //:CircularProgressIndicator()
-                    ),
+
+
                     // You can add your location name widget here, using Obx to make it reactive
                   ],
                 ),
@@ -364,21 +395,52 @@ class ClockAttendance extends StatelessWidget {
                               child: Builder(
                                 builder: (context) {
                                   final GlobalKey<SlideActionState> key = GlobalKey();
-                                  return SlideAction(
+                                  return
+                                  //   MySlideAction(
+                                  //   text: "Slide to Clock Out",
+                                  //   key: key,
+                                  //   onSubmit: () async {
+                                  //     await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);// No need to pass the key
+                                  //   },
+                                  // );
+
+
+                                  Obx(() => SlideAction(
                                     text: "Slide to Clock Out",
+                                      animationDuration:const Duration(milliseconds: 1000),
+                                    submittedIcon: controller.isLoading.value
+                                        ? const CircularProgressIndicator() // Show during loading
+                                        : const Icon(Icons.done),
                                     textStyle: TextStyle(
-                                      color: Colors.black54,
-                                      fontSize: screenWidth / 20,
-                                      fontFamily: "NexaLight",
-                                    ),
-                                    outerColor: Colors.white,
-                                    innerColor: Colors.red,
-                                    key: key,
-                                    onSubmit: () async {
+                                        color: Colors.black54,
+                                        fontSize: screenWidth / 20,
+                                        fontFamily: "NexaLight",
+                                      ),
+                                      outerColor: Colors.white,
+                                      innerColor: Colors.red,
+                                      key: key,
+                                    onSubmit: controller.isLoading.value ? null : () async { // Disable onSubmit if loading
                                       await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
-                                      //await controller._clockIn(isInternetConnected.value);
                                     },
-                                  );
+                                    sliderButtonIcon: controller.isLoading.value ? const CircularProgressIndicator(strokeWidth: 2,) : const Icon(Icons.arrow_forward_ios_rounded),
+                                  ));
+
+                                  //   SlideAction(
+                                  //   text: "Slide to Clock Out",
+                                  //   textStyle: TextStyle(
+                                  //     color: Colors.black54,
+                                  //     fontSize: screenWidth / 20,
+                                  //     fontFamily: "NexaLight",
+                                  //   ),
+                                  //   outerColor: Colors.white,
+                                  //   innerColor: Colors.red,
+                                  //   key: key,
+                                  //   onSubmit: () async {
+                                  //     await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
+                                  //     //await controller._clockIn(isInternetConnected.value);
+                                  //   },
+                                  //
+                                  // );
                                 },
                               ),
                             ),
@@ -888,20 +950,47 @@ class ClockAttendance extends StatelessWidget {
                           child: Builder(
                             builder: (context) {
                               final GlobalKey<SlideActionState> key = GlobalKey();
-                              return SlideAction(
-                                text: "Slide to Clock In",
-                                textStyle: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: screenWidth / 20,
-                                  fontFamily: "NexaLight",
-                                ),
-                                outerColor: Colors.white,
-                                innerColor: Colors.red,
-                                key: key,
-                                onSubmit: () async {
-                                  await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
-                                },
-                              );
+                              return
+                              //   MySlideAction(
+                              //   text: "Slide to Clock In",
+                              //   key: key,
+                              //   onSubmit: () async {
+                              //     await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);// No need to pass the key
+                              //   },
+                              // );
+                                Obx(() => SlideAction(
+                                  text: "Slide to Clock In",
+                                  animationDuration:const Duration(milliseconds: 1000),
+                                  submittedIcon: controller.isLoading.value
+                                      ? const CircularProgressIndicator() // Show during loading
+                                      : const Icon(Icons.done),
+                                  textStyle: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: screenWidth / 20,
+                                    fontFamily: "NexaLight",
+                                  ),
+                                  outerColor: Colors.white,
+                                  innerColor: Colors.red,
+                                  key: key,
+                                  onSubmit: controller.isLoading.value ? null : () async { // Disable onSubmit if loading
+                                    await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
+                                  },
+                                  sliderButtonIcon: controller.isLoading.value ? const CircularProgressIndicator(strokeWidth: 2,) : const Icon(Icons.arrow_forward_ios_rounded),
+                                ));
+                              //   SlideAction(
+                              //   text: "Slide to Clock In",
+                              //   textStyle: TextStyle(
+                              //     color: Colors.black54,
+                              //     fontSize: screenWidth / 20,
+                              //     fontFamily: "NexaLight",
+                              //   ),
+                              //   outerColor: Colors.white,
+                              //   innerColor: Colors.red,
+                              //   key: key,
+                              //   onSubmit: () async {
+                              //     await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
+                              //   },
+                              // );
                             },
                           ),
                         ),
@@ -1238,6 +1327,9 @@ class ClockAttendanceController extends GetxController {
 
   }
 
+  // Add a lock to prevent race conditions
+  final _clockInOutLock = Lock();
+
   var isCircularProgressBarOn = true.obs; // Observable boolean
 
   var _clockInStreamController = StreamController<String>.broadcast();
@@ -1281,9 +1373,9 @@ class ClockAttendanceController extends GetxController {
   RxDouble headingAccuracy = 0.0.obs;
   RxDouble elapsedRealtimeNanos = 0.0.obs;
   RxDouble elapsedRealtimeUncertaintyNanos = 0.0.obs;
-  RxInt satelliteNumber = 0.obs;
-  RxString provider = "".obs;
-
+  //RxInt satelliteNumber = 0.obs;
+  //RxString provider = "".obs;
+  RxBool isLoading = false.obs;  // Add a loading state observable
 
 
   RxString administrativeArea = "".obs; // Added for state name
@@ -1849,8 +1941,8 @@ class ClockAttendanceController extends GetxController {
         headingAccuracy.value = locationData.headingAccuracy!;
         elapsedRealtimeNanos.value = locationData.elapsedRealtimeNanos!;
         elapsedRealtimeUncertaintyNanos.value = locationData.elapsedRealtimeUncertaintyNanos!;
-        satelliteNumber.value = locationData.satelliteNumber!;
-        provider.value = locationData.provider!;
+       // satelliteNumber.value = locationData.satelliteNumber!;
+       // provider.value = locationData.provider!;
 
 
         // print("locationData.latitude! == ${locationData.latitude!}");
@@ -1860,82 +1952,36 @@ class ClockAttendanceController extends GetxController {
       });
     }catch(e){
       print("_getLocation2 Error:$e");
-      Fluttertoast.showToast(
-        msg: "GeoCordinate Error: $e",
-        toastLength: Toast.LENGTH_LONG,
-        backgroundColor: Colors.black54,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        textColor: Colors.white,
-        fontSize: 16.0,
+      print("There is nooooooo internet to get location data");
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: geolocator.LocationAccuracy.best,
+        forceAndroidLocationManager: true, // Important for Android
       );
+
+      Position? position1 = await Geolocator.getLastKnownPosition();
+
+      if (position != null) {
+
+        lati.value = position.latitude;
+        longi.value = position.longitude;
+        print("locationData.latitude == ${position.latitude}");
+        _updateLocation();
+      } else if (position1 != null){
+        // Store the latitude and longitude (e.g., in shared preferences, database, etc.)
+        print('Cached Latitude: ${position.latitude}');
+        print('Cached Longitude: ${position.longitude}');
+        lati.value = position1.latitude;
+        longi.value = position1.longitude;
+        _updateLocation();
+      }
+      else {
+        print('No last known location available.');
+      }
+
+
 
     }
 
-    // if (!isInternetConnected.value) {
-    //   // Use Geolocator and request location updates using GPS
-    //   try {
-    //     print("There is nooooooo internet to get location data");
-    //     Position position = await Geolocator.getCurrentPosition(
-    //       desiredAccuracy: geolocator.LocationAccuracy.best,
-    //       forceAndroidLocationManager: true, // Important for Android
-    //     );
-    //
-    //     Position? position1 = await Geolocator.getLastKnownPosition();
-    //
-    //     if (position != null) {
-    //
-    //       lati.value = position.latitude;
-    //       longi.value = position.longitude;
-    //       print("locationData.latitude == ${position.latitude}");
-    //       _updateLocation();
-    //     } else if (position1 != null){
-    //       // Store the latitude and longitude (e.g., in shared preferences, database, etc.)
-    //       print('Cached Latitude: ${position.latitude}');
-    //       print('Cached Longitude: ${position.longitude}');
-    //       lati.value = position1.latitude;
-    //       longi.value = position1.longitude;
-    //       _updateLocation();
-    //     }
-    //     else {
-    //       print('No last known location available.');
-    //     }
-    //
-    //
-    //
-    //
-    //     // locationService.onLocationChanged.listen((LocationData locationData) {
-    //     //   lati.value = locationData.latitude!;
-    //     //   longi.value = locationData.longitude!;
-    //     //   print("locationData.latitude == ${locationData.latitude}");
-    //     //   _updateLocation();
-    //     //   _getAttendanceSummary();
-    //     // });
-    //   } catch (e) {
-    //     log("Error getting GPS location: ${e.toString()}");
-    //     Fluttertoast.showToast(
-    //       msg:
-    //       "Error getting GPS location.",
-    //       toastLength: Toast.LENGTH_LONG,
-    //       backgroundColor: Colors.black54,
-    //       gravity: ToastGravity.BOTTOM,
-    //       timeInSecForIosWeb: 1,
-    //       textColor: Colors.white,
-    //       fontSize: 16.0,
-    //     );
-    //   }
-    // } else {
-    //   // Continue using location package for updates
-    //   print("There is internet to get location data");
-    //   locationService.onLocationChanged.listen((LocationData locationData) {
-    //     lati.value = locationData.latitude!;
-    //     longi.value = locationData.longitude!;
-    //    // print("locationData.latitude! == ${locationData.latitude!}");
-    //     //print("locationData.longitude! == ${locationData.longitude!}");
-    //     _updateLocation();
-    //     _getAttendanceSummary();
-    //   });
-    // }
   }
 
   Future<void> _updateLocation() async {
@@ -2092,9 +2138,81 @@ class ClockAttendanceController extends GetxController {
       );
     }
   }
-  //
-  // Future<void> handleClockInOut(
-  //     BuildContext context, GlobalKey<SlideActionState> key,newlatitude,newlongitude,newlocation) async {
+
+
+  // Updated handleClockInOut function
+  Future<void> handleClockInOut(BuildContext context, GlobalKey<SlideActionState> key, newlatitude, newlongitude, newlocation) async {
+    // 1. Acquire the lock to prevent concurrent clock in/out operations
+    if (!isLoading.value) {
+      await _clockInOutLock.synchronized(() async {
+        try {
+          // 2. Recalculate currentDate to ensure it's up-to-date
+          currentDate = DateFormat('dd-MMMM-yyyy').format(DateTime.now());
+
+          final lastAttend = await service.getLastAttendance(
+              DateFormat("MMMM yyyy").format(DateTime.now()).toString());
+
+          if (lastAttend?.date != currentDate) {
+            // Clock In
+            // await _clockIn(isInternetConnected.value);
+            await _clockIn(isInternetConnected.value, newlatitude, newlongitude,
+                newlocation);
+          } else if (lastAttend?.date == currentDate &&
+              lastAttend?.clockOut == "--/--") {
+            // Clock Out ONLY if clocked in and NOT already clocked out
+            final attendanceResult = await service.getAttendanceForDate(
+                currentDate);
+            final bioInfoForUser = await service.getBioInfoWithFirebaseAuth();
+            await _clockOut(
+                attendanceResult[0].id, bioInfoForUser, attendanceResult,
+                newlatitude, newlongitude, newlocation);
+          } else {
+            // Handle cases where there's no record for today,
+            // or the user is already clocked out
+            print("You are already clocked out for today.");
+            Fluttertoast.showToast(
+              msg: "You are already clocked out for today.",
+              toastLength: Toast.LENGTH_LONG,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }
+          key.currentState!.reset();
+        } catch (e) {
+          // ... [Handle errors appropriately]
+          log("Attendance clockInandOut Error ====== ${e.toString()}");
+          Fluttertoast.showToast(
+            msg: "Attendance clockInandOut Error ====== ${e.toString()}",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          // Handle the error appropriately -  display an error message
+          //  and potentially allow the user to retry.
+          print("An error occurred. Please try again.");
+          key.currentState!.reset();
+        }finally {
+          // Ensure the slider is reset and re-enabled, regardless of success or failure.
+          key.currentState!.reset();
+         // key.currentState!.setEnabled(true); // Re-enable the slider
+        }
+      });
+    }
+
+    key.currentState!.reset();
+  }
+
+
+
+
+
+  // Future<void> handleClockInOut(BuildContext context, GlobalKey<SlideActionState> key, newlatitude, newlongitude, newlocation) async {
   //
   //   try {
   //     final lastAttend = await service.getLastAttendance(
@@ -2102,7 +2220,7 @@ class ClockAttendanceController extends GetxController {
   //
   //     if (lastAttend?.date != currentDate) {
   //       // Clock In
-  //       await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
+  //       await _clockIn(isInternetConnected.value, newlatitude, newlongitude, newlocation);
   //     } else if (lastAttend?.date == currentDate) {
   //       // Clock Out
   //       List<AttendanceModel> attendanceResult = await service
@@ -2110,69 +2228,39 @@ class ClockAttendanceController extends GetxController {
   //           DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
   //       final bioInfoForUser = await service.getBioInfoWithFirebaseAuth();
   //       await _clockOut(
-  //           attendanceResult[0].id, bioInfoForUser, attendanceResult,newlatitude,newlongitude,newlocation);
-  //     } else if (lastAttend?.date == null) {
-  //       // No previous record, clock in
-  //       await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
+  //           attendanceResult[0].id, bioInfoForUser, attendanceResult, newlatitude, newlongitude, newlocation);
+  //     } else {
+  //       // No previous record OR potential error, prompt the user
+  //       // You might want to display a message or allow the user to retry.
+  //       print("Error determining clock in/out status. Please try again.");
+  //       Fluttertoast.showToast(
+  //         msg: "Error determining clock in/out status. Please try again.",
+  //         toastLength: Toast.LENGTH_LONG,
+  //         backgroundColor: Colors.black54,
+  //         gravity: ToastGravity.BOTTOM,
+  //         timeInSecForIosWeb: 1,
+  //         textColor: Colors.white,
+  //         fontSize: 16.0,
+  //       );
   //     }
   //   } catch (e) {
   //     log("Attendance clockInandOut Error ====== ${e.toString()}");
-  //     await _clockIn(isInternetConnected.value,newlatitude,newlongitude,newlocation);
+  //     Fluttertoast.showToast(
+  //       msg: "Attendance clockInandOut Error ====== ${e.toString()}",
+  //       toastLength: Toast.LENGTH_LONG,
+  //       backgroundColor: Colors.black54,
+  //       gravity: ToastGravity.BOTTOM,
+  //       timeInSecForIosWeb: 1,
+  //       textColor: Colors.white,
+  //       fontSize: 16.0,
+  //     );
+  //     // Handle the error appropriately -  display an error message
+  //     //  and potentially allow the user to retry.
+  //     print("An error occurred. Please try again.");
   //   }
   //
   //   key.currentState!.reset();
   // }
-
-
-  Future<void> handleClockInOut(BuildContext context, GlobalKey<SlideActionState> key, newlatitude, newlongitude, newlocation) async {
-
-    try {
-      final lastAttend = await service.getLastAttendance(
-          DateFormat("MMMM yyyy").format(DateTime.now()).toString());
-
-      if (lastAttend?.date != currentDate) {
-        // Clock In
-        await _clockIn(isInternetConnected.value, newlatitude, newlongitude, newlocation);
-      } else if (lastAttend?.date == currentDate) {
-        // Clock Out
-        List<AttendanceModel> attendanceResult = await service
-            .getAttendanceForDate(
-            DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
-        final bioInfoForUser = await service.getBioInfoWithFirebaseAuth();
-        await _clockOut(
-            attendanceResult[0].id, bioInfoForUser, attendanceResult, newlatitude, newlongitude, newlocation);
-      } else {
-        // No previous record OR potential error, prompt the user
-        // You might want to display a message or allow the user to retry.
-        print("Error determining clock in/out status. Please try again.");
-        Fluttertoast.showToast(
-          msg: "Error determining clock in/out status. Please try again.",
-          toastLength: Toast.LENGTH_LONG,
-          backgroundColor: Colors.black54,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      }
-    } catch (e) {
-      log("Attendance clockInandOut Error ====== ${e.toString()}");
-      Fluttertoast.showToast(
-        msg: "Attendance clockInandOut Error ====== ${e.toString()}",
-        toastLength: Toast.LENGTH_LONG,
-        backgroundColor: Colors.black54,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      // Handle the error appropriately -  display an error message
-      //  and potentially allow the user to retry.
-      print("An error occurred. Please try again.");
-    }
-
-    key.currentState!.reset();
-  }
 
   Future<void> _clockIn(bool isDeviceConnected,double newlatitude,double newlongitude,String newlocation) async {
     final time = isDeviceConnected
@@ -2181,7 +2269,7 @@ class ClockAttendanceController extends GetxController {
             localTime: DateTime.now(), lookUpAddress: "time.google.com")))
         : DateTime.now();
 
-    if(UserModel.lat != 0.0) {
+    if(newlatitude != 0.0) {
       final attendance = AttendanceModel()
         ..clockIn = DateFormat('hh:mm a').format(time)
         ..date = DateFormat('dd-MMMM-yyyy').format(time)
@@ -2190,7 +2278,7 @@ class ClockAttendanceController extends GetxController {
         ..clockInLongitude = newlongitude
         ..clockOut = "--/--"
         ..clockOutLatitude = 0.0
-        ..clockOutLocation = null
+        ..clockOutLocation = ''
         ..clockOutLongitude = 0.0
         ..isSynced = false
         ..voided = false
@@ -2227,6 +2315,8 @@ class ClockAttendanceController extends GetxController {
         fontSize: 16.0,
       );
     }
+    // After successful clock-in, refresh the attendance summary
+    await _getAttendanceSummary();
   }
 
   Future<void> _clockOut(
@@ -2285,6 +2375,8 @@ class ClockAttendanceController extends GetxController {
         fontSize: 16.0,
       );
     }
+    // After successful clock-in, refresh the attendance summary
+    await _getAttendanceSummary();
   }
 
 
@@ -2363,7 +2455,12 @@ class ClockAttendanceController extends GetxController {
 
     if (clockTimeIn.isAfter(clockTimeOut)) {
       clockTimeOut = clockTimeOut.add(const Duration(days: 1));
-    }
+    } else if (clockInTime == "--/--" || clockOutTime == "--/--") {
+        // Handle the case where either time is not yet set
+        // You could return a default string or handle it differently
+        return "Time not set";
+
+      }
 
     Duration diff = clockTimeOut.difference(clockTimeIn);
     final hours = diff.inHours;

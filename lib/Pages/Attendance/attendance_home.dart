@@ -217,23 +217,27 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
 
   }
 
-  void _getUserDetail() async {
+  Future<void> _getUserDetail() async {
     final userDetail = await IsarService().getBioInfoWithFirebaseAuth();
-    setState(() {
-      firebaseAuthId = userDetail?.firebaseAuthId;
-      state = userDetail?.state;
-      project = userDetail?.project;
-      firstName = userDetail?.firstName;
-      lastName = userDetail?.lastName;
-      designation = userDetail?.designation;
-      department = userDetail?.department;
-      location = userDetail?.location;
-      staffCategory = userDetail?.staffCategory;
-      mobile = userDetail?.mobile;
-      emailAddress = userDetail?.emailAddress;
-      id = userDetail?.id;
-      role = userDetail?.role;
-    });
+    // Check if the widget is still mounted
+    if (mounted) { // <-- Add this check
+      setState(() {
+        firebaseAuthId = userDetail?.firebaseAuthId;
+        state = userDetail?.state;
+        project = userDetail?.project;
+        firstName = userDetail?.firstName;
+        lastName = userDetail?.lastName;
+        designation = userDetail?.designation;
+        department = userDetail?.department;
+        location = userDetail?.location;
+        staffCategory = userDetail?.staffCategory;
+        mobile = userDetail?.mobile;
+        emailAddress = userDetail?.emailAddress;
+        id = userDetail?.id;
+        role = userDetail?.role;
+      });
+    }
+
   }
 
   getConnectivity() {

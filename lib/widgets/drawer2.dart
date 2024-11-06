@@ -26,6 +26,7 @@ import 'package:refreshable_widget/refreshable_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Pages/Dashboard/admin_dashboard.dart';
+import '../Pages/Timesheet/timesheet.dart';
 import 'my_app.dart';
 
 Widget drawer2(
@@ -208,6 +209,31 @@ Widget drawer2(
                     builder: (context) => DaysOffPage(
                       service: IsarService(),
                     )),
+              );
+            },
+          ),
+
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.local_post_office,
+              size: _drawerIconSize,
+              color: Colors.blue,
+            ),
+            title: Text(
+              'TimeSheet',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TimesheetScreen()),
               );
             },
           ),
