@@ -273,7 +273,7 @@ class LoginPage extends StatelessWidget {
                     Text(
                       "LOGIN",
                       style: TextStyle(
-                        fontSize: screenWidth * 0.08, // Responsive font size
+                        fontSize:  MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.085 : 0.065), // Responsive font size
                         fontWeight: FontWeight.bold,
                         fontFamily: "NexaBold",
                       ),
@@ -284,7 +284,7 @@ class LoginPage extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.grey,
                         fontFamily: "NexaBold",
-                        fontSize: screenWidth * 0.04, // Responsive font size
+                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.030), // Responsive font size
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.03), // Responsive SizedBox height
@@ -299,11 +299,12 @@ class LoginPage extends StatelessWidget {
                                 "Email Address",
                                 style: TextStyle(
                                   color: Colors.black87,
-                                  fontSize: screenWidth * 0.035, // Responsive font size
+                                  fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.040 : 0.025), // Responsive font size
                                 ),
                               ),
                               SizedBox(height: screenHeight * 0.01), // Responsive SizedBox height
                               Container(
+
                                 decoration: ThemeHelper().inputBoxDecorationShaddow(),
                                 child: TextFormField(
                                   controller: loginController.emailAddressController,
@@ -315,7 +316,7 @@ class LoginPage extends StatelessWidget {
                                       icon: Icon(
                                         Icons.email,
                                         color: Colors.black54,
-                                        size: screenWidth * 0.05, // Responsive icon size
+                                        size: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.055 : 0.030), // Responsive icon size
                                       ),
                                     ),
                                   ),
@@ -335,7 +336,7 @@ class LoginPage extends StatelessWidget {
                                 "Password**",
                                 style: TextStyle(
                                   color: Colors.black87,
-                                  fontSize: screenWidth * 0.035, // Responsive font size
+                                  fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.040 : 0.025), // Responsive font size
                                 ),
                               ),
                               SizedBox(height: screenHeight * 0.01), // Responsive SizedBox height
@@ -352,7 +353,7 @@ class LoginPage extends StatelessWidget {
                                       icon: Icon(
                                         loginController.isObscure.value ? Icons.visibility : Icons.visibility_off,
                                         color: Colors.black54,
-                                        size: screenWidth * 0.05, // Responsive icon size
+                                        size: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.055 : 0.030),  // Responsive icon size
                                       ),
                                     ),
                                   ),
@@ -371,7 +372,7 @@ class LoginPage extends StatelessWidget {
                                 "Forgot your password?",
                                 style: TextStyle(
                                     color: Colors.red,
-                                    fontSize: screenWidth * 0.035
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.040 : 0.025),
                                 ),
                               ),
                               onPressed: () => Get.to(() => ForgotPasswordPage()),
@@ -387,7 +388,7 @@ class LoginPage extends StatelessWidget {
                                 padding:  EdgeInsets.symmetric(vertical: screenHeight * 0.015, horizontal: screenWidth * 0.1), // Responsive padding
                                 child: Text(
                                   "Sign In".toUpperCase(),
-                                  style: TextStyle(fontSize: screenWidth * 0.04, color: Colors.white),
+                                  style: TextStyle(fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.040 : 0.025), color: Colors.white),
                                 ),
                               ),
                             ),
@@ -469,7 +470,7 @@ class LoginPage extends StatelessWidget {
                                     style: TextStyle(
                                       fontFamily: "NexaBold",
                                       color: Colors.red,
-                                      fontSize: screenWidth * 0.035,
+                                      fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.040 : 0.025),
                                     ),
                                   ),
                                 ],

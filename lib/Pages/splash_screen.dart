@@ -117,7 +117,8 @@ class _SplashScreenState extends State<SplashScreen> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
               child: SizedBox(
-                height: screenHeight * 0.4,
+                height: screenHeight * 0.2,
+                width: screenWidth * 0.7,
                 child: Image.asset(
                   "assets/image/caritaslogo1.png",
                   fit: BoxFit.contain,
@@ -141,23 +142,23 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             )),
             SizedBox(height: screenHeight * 0.02),
-            Text("Attendance v1.5 ",
+            Text("Attendance v1.6(Pre-release) ",
                 style: TextStyle(
                     color: const Color.fromARGB(255, 97, 9, 9),
-                    fontSize: screenWidth * 0.05,
+                    fontSize: MediaQuery.of(context).size.height * 0.025,
                     fontWeight: FontWeight.bold)),
             SizedBox(height: screenHeight * 0.05),
             Text("| Powered By:CARITAS Nigeria |",
                 style: TextStyle(
                     color: const Color.fromARGB(255, 97, 9, 9),
-                    fontSize: screenWidth * 0.04,
+                    fontSize: MediaQuery.of(context).size.height * 0.017,
                     fontWeight: FontWeight.bold)),
 
             SizedBox(height: screenHeight * 0.05),
             Text("Developer: Emmanuel Vegher",
                 style: TextStyle(
                     color: const Color.fromARGB(255, 97, 9, 9),
-                    fontSize: screenWidth * 0.03,
+                    fontSize: MediaQuery.of(context).size.height * 0.015,
                     fontWeight: FontWeight.bold))
           ],
         ),

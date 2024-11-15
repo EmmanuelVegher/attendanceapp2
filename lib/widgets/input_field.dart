@@ -23,7 +23,7 @@ class MyInputField extends StatelessWidget {
       margin: const EdgeInsets.only(top: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, // Aligns title to start
-        mainAxisAlignment: MainAxisAlignment.start,
+        //mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             title,
@@ -34,9 +34,10 @@ class MyInputField extends StatelessWidget {
             ),
           ),
           Container(
-            height:50,
-            width: MediaQuery.of(context).size.width,
-            margin: const EdgeInsets.only(top: 8.0),
+            height:MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.13 : 0.065),
+
+            width: MediaQuery.of(context).size.width*1,
+           // margin: const EdgeInsets.only(top: 8.0),
             decoration: BoxDecoration(
               border: Border.all(
                 color: Colors.grey,
@@ -64,7 +65,7 @@ class MyInputField extends StatelessWidget {
                         fontFamily: "NexaBold",
                         color: Colors.black,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10), // Ensures text starts from the left
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 0), // Ensures text starts from the left
                       focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide.none,
                       ),

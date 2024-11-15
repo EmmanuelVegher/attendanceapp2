@@ -5,12 +5,12 @@ import 'dart:typed_data';
 
 class TimesheetDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> timesheetData;
-  final String timesheetId;
+  //final String timesheetId;
   final String staffId;
 
   TimesheetDetailsScreen({
     required this.timesheetData,
-    required this.timesheetId,
+    //required this.timesheetId,
     required this.staffId,
   });
 

@@ -15,8 +15,10 @@ import '../model/appversion.dart';
 import '../model/departmentmodel.dart';
 import '../model/designationmodel.dart';
 import '../model/last_update_date.dart';
+import '../model/leave_request_model.dart';
 import '../model/projectmodel.dart';
 import '../model/reasonfordaysoff.dart';
+import '../model/remaining_leave_model.dart';
 import '../model/staffcategory.dart';
 import '../model/supervisor_model.dart';
 import '../model/track_location_model.dart';
@@ -632,7 +634,10 @@ class IsarService extends DatabaseAdapter {
         ReasonForDaysOffModelSchema,
         StaffCategoryModelSchema,
         LastUpdateDateModelSchema,
-        SupervisorModelSchema
+        SupervisorModelSchema,
+        LeaveRequestModelSchema,
+        RemainingLeaveModelSchema
+
       ], inspector: true, directory: directory.path);
     }
     return Future.value(Isar.getInstance());
@@ -714,6 +719,16 @@ class IsarService extends DatabaseAdapter {
         .idEqualTo(attendanceModel.id)
         .findAll();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
+  }
+
+  Future<List<LeaveRequestModel>> getFilteredLeaves(
+      LeaveRequestModel leaveRequestModels,String firebaseAuthId ) async {
+    final isar = await db;
+    return await isar.leaveRequestModels
+        .filter()
+        .staffIdEqualTo(firebaseAuthId!) // Correct filter method
+        .findAll();
+
   }
 
   Future<List<AttendanceModel>> getAttendanceForDate(String? date) async {
@@ -1505,6 +1520,17 @@ class IsarService extends DatabaseAdapter {
         .roleEqualTo("Super-Admin")
         .findAll();
   }
+
+  Future<List<BioModel>> getBioInfoForUser() async {
+    final isar = await db;
+    return await isar.bioModels
+        .where()
+        .filter()
+        .firebaseAuthIdIsNotNull()
+        .findAll();
+  }
+
+
 
   Future<List<LastUpdateDateModel>> getUpdateDateInfo() async {
     final isar = await db;

@@ -68,7 +68,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
     // TODO: implement initState
     super.initState();
     checkForIsSyncedForBio();
-    fetchVersion(IsarService());
+   // fetchVersion(IsarService());
     _getUserDetail();
     tz.initializeTimeZones();
     // _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
@@ -300,7 +300,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                 style: TextStyle(
                                     color: Colors.brown,
                                     fontFamily: "NexaBold",
-                                    fontSize: screenWidth / 18,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.025),
                                     fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -357,7 +357,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                   style: TextStyle(
                                       color: Colors.red,
                                       fontFamily: "NexaBold",
-                                      fontSize: screenWidth / 18,
+                                      fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.025),
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -490,7 +490,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                           child: Text(
                             "Out-Of-Office History:",
                             style: TextStyle(
-                                fontSize: MediaQuery.of(context).size.width * 0.06,
+                                fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.025),
                                 fontWeight: FontWeight.w900,
                                 color: Colors.brown),
                           ),

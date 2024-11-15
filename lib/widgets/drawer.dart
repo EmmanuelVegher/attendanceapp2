@@ -24,6 +24,8 @@ import 'package:intl/intl.dart';
 import 'package:refreshable_widget/refreshable_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Pages/Leave_Request/Pending_Approvals.dart';
+import '../Pages/Leave_Request/out_of_office_request_page.dart';
 import '../Pages/Timesheet/pending_timesheet.dart';
 import '../Pages/Timesheet/timesheet.dart';
 import 'my_app.dart';
@@ -167,26 +169,49 @@ Widget drawer(
               );
             },
           ),
-          // Divider(
-          //   color: Colors.grey,
-          //   height: 1,
-          // ),
-          // ListTile(
-          //   leading: Icon(Icons.person_add_alt_1,
-          //       size: _drawerIconSize, color: Colors.red),
-          //   title: Text(
-          //     'Profile Page',
-          //     style: TextStyle(
-          //         fontSize: _drawerFontSize,
-          //         color: Get.isDarkMode ? Colors.white : Colors.brown),
-          //   ),
-          //   onTap: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(builder: (context) => OfficesMap()),
-          //     );
-          //   },
-          // ),
+
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+          ListTile(
+            leading: Icon(Icons.person_add_alt_1,
+                size: _drawerIconSize, color: Colors.red),
+            title: Text(
+              'Pending Approval',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PendingApprovalsPage(service: IsarService(),)),
+              );
+            },
+          ),
+
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+          ListTile(
+            leading: Icon(Icons.person_add_alt_1,
+                size: _drawerIconSize, color: Colors.red),
+            title: Text(
+              'Leave Request',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LeaveRequestsPage1(service: IsarService(),)),
+              );
+            },
+          ),
+
 
           Divider(
             color: Colors.grey,

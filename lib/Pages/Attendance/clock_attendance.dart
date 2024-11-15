@@ -37,6 +37,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../Pages/Dashboard/admin_dashboard.dart';
 import '../../Pages/Dashboard/user_dashboard.dart';
+import '../../main.dart';
 import '../../model/attendance.dart';
 import '../../model/user_model.dart';
 import '../../services/location_services.dart';
@@ -77,6 +78,7 @@ class ClockAttendance extends StatelessWidget {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     final TextEditingController commentsController = TextEditingController();
+    final sizee = MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035);
 
     final ClockAttendanceController controller =
     Get.put(ClockAttendanceController(service)); // Initialize the controller here
@@ -112,7 +114,7 @@ class ClockAttendance extends StatelessWidget {
                         style: TextStyle(
                           color: Colors.black54,
                           fontFamily: "NexaLight",
-                          fontSize: screenWidth / 20,
+                          fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                         ),
                       ),
                     ),
@@ -143,7 +145,7 @@ class ClockAttendance extends StatelessWidget {
                           style: TextStyle(
                             color: Colors.black54,
                             fontFamily: "NexaBold",
-                            fontSize: screenWidth / 18,
+                            fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.040),
                           ),
                         ),
                       );
@@ -170,7 +172,7 @@ class ClockAttendance extends StatelessWidget {
                       "Today's Status:",
                       style: TextStyle(
                         fontFamily: "NexaBold",
-                        fontSize: screenWidth / 18,
+                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.030),
                       ),
                     ),
                     SizedBox(height: 10), // Spacing between status and coordinates
@@ -200,7 +202,7 @@ class ClockAttendance extends StatelessWidget {
                                   "Geo-Cordinates Information:",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: screenWidth / 20,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.030),
                                     color: Colors.blueGrey, // Change color to blueGrey
                                   ),
                                 ),
@@ -211,7 +213,7 @@ class ClockAttendance extends StatelessWidget {
                                   "GPS is: ${controller.isGpsEnabled.value ? 'On' : 'Off'}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: screenWidth / 23,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
                                   ),
                                 ),
                                 SizedBox(height: 10), // Spacing between status and coordinates
@@ -220,7 +222,7 @@ class ClockAttendance extends StatelessWidget {
                                   "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: screenWidth / 23,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
                                   ),
                                 ),
                                 SizedBox(height: 10), // Spacing between status and coordinates
@@ -229,7 +231,7 @@ class ClockAttendance extends StatelessWidget {
                                   "Coordinates Accuracy: ${controller.accuracy.value}, Altitude: ${controller.altitude.value} , Speed: ${controller.speed.value}, Speed Accuracy: ${controller.speedAccuracy.value}, Location Data Timestamp: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(controller.time.value.toInt()))} , Is Location Mocked?: ${controller.isMock.value}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: screenWidth / 23,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
                                   ),
                                 ),
                                 SizedBox(height: 10),
@@ -238,7 +240,7 @@ class ClockAttendance extends StatelessWidget {
                                   "Current State: ${controller.administrativeArea.value}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: screenWidth / 23,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
                                   ),
                                 ),
 
@@ -248,7 +250,7 @@ class ClockAttendance extends StatelessWidget {
                                   "Current Location: ${controller.location.value}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: screenWidth / 23,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
                                   ),
                                 ),),
                                   //:CircularProgressIndicator()
@@ -310,7 +312,7 @@ class ClockAttendance extends StatelessWidget {
                                           "Clock In",
                                           style: TextStyle(
                                             fontFamily: "NexaLight",
-                                            fontSize: screenWidth / 20,
+                                            fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                             color: Colors.black54,
                                           ),
                                         ),
@@ -318,7 +320,7 @@ class ClockAttendance extends StatelessWidget {
                                           lastAttendance?.clockIn ?? "--/--",
                                           style: TextStyle(
                                             fontFamily: "NexaBold",
-                                            fontSize: screenWidth / 18,
+                                            fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                           ),
                                         ),
                                       ],
@@ -333,7 +335,7 @@ class ClockAttendance extends StatelessWidget {
                                           "Clock Out",
                                           style: TextStyle(
                                             fontFamily: "NexaLight",
-                                            fontSize: screenWidth / 20,
+                                            fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                             color: Colors.black54,
                                           ),
                                         ),
@@ -341,7 +343,7 @@ class ClockAttendance extends StatelessWidget {
                                           lastAttendance?.clockOut ?? "--/--",
                                           style: TextStyle(
                                             fontFamily: "NexaBold",
-                                            fontSize: screenWidth / 18,
+                                            fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                           ),
                                         ),
 
@@ -358,7 +360,7 @@ class ClockAttendance extends StatelessWidget {
                                   text: DateTime.now().day.toString(),
                                   style: TextStyle(
                                     color: Colors.red,
-                                    fontSize: screenWidth / 18,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                     fontFamily: "NexaBold",
                                   ),
                                   children: [
@@ -366,7 +368,7 @@ class ClockAttendance extends StatelessWidget {
                                       text: DateFormat(" MMMM yyyy").format(DateTime.now()),
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: screenWidth / 20,
+                                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                         fontFamily: "NexaBold",
                                       ),
                                     ),
@@ -383,7 +385,7 @@ class ClockAttendance extends StatelessWidget {
                                     DateFormat("hh:mm:ss a").format(DateTime.now()),
                                     style: TextStyle(
                                       fontFamily: "NexaLight",
-                                      fontSize: screenWidth / 20,
+                                      fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                       color: Colors.black54,
                                     ),
                                   ),
@@ -407,20 +409,21 @@ class ClockAttendance extends StatelessWidget {
 
                                   Obx(() => SlideAction(
                                     text: "Slide to Clock Out",
-                                      animationDuration:const Duration(milliseconds: 1000),
+                                      animationDuration:const Duration(milliseconds: 300),
                                     submittedIcon: controller.isLoading.value
                                         ? const CircularProgressIndicator() // Show during loading
                                         : const Icon(Icons.done),
                                     textStyle: TextStyle(
                                         color: Colors.black54,
-                                        fontSize: screenWidth / 20,
+                                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                         fontFamily: "NexaLight",
                                       ),
                                       outerColor: Colors.white,
                                       innerColor: Colors.red,
                                       key: key,
                                     onSubmit: controller.isLoading.value ? null : () async { // Disable onSubmit if loading
-                                      await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
+                                      //await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
+                                      await controller.clockOutUpdated(controller.lati.value,controller.longi.value,controller.location.value);
                                     },
                                     sliderButtonIcon: controller.isLoading.value ? const CircularProgressIndicator(strokeWidth: 2,) : const Icon(Icons.arrow_forward_ios_rounded),
                                   ));
@@ -466,7 +469,7 @@ class ClockAttendance extends StatelessWidget {
                                       "Location Status",
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        fontSize: screenWidth / 20,
+                                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                         fontFamily: "NexaBold",
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -491,7 +494,7 @@ class ClockAttendance extends StatelessWidget {
                                                   "Clock-In Location",
                                                   style: TextStyle(
                                                     fontFamily: "NexaLight",
-                                                    fontSize: screenWidth / 25,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.035 : 0.025),
                                                     color: Colors.white,
                                                   ),
                                                 ),
@@ -500,7 +503,7 @@ class ClockAttendance extends StatelessWidget {
                                                   lastAttendance?.clockInLocation ?? "--/--",
                                                   style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 35,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.025 : 0.020),
                                                     color: Colors.white,
                                                   ),
                                                 ),
@@ -518,7 +521,7 @@ class ClockAttendance extends StatelessWidget {
                                                   "Clock-Out Location",
                                                   style: TextStyle(
                                                     fontFamily: "NexaLight",
-                                                    fontSize: screenWidth / 35,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.035 : 0.025),
                                                     color: Colors.white,
                                                   ),
                                                 ),
@@ -527,7 +530,7 @@ class ClockAttendance extends StatelessWidget {
                                                   lastAttendance?.clockOutLocation ?? "",
                                                   style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 35,
+                                                    fontSize:MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.025 : 0.020),
                                                     color: Colors.white,
                                                   ),
                                                 ),
@@ -574,7 +577,7 @@ class ClockAttendance extends StatelessWidget {
                                           "Clock In",
                                           style: TextStyle(
                                             fontFamily: "NexaLight",
-                                            fontSize: screenWidth / 20,
+                                            fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                             color: Colors.black54,
                                           ),
                                         ),
@@ -582,7 +585,7 @@ class ClockAttendance extends StatelessWidget {
                                           lastAttendance?.clockIn ?? "--/--",
                                           style: TextStyle(
                                             fontFamily: "NexaBold",
-                                            fontSize: screenWidth / 18,
+                                            fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                           ),
                                         ),
                                       ],
@@ -597,7 +600,7 @@ class ClockAttendance extends StatelessWidget {
                                           "Clock Out",
                                           style: TextStyle(
                                             fontFamily: "NexaLight",
-                                            fontSize: screenWidth / 20,
+                                            fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                             color: Colors.black54,
                                           ),
                                         ),
@@ -605,7 +608,7 @@ class ClockAttendance extends StatelessWidget {
                                           lastAttendance?.clockOut ?? "--/--",
                                           style: TextStyle(
                                             fontFamily: "NexaBold",
-                                            fontSize: screenWidth / 18,
+                                            fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                           ),
                                         ),
 
@@ -622,7 +625,7 @@ class ClockAttendance extends StatelessWidget {
                                   text: DateTime.now().day.toString(),
                                   style: TextStyle(
                                     color: Colors.red,
-                                    fontSize: screenWidth / 18,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                     fontFamily: "NexaBold",
                                   ),
                                   children: [
@@ -630,7 +633,7 @@ class ClockAttendance extends StatelessWidget {
                                       text: DateFormat(" MMMM yyyy").format(DateTime.now()),
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: screenWidth / 20,
+                                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                         fontFamily: "NexaBold",
                                       ),
                                     ),
@@ -647,7 +650,7 @@ class ClockAttendance extends StatelessWidget {
                                     DateFormat("hh:mm:ss a").format(DateTime.now()),
                                     style: TextStyle(
                                       fontFamily: "NexaLight",
-                                      fontSize: screenWidth / 20,
+                                      fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                       color: Colors.black54,
                                     ),
                                   ),
@@ -662,7 +665,7 @@ class ClockAttendance extends StatelessWidget {
                   "You have completed this day!!!",
                   style: TextStyle(
                   fontFamily: "NexaLight",
-                  fontSize: screenWidth / 20,
+                  fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                   color: Colors.black54,
                   ),
                   ),
@@ -672,7 +675,7 @@ class ClockAttendance extends StatelessWidget {
                   "Duration Worked: ${controller.durationWorked.value}",
                   style: TextStyle(
                   fontFamily: "NexaLight",
-                  fontSize: screenWidth / 20,
+                  fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                   color: Colors.black54,
                   ),
                   ),
@@ -685,7 +688,7 @@ class ClockAttendance extends StatelessWidget {
                   "Comment(s): ${controller.comments.value}",
                   style: TextStyle(
                   fontFamily: "NexaLight",
-                  fontSize: screenWidth / 21,
+                  fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                   color: Colors.black54,
                   ),
                   ),
@@ -716,7 +719,7 @@ class ClockAttendance extends StatelessWidget {
                                       "Location Status",
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        fontSize: screenWidth / 20,
+                                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                         fontFamily: "NexaBold",
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -741,7 +744,7 @@ class ClockAttendance extends StatelessWidget {
                                                   "Clock-In Location",
                                                   style: TextStyle(
                                                     fontFamily: "NexaLight",
-                                                    fontSize: screenWidth / 25,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.035 : 0.025),
                                                     color: Colors.white,
                                                   ),
                                                 ),
@@ -750,7 +753,7 @@ class ClockAttendance extends StatelessWidget {
                                                   lastAttendance?.clockInLocation ?? "--/--",
                                                   style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 35,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.025 : 0.020),
                                                     color: Colors.white,
                                                   ),
                                                 ),
@@ -768,7 +771,7 @@ class ClockAttendance extends StatelessWidget {
                                                   "Clock-Out Location",
                                                   style: TextStyle(
                                                     fontFamily: "NexaLight",
-                                                    fontSize: screenWidth / 35,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                                     color: Colors.white,
                                                   ),
                                                 ),
@@ -777,7 +780,7 @@ class ClockAttendance extends StatelessWidget {
                                                   lastAttendance?.clockOutLocation ?? "",
                                                   style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 35,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.025 : 0.020),
                                                     color: Colors.white,
                                                   ),
                                                 ),
@@ -877,7 +880,7 @@ class ClockAttendance extends StatelessWidget {
                                       "Clock In",
                                       style: TextStyle(
                                         fontFamily: "NexaLight",
-                                        fontSize: screenWidth / 20,
+                                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                         color: Colors.black54,
                                       ),
                                     ),
@@ -894,7 +897,7 @@ class ClockAttendance extends StatelessWidget {
                                       "Clock Out",
                                       style: TextStyle(
                                         fontFamily: "NexaLight",
-                                        fontSize: screenWidth / 20,
+                                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                         color: Colors.black54,
                                       ),
                                     ),
@@ -913,7 +916,7 @@ class ClockAttendance extends StatelessWidget {
                               text: DateTime.now().day.toString(),
                               style: TextStyle(
                                 color: Colors.red,
-                                fontSize: screenWidth / 18,
+                                fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                 fontFamily: "NexaBold",
                               ),
                               children: [
@@ -921,7 +924,7 @@ class ClockAttendance extends StatelessWidget {
                                   text: DateFormat(" MMMM yyyy").format(DateTime.now()),
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: screenWidth / 20,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                     fontFamily: "NexaBold",
                                   ),
                                 ),
@@ -938,7 +941,7 @@ class ClockAttendance extends StatelessWidget {
                                 DateFormat("hh:mm:ss a").format(DateTime.now()),
                                 style: TextStyle(
                                   fontFamily: "NexaLight",
-                                  fontSize: screenWidth / 20,
+                                  fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                   color: Colors.black54,
                                 ),
                               ),
@@ -960,20 +963,22 @@ class ClockAttendance extends StatelessWidget {
                               // );
                                 Obx(() => SlideAction(
                                   text: "Slide to Clock In",
-                                  animationDuration:const Duration(milliseconds: 1000),
+                                  animationDuration:const Duration(milliseconds: 300),
                                   submittedIcon: controller.isLoading.value
                                       ? const CircularProgressIndicator() // Show during loading
                                       : const Icon(Icons.done),
                                   textStyle: TextStyle(
                                     color: Colors.black54,
-                                    fontSize: screenWidth / 20,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                     fontFamily: "NexaLight",
                                   ),
                                   outerColor: Colors.white,
                                   innerColor: Colors.red,
                                   key: key,
                                   onSubmit: controller.isLoading.value ? null : () async { // Disable onSubmit if loading
-                                    await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
+                                    //await controller.handleClockInOut(context, key,controller.lati.value,controller.longi.value,controller.location.value);
+                                    await controller.clockInUpdated(controller.lati.value,controller.longi.value,controller.location.value);
+
                                   },
                                   sliderButtonIcon: controller.isLoading.value ? const CircularProgressIndicator(strokeWidth: 2,) : const Icon(Icons.arrow_forward_ios_rounded),
                                 ));
@@ -1024,7 +1029,9 @@ class ClockAttendance extends StatelessWidget {
                                         ),
                                       ),
                                       child: const Row(
+
                                         children:[
+
                                           Text(
                                             "Out Of Office? CLICK HERE",
                                             style: TextStyle(
@@ -1035,7 +1042,7 @@ class ClockAttendance extends StatelessWidget {
                                           SizedBox(width:10),
                                           Icon(
                                             Icons.arrow_forward,
-                                            size: 20,
+                                            size: 16,
                                             color: Colors.white,
                                           ),
 
@@ -1080,7 +1087,7 @@ class ClockAttendance extends StatelessWidget {
                                   "Location Status",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: screenWidth / 20,
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                     fontFamily: "NexaBold",
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -1105,7 +1112,7 @@ class ClockAttendance extends StatelessWidget {
                                               "Clock-In Location",
                                               style: TextStyle(
                                                 fontFamily: "NexaLight",
-                                                fontSize: screenWidth / 25,
+                                                fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.035 : 0.025),
                                                 color: Colors.white,
                                               ),
                                             ),
@@ -1119,7 +1126,7 @@ class ClockAttendance extends StatelessWidget {
                                                     attendance.toString(), // Assuming you have overridden the 'toString' method in AttendanceModel
                                                     style: TextStyle(
                                                       fontFamily: "NexaBold",
-                                                      fontSize: screenWidth / 35,
+                                                      fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.025 : 0.020),
                                                       color: Colors.white,
                                                     ),
                                                   );
@@ -1141,7 +1148,7 @@ class ClockAttendance extends StatelessWidget {
                                               "Clock-Out Location",
                                               style: TextStyle(
                                                 fontFamily: "NexaLight",
-                                                fontSize: screenWidth / 35,
+                                                fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                                 color: Colors.white,
                                               ),
                                             ),
@@ -1154,7 +1161,7 @@ class ClockAttendance extends StatelessWidget {
                                                     snapshot.data!,
                                                     style: TextStyle(
                                                       fontFamily: "NexaBold",
-                                                      fontSize: screenWidth / 35,
+                                                      fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                                       color: Colors.white,
                                                     ),
                                                   );
@@ -1184,7 +1191,8 @@ class ClockAttendance extends StatelessWidget {
                 margin: const EdgeInsets.only(top: 10),
                 child: Column(
                   children: [
-                    controller.clockOut.value  != "--/--"?TextField(
+                 //   controller.clockOut.value  != "--/--"?
+                    TextField(
                       controller: commentsController,
                       maxLines: 3, // Allow multiple lines
                       decoration: InputDecoration(
@@ -1193,9 +1201,10 @@ class ClockAttendance extends StatelessWidget {
                           borderRadius: BorderRadius.circular(15.0), // More pronounced curve
                           borderSide: BorderSide(color: Colors.grey), // Customize border color
                         ), // Add a border
-                      ),): SizedBox.shrink(),
+                      ),),
+                        //: SizedBox.shrink(),
                     controller.comments.value == "No Comment"?const SizedBox(height:10):const SizedBox(height:0),
-                    controller.clockOut.value  != "--/--"?
+                    //controller.clockOut.value  != "--/--"?
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
                         child:
@@ -1228,7 +1237,7 @@ class ClockAttendance extends StatelessWidget {
 
                       ),
                     ))
-                        :const SizedBox(height:0),
+                       // :const SizedBox(height:0),
                   ],
                 ),
               ):SizedBox.shrink(),
@@ -1376,6 +1385,7 @@ class ClockAttendanceController extends GetxController {
   //RxInt satelliteNumber = 0.obs;
   //RxString provider = "".obs;
   RxBool isLoading = false.obs;  // Add a loading state observable
+  RxBool isSliderEnabled = true.obs;  // Observable for slider state
 
 
   RxString administrativeArea = "".obs; // Added for state name
@@ -2138,6 +2148,325 @@ class ClockAttendanceController extends GetxController {
       );
     }
   }
+
+
+  Future<void> clockInUpdated(double newlatitude,double newlongitude,String newlocation) async {
+    print("clockInUpdated");
+
+    if (!isLoading.value) {
+      await _clockInOutLock.synchronized(() async {
+        try {
+          // 2. Recalculate currentDate to ensure it's up-to-date
+          currentDate = DateFormat('dd-MMMM-yyyy').format(DateTime.now());
+
+          final lastAttend = await service.getLastAttendance(
+              DateFormat("MMMM yyyy").format(DateTime.now()).toString());
+
+          print("lastAttend == $lastAttend");
+
+          if (lastAttend == null) {
+            if (newlatitude != 0.0) {
+              final attendance = AttendanceModel()
+                ..clockIn = DateFormat('hh:mm a').format(DateTime.now())
+                ..date = DateFormat('dd-MMMM-yyyy').format(DateTime.now())
+                ..clockInLatitude = newlatitude
+                ..clockInLocation = newlocation
+                ..clockInLongitude = newlongitude
+                ..clockOut = "--/--"
+                ..clockOutLatitude = 0.0
+                ..clockOutLocation = ''
+                ..clockOutLongitude = 0.0
+                ..isSynced = false
+                ..voided = false
+                ..isUpdated = false
+                ..durationWorked = "0 hours 0 minutes"
+                ..noOfHours = 0.0
+                ..offDay = false
+                ..month = DateFormat('MMMM yyyy').format(DateTime.now())
+                ..comments = "No Comment"
+              ;
+
+              await service.saveAttendance(attendance);
+              // Update the clockIn stream after saving the attendance
+              _clockInStreamController.add(
+                  DateFormat('hh:mm a').format(DateTime.now()));
+              _clockInLocationStreamController.add(location.value);
+              Fluttertoast.showToast(
+                msg: "Clocking-In..",
+                toastLength: Toast.LENGTH_LONG,
+                backgroundColor: Colors.black54,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+              Get.off(() => AttendanceHomeScreen(service: IsarService()));
+            } else {
+              Fluttertoast.showToast(
+                msg: "Latitude and Longitude cannot be 0.0..",
+                toastLength: Toast.LENGTH_LONG,
+                backgroundColor: Colors.black54,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+            }
+          }else
+          if (lastAttend?.date != currentDate) {
+            // final time = isDeviceConnected
+            //     ? DateTime.now().add(Duration(
+            //     milliseconds: await NTP.getNtpOffset(
+            //         localTime: DateTime.now(), lookUpAddress: "time.google.com")))
+            //     : DateTime.now();
+            final clockInDateTime = DateFormat('dd-MMMM-yyyy hh:mm a').parse(
+                '${lastAttend!.date} ${lastAttend.clockIn}');
+
+            final now = DateTime.now();
+            final difference = now.difference(clockInDateTime);
+
+            if (difference < const Duration(hours: 1)) {
+              // Deactivate slider and show message
+              Fluttertoast.showToast(
+                msg: "You can clock out after 1 hour",
+                toastLength: Toast.LENGTH_LONG,
+                backgroundColor: Colors.black54,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+              isLoading.value =
+              false; // Set loading state to false after handling the error
+
+            } else {
+              if (lastAttend?.clockIn ==
+                  DateFormat('hh:mm a').format(DateTime.now())) {
+                // Prevent clock-out if time is the same as clock-in
+                Fluttertoast.showToast(
+                    msg: "You cannot clock in and clock out the same time",
+                    toastLength: Toast.LENGTH_LONG,
+                    backgroundColor: Colors.black54,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0
+                );
+                isLoading.value =
+                false; // Set loading state to false after handling the error
+
+              }
+              else {
+                if (newlatitude != 0.0) {
+                  final attendance = AttendanceModel()
+                    ..clockIn = DateFormat('hh:mm a').format(DateTime.now())
+                    ..date = DateFormat('dd-MMMM-yyyy').format(DateTime.now())
+                    ..clockInLatitude = newlatitude
+                    ..clockInLocation = newlocation
+                    ..clockInLongitude = newlongitude
+                    ..clockOut = "--/--"
+                    ..clockOutLatitude = 0.0
+                    ..clockOutLocation = ''
+                    ..clockOutLongitude = 0.0
+                    ..isSynced = false
+                    ..voided = false
+                    ..isUpdated = false
+                    ..durationWorked = "0 hours 0 minutes"
+                    ..noOfHours = 0.0
+                    ..offDay = false
+                    ..month = DateFormat('MMMM yyyy').format(DateTime.now())
+                    ..comments = "No Comment"
+                  ;
+
+                  await service.saveAttendance(attendance);
+                  // Update the clockIn stream after saving the attendance
+                  _clockInStreamController.add(
+                      DateFormat('hh:mm a').format(DateTime.now()));
+                  _clockInLocationStreamController.add(location.value);
+                  Fluttertoast.showToast(
+                    msg: "Clocking-In..",
+                    toastLength: Toast.LENGTH_LONG,
+                    backgroundColor: Colors.black54,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                  Get.off(() => AttendanceHomeScreen(service: IsarService()));
+                } else {
+                  Fluttertoast.showToast(
+                    msg: "Latitude and Longitude cannot be 0.0..",
+                    toastLength: Toast.LENGTH_LONG,
+                    backgroundColor: Colors.black54,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                }
+                // After successful clock-in, refresh the attendance summary
+                await _getAttendanceSummary();
+              }
+            }
+          }
+
+        }catch(e){
+          Fluttertoast.showToast(
+            msg: "Error from clock in: $e",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+
+        }
+        });
+      }
+
+  }
+
+  Future<void> clockOutUpdated(
+      // int attendanceId,
+      // BioModel? bioInfoForUser,
+      // List<AttendanceModel> attendanceResult,
+      double newlatitude,double newlongitude,String newlocation
+      ) async {
+
+    print("clockOutUpdated");
+
+    if (!isLoading.value) {
+      await _clockInOutLock.synchronized(() async {
+        try {
+          // 2. Recalculate currentDate to ensure it's up-to-date
+          currentDate = DateFormat('dd-MMMM-yyyy').format(DateTime.now());
+
+          final lastAttend = await service.getLastAttendance(
+              DateFormat("MMMM yyyy").format(DateTime.now()).toString());
+
+          if (lastAttend?.date == currentDate &&
+              lastAttend?.clockOut == "--/--") {
+            //
+            // final time = isDeviceConnected
+            //     ? DateTime.now().add(Duration(
+            //     milliseconds: await NTP.getNtpOffset(
+            //         localTime: DateTime.now(), lookUpAddress: "time.google.com")))
+            //     : DateTime.now();
+
+            final clockInDateTime = DateFormat('dd-MMMM-yyyy hh:mm a').parse(
+                '${lastAttend!.date} ${lastAttend.clockIn}');
+
+            final now = DateTime.now();
+            final difference = now.difference(clockInDateTime);
+
+            if (difference < const Duration(hours: 1)) {
+              // Deactivate slider and show message
+              Fluttertoast.showToast(
+                msg: "You can clock out after 1 hour",
+                toastLength: Toast.LENGTH_LONG,
+                backgroundColor: Colors.black54,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+              isLoading.value =
+              false; // Set loading state to false after handling the error
+
+            } else {
+              if (lastAttend?.clockIn ==
+                  DateFormat('hh:mm a').format(DateTime.now())) {
+                // Prevent clock-out if time is the same as clock-in
+                Fluttertoast.showToast(
+                    msg: "You cannot clock in and clock out the same time",
+                    toastLength: Toast.LENGTH_LONG,
+                    backgroundColor: Colors.black54,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0
+                );
+                isLoading.value =
+                false; // Set loading state to false after handling the error
+
+              }
+              else {
+                final attendanceResult = await service.getAttendanceForDate(
+                    currentDate);
+                final bioInfoForUser = await service
+                    .getBioInfoWithFirebaseAuth();
+                // await _clockOut(
+                //     attendanceResult[0].id, bioInfoForUser, attendanceResult,
+                //     newlatitude, newlongitude, newlocation);
+                if(newlatitude != 0.0) {
+                  await service.updateAttendance(
+                    attendanceResult[0].id,
+                    AttendanceModel(),
+                    DateFormat('hh:mm a').format(DateTime.now()),
+                    newlatitude,
+                    newlongitude,
+                    newlocation,
+                    false,
+                    true,
+                    _diffClockInOut(
+                        attendanceResult[0].clockIn.toString(),
+                        DateFormat('h:mm a').format(DateTime.now())),
+                    _diffHoursWorked(
+                        attendanceResult[0].clockIn.toString(),
+                        DateFormat('h:mm a').format(DateTime.now())),
+                  );
+                  _clockOutStreamController.add(DateFormat('hh:mm a').format(DateTime.now()));
+                  _clockOutLocationStreamController.add(location.value);
+                  Fluttertoast.showToast(
+                    msg: "Clocking-Out..",
+                    toastLength: Toast.LENGTH_LONG,
+                    backgroundColor: Colors.black54,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                  Get.off(() =>
+                  bioInfoForUser!.role == "User"
+                      ? UserDashBoard(service: service)
+                      : AdminDashBoard(service: service));
+                } else{
+                  Fluttertoast.showToast(
+                    msg: "Latitude and Longitude cannot be 0.0..",
+                    toastLength: Toast.LENGTH_LONG,
+                    backgroundColor: Colors.black54,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                }
+              }
+            }
+          }
+
+
+    // After successful clock-in, refresh the attendance summary
+    await _getAttendanceSummary();
+
+        }catch(e){
+          Fluttertoast.showToast(
+            msg: "Error: $e",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.black54,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+
+        }
+      });
+    }
+
+  }
+
 
 
   // Updated handleClockInOut function

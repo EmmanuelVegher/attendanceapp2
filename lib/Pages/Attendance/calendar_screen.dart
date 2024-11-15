@@ -23,6 +23,7 @@ import 'package:intl/intl.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../model/appversion.dart';
 import '../../model/bio_model.dart';
 import '../../model/locationmodel.dart';
 import '../../model/track_location_model.dart';
@@ -249,7 +250,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     style: TextStyle(
                         color: Colors.black54,
                         fontFamily: "NexaBold",
-                        fontSize: screenWidth / 18,
+                        fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.030),
                         fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -303,7 +304,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       style: TextStyle(
                           color: Colors.black54,
                           fontFamily: "NexaBold",
-                          fontSize: screenWidth / 18,
+                          fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.030),
                           fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -313,9 +314,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
             SizedBox(
               height: 10,
             ),
-            const SizedBox(height: 10.0),
+            //const SizedBox(height: 10.0),
             SizedBox(
-              height: screenHeight / 1.45,
+              height:
+              //screenHeight / 1.25,
+              MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 1.38 : 1.28),
               width: screenWidth / 1,
               child: StreamBuilder<List<AttendanceModel>>(
                 stream: widget.service.searchAllAttendance(),
@@ -342,7 +345,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         Container(
                                 margin: EdgeInsets.only(
                                     top: index > 0 ? 20 : 0, left: 6, right: 6),
-                                //height: 300,
+                               // height: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.025),
                                 decoration: const BoxDecoration(
                                   color: Colors.white,
                                   boxShadow: [
@@ -395,7 +398,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   attendance[index].date.toString(),
                                                   style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 30,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.035 : 0.025),
                                                     color: Colors.white,
                                                       fontWeight:FontWeight.bold
                                                   ),
@@ -409,7 +412,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                       : "Hour : ${attendance[index].durationWorked}",
                                                   style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 26,
+                                                    fontSize:  MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.040 : 0.030),
                                                     color: Colors.white,
                                                       fontWeight:FontWeight.bold
                                                   ),
@@ -426,7 +429,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                       : "Not Synced",
                                                   style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 27,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.035 : 0.025),
                                                     color: attendance[index]
                                                         .isSynced
                                                         .toString() ==
@@ -439,7 +442,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 ),
                                                 SizedBox(height: 10),
                                                 IconButton(
-                                                  icon: Icon(Icons.refresh, color: Colors.white, size: screenWidth / 18),
+                                                  icon: Icon(Icons.refresh, color: Colors.white, size: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.040),),
                                                   onPressed: () {
                                                     // Add your re-sync logic here
                                                     syncCompleteData(attendance[index].id);
@@ -463,7 +466,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 "Clock In",
                                                 style: TextStyle(
                                                     fontFamily: "NexaLight",
-                                                    fontSize: screenWidth / 20,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                                     color: attendance[index]
                                                         .clockIn
                                                         .toString() ==
@@ -477,7 +480,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                     .toString(),
                                                 style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 18,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.040),
                                                     color: attendance[index]
                                                         .clockIn
                                                         .toString() ==
@@ -492,7 +495,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 "Lat:${attendance[index].clockInLatitude.toString()}",
                                                 style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 30,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                                     color: attendance[index]
                                                         .clockInLatitude
                                                         .toString() ==
@@ -504,7 +507,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 "Long:${attendance[index].clockInLongitude.toString()}",
                                                 style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 30,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                                     color: attendance[index]
                                                         .clockInLongitude
                                                         .toString() ==
@@ -535,7 +538,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 "Clock Out",
                                                 style: TextStyle(
                                                     fontFamily: "NexaLight",
-                                                    fontSize: screenWidth / 20,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.035),
                                                     color: attendance[index]
                                                         .clockOut
                                                         .toString() ==
@@ -549,7 +552,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                     .toString(),
                                                 style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 18,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.040),
                                                     color: attendance[index]
                                                         .clockOut
                                                         .toString() ==
@@ -564,7 +567,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 "Lat:${attendance[index].clockOutLatitude.toString()}",
                                                 style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 30,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                                     color: attendance[index]
                                                         .clockOutLatitude
                                                         .toString() ==
@@ -576,7 +579,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 "Long:${attendance[index].clockOutLongitude.toString()}",
                                                 style: TextStyle(
                                                     fontFamily: "NexaBold",
-                                                    fontSize: screenWidth / 30,
+                                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                                     color: attendance[index]
                                                         .clockOutLongitude
                                                         .toString() ==
@@ -618,7 +621,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             "Clock-In Location: ${attendance[index].clockInLocation.toString()}",
                                             style: TextStyle(
                                               fontFamily: "NexaBold",
-                                              fontSize: screenWidth / 30,
+                                              fontSize:  MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                               color: Colors.white,
                                               fontWeight:FontWeight.bold
                                             ),
@@ -628,7 +631,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             "Clock-Out Location: ${attendance[index].clockOutLocation.toString()}",
                                             style: TextStyle(
                                               fontFamily: "NexaBold",
-                                              fontSize: screenWidth / 30,
+                                              fontSize:  MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                               color: Colors.white,
                                                 fontWeight:FontWeight.bold
                                             ),
@@ -638,7 +641,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             "Comments: ${attendance[index].comments.toString()}",
                                             style: TextStyle(
                                               fontFamily: "NexaBold",
-                                              fontSize: screenWidth / 30,
+                                              fontSize:  MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.030 : 0.025),
                                               color: Colors.white,
                                                 fontWeight:FontWeight.bold
                                             ),
@@ -830,6 +833,92 @@ class _CalendarScreenState extends State<CalendarScreen> {
     //Iterate through each queried loop
   }
 
+  Future<void> checkForAppVersion1() async {
+    final firestore = FirebaseFirestore.instance;
+    try {
+      List<AppVersionModel> getAppVersion =
+      await widget.service.getAppVersion();
+
+
+
+      List<BioModel> getAttendanceForBio =
+      await widget.service.getBioInfoWithUserBio();
+
+      QuerySnapshot snap = await firestore
+          .collection("Staff")
+          .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
+          .get();
+
+
+
+      final lastAppVersionDoc = await firestore
+          .collection('AppVersion')
+          .doc('AppVersion')
+          .get();
+
+      if (lastAppVersionDoc.exists) {
+        // Get the data from the document
+        final data = lastAppVersionDoc.data();
+
+        if (data != null ) {
+
+          final versionNumber = data['appVersion'];
+
+          print("versionNumber ====${versionNumber}");
+
+          if (getAppVersion[0].appVersion != versionNumber) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              // Prevent dismissing by tapping outside
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Update Available'),
+                  content: Text(
+                      'You are using an older version of the app (${getAppVersion[0]
+                          .appVersion}). Please update to the latest version (${versionNumber}). Kindly Note that you would be logged out after 15 days if you do not upgrade to the latest version (${versionNumber})'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () async {
+                        // TODO: Add logic to redirect to app store/update mechanism
+                        await IsarService().updateAppVersion(
+                            1, AppVersionModel(), DateTime.now(),false);
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      child: Text('Close'),
+                    ),
+                  ],
+                );
+              },
+            );
+            //IsarService().updateAppVersion(1,AppVersionModel(),DateTime.now());
+            // setState(() {
+            //   isAppCheckShown == true;
+            // });
+          }
+
+        } else {
+          print("Document does not contain 'appVersionDate' field.");
+        }
+
+
+      }
+
+
+
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "AppVersion Check Error: ${e.toString()}",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
   // This Method updates all attendance that has a clock-out made. This is necessary for data validation and to ensure that folks sign-out appropraitely
   syncCompleteData(int id) async {
     try {
@@ -872,49 +961,39 @@ class _CalendarScreenState extends State<CalendarScreen> {
         });
       }
 
-      await _updateEmptyClockInAndOutLocation().then((value) async => {
-        //Iterate through each queried loop
-        for (var unSyncedAttend in getAttendanceForPartialUnSynced)
-          {
+      await checkForAppVersion1().then((_) async {
+        await _updateEmptyClockInAndOutLocation().then((value) async => {
+          //Iterate through each queried loop
+          for (var unSyncedAttend in getAttendanceForPartialUnSynced)
+            {
 
-            await FirebaseFirestore.instance
-                .collection("Staff")
-                .doc(snap.docs[0].id)
-                .collection("Record")
-                .doc(unSyncedAttend.date)
-                .set({
-              "Offline_DB_id": unSyncedAttend.id,
-              'clockIn': unSyncedAttend.clockIn,
-              'clockOut': unSyncedAttend.clockOut,
-              'clockInLocation': unSyncedAttend.clockInLocation,
-              'clockOutLocation': unSyncedAttend.clockOutLocation,
-              'date': unSyncedAttend.date,
-              'isSynced': true,
-              'clockInLatitude': unSyncedAttend.clockInLatitude,
-              'clockInLongitude': unSyncedAttend.clockInLongitude,
-              'clockOutLatitude': unSyncedAttend.clockOutLatitude,
-              'clockOutLongitude': unSyncedAttend.clockOutLongitude,
-              'voided': unSyncedAttend.voided,
-              'isUpdated': unSyncedAttend.isUpdated,
-              'noOfHours': unSyncedAttend.noOfHours,
-              'month': unSyncedAttend.month,
-              'durationWorked': unSyncedAttend.durationWorked,
-              'offDay': unSyncedAttend.offDay,
-              'comments':unSyncedAttend.comments
-            }).then((value) {
-              Fluttertoast.showToast(
-                msg: "Syncing to Server...",
-                toastLength: Toast.LENGTH_SHORT,
-                backgroundColor: Colors.black54,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                textColor: Colors.white,
-                fontSize: 16.0,
-              );
-              widget.service.updateSyncStatus(
-                  unSyncedAttend.id, AttendanceModel(), true).then((_){
+              await FirebaseFirestore.instance
+                  .collection("Staff")
+                  .doc(snap.docs[0].id)
+                  .collection("Record")
+                  .doc(unSyncedAttend.date)
+                  .set({
+                "Offline_DB_id": unSyncedAttend.id,
+                'clockIn': unSyncedAttend.clockIn,
+                'clockOut': unSyncedAttend.clockOut,
+                'clockInLocation': unSyncedAttend.clockInLocation,
+                'clockOutLocation': unSyncedAttend.clockOutLocation,
+                'date': unSyncedAttend.date,
+                'isSynced': true,
+                'clockInLatitude': unSyncedAttend.clockInLatitude,
+                'clockInLongitude': unSyncedAttend.clockInLongitude,
+                'clockOutLatitude': unSyncedAttend.clockOutLatitude,
+                'clockOutLongitude': unSyncedAttend.clockOutLongitude,
+                'voided': unSyncedAttend.voided,
+                'isUpdated': unSyncedAttend.isUpdated,
+                'noOfHours': unSyncedAttend.noOfHours,
+                'month': unSyncedAttend.month,
+                'durationWorked': unSyncedAttend.durationWorked,
+                'offDay': unSyncedAttend.offDay,
+                'comments':unSyncedAttend.comments
+              }).then((value) {
                 Fluttertoast.showToast(
-                  msg: "Syncing Completed...",
+                  msg: "Syncing to Server...",
                   toastLength: Toast.LENGTH_SHORT,
                   backgroundColor: Colors.black54,
                   gravity: ToastGravity.BOTTOM,
@@ -922,54 +1001,69 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   textColor: Colors.white,
                   fontSize: 16.0,
                 );
-              }); // Update Isar
+                widget.service.updateSyncStatus(
+                    unSyncedAttend.id, AttendanceModel(), true).then((_){
+                  Fluttertoast.showToast(
+                    msg: "Syncing Completed...",
+                    toastLength: Toast.LENGTH_SHORT,
+                    backgroundColor: Colors.black54,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                }); // Update Isar
 
 
 
-            })
-                .catchError((error) {
-              Fluttertoast.showToast(
-                msg: "Server Write Error: ${error.toString()}",
-                toastLength: Toast.LENGTH_SHORT,
-                backgroundColor: Colors.black54,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                textColor: Colors.white,
-                fontSize: 16.0,
-              );
-            })
-            // ----------------
-            // await _updateGoogleSheet(
-            //         state,
-            //         project,
-            //         firstName,
-            //         lastName,
-            //         designation,
-            //         department,
-            //         location,
-            //         staffCategory,
-            //         mobile,
-            //         unSyncedAttend.date.toString(),
-            //         emailAddress,
-            //         unSyncedAttend.clockIn.toString(),
-            //         unSyncedAttend.clockInLatitude.toString(),
-            //         unSyncedAttend.clockInLongitude.toString(),
-            //         unSyncedAttend.clockInLocation.toString(),
-            //         unSyncedAttend.clockOut.toString(),
-            //         unSyncedAttend.clockOutLatitude.toString(),
-            //         unSyncedAttend.clockOutLongitude.toString(),
-            //         unSyncedAttend.clockOutLocation.toString(),
-            //         unSyncedAttend.durationWorked.toString(),
-            //         unSyncedAttend.noOfHours.toString(),
-            //     unSyncedAttend.comments.toString()
-            // )
-            //      .then((value) async {
-            //
-            // })
+              })
+                  .catchError((error) {
+                Fluttertoast.showToast(
+                  msg: "Server Write Error: ${error.toString()}",
+                  toastLength: Toast.LENGTH_SHORT,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              })
+              // ----------------
+              // await _updateGoogleSheet(
+              //         state,
+              //         project,
+              //         firstName,
+              //         lastName,
+              //         designation,
+              //         department,
+              //         location,
+              //         staffCategory,
+              //         mobile,
+              //         unSyncedAttend.date.toString(),
+              //         emailAddress,
+              //         unSyncedAttend.clockIn.toString(),
+              //         unSyncedAttend.clockInLatitude.toString(),
+              //         unSyncedAttend.clockInLongitude.toString(),
+              //         unSyncedAttend.clockInLocation.toString(),
+              //         unSyncedAttend.clockOut.toString(),
+              //         unSyncedAttend.clockOutLatitude.toString(),
+              //         unSyncedAttend.clockOutLongitude.toString(),
+              //         unSyncedAttend.clockOutLocation.toString(),
+              //         unSyncedAttend.durationWorked.toString(),
+              //         unSyncedAttend.noOfHours.toString(),
+              //     unSyncedAttend.comments.toString()
+              // )
+              //      .then((value) async {
+              //
+              // })
 
-            // ---------------
-          }
+              // ---------------
+            }
+        });
+
       });
+
+
 
       for (var unSyncedBio in getBioForPartialUnSynced)
       {

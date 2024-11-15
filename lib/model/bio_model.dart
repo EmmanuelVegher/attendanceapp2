@@ -6,6 +6,8 @@ class BioModel {
   Id id = Isar.autoIncrement; // you can also use id = null to auto increment
   String? firstName;
   String? lastName;
+  String? maritalStatus;
+  String? gender;
   String? staffCategory;
   String? designation;
   String? password;

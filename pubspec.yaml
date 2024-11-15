@@ -113,6 +113,8 @@ dependencies:
   syncfusion_flutter_pdf:
   #open_file:
   open_filex:
+  percent_indicator:
+  uuid: ^4.5.1
 
   #another_telephony:
   #bcrypt: ^1.1.3

@@ -133,7 +133,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     //getCurrentDateRecordCount();
     //_pickImage();
    // _checkTimeAndTriggerNotification();
-    checkForAppVersion();
+   // checkForAppVersion();
 
     tz.initializeTimeZones();
     _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
@@ -1431,7 +1431,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
   }
 
 
-  checkForAppVersion() async {
+  Future<void> checkForAppVersion() async {
     final firestore = FirebaseFirestore.instance;
     try {
       List<AppVersionModel> getAppVersion =
@@ -1445,6 +1445,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
 
       DateTime currentDate = DateTime.now();
       log("getAppVersion[0].appVersion== ${getAppVersion[0].appVersion}");
+      print("getAppVersion[0].appVersion== ${getAppVersion[0].appVersion}");
 
         if (getAppVersion[0].checkDate == null ||
             currentDate.difference(getAppVersion[0].checkDate!).inDays > 3) {
@@ -1489,8 +1490,10 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
               print("appVersionDate ====${appVersionDate}");
               print("versionNumber ====${versionNumber}");
 
-              if (getAppVersion[0].appVersion != versionNumber &&
-                  !isAppCheckShown) {
+              if (getAppVersion[0].appVersion != versionNumber
+                  // &&
+                  // !isAppCheckShown
+              ) {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -1711,6 +1714,92 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
 
         }
 
+
+
+
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "AppVersion Check Error: ${e.toString()}",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
+  Future<void> checkForAppVersion1() async {
+    final firestore = FirebaseFirestore.instance;
+    try {
+      List<AppVersionModel> getAppVersion =
+      await widget.service.getAppVersion();
+
+
+
+      List<BioModel> getAttendanceForBio =
+      await widget.service.getBioInfoWithUserBio();
+
+      QuerySnapshot snap = await firestore
+          .collection("Staff")
+          .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
+          .get();
+
+
+
+      final lastAppVersionDoc = await firestore
+          .collection('AppVersion')
+          .doc('AppVersion')
+          .get();
+
+      if (lastAppVersionDoc.exists) {
+        // Get the data from the document
+        final data = lastAppVersionDoc.data();
+
+        if (data != null ) {
+
+          final versionNumber = data['appVersion'];
+
+          print("versionNumber ====${versionNumber}");
+
+          if (getAppVersion[0].appVersion != versionNumber) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              // Prevent dismissing by tapping outside
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Update Available'),
+                  content: Text(
+                      'You are using an older version of the app (${getAppVersion[0]
+                          .appVersion}). Please update to the latest version (${versionNumber}). Kindly Note that you would be logged out after 15 days if you do not upgrade to the latest version (${versionNumber})'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () async {
+                        // TODO: Add logic to redirect to app store/update mechanism
+                        await IsarService().updateAppVersion(
+                            1, AppVersionModel(), DateTime.now(),false);
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      child: Text('Close'),
+                    ),
+                  ],
+                );
+              },
+            );
+            //IsarService().updateAppVersion(1,AppVersionModel(),DateTime.now());
+            // setState(() {
+            //   isAppCheckShown == true;
+            // });
+          }
+
+        } else {
+          print("Document does not contain 'appVersionDate' field.");
+        }
+
+
+      }
 
 
 
@@ -2055,8 +2144,11 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     try {
       // The try block first of all saves the data in the google sheet for the visualization and then on the firebase database as an extra backup database  before chahing the sync status on Mobile App to "Synced"
       //Query the firebase and get the records having updated records
+
       List<BioModel> getAttendanceForBio =
       await widget.service.getBioInfoWithUserBio();
+
+
 
 
       QuerySnapshot snap = await FirebaseFirestore.instance
@@ -2093,91 +2185,98 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
         });
       }
 
-      await _updateEmptyClockInAndOutLocation().then((value) async => {
-            //Iterate through each queried loop
-            for (var unSyncedAttend in getAttendanceForPartialUnSynced)
-              {
+      await checkForAppVersion1().then((_) async {
 
-          await FirebaseFirestore.instance
-              .collection("Staff")
-          .doc(snap.docs[0].id)
-          .collection("Record")
-          .doc(unSyncedAttend.date)
-          .set({
-        "Offline_DB_id": unSyncedAttend.id,
-        'clockIn': unSyncedAttend.clockIn,
-        'clockOut': unSyncedAttend.clockOut,
-        'clockInLocation': unSyncedAttend.clockInLocation,
-        'clockOutLocation': unSyncedAttend.clockOutLocation,
-        'date': unSyncedAttend.date,
-        'isSynced': true,
-        'clockInLatitude': unSyncedAttend.clockInLatitude,
-        'clockInLongitude': unSyncedAttend.clockInLongitude,
-        'clockOutLatitude': unSyncedAttend.clockOutLatitude,
-        'clockOutLongitude': unSyncedAttend.clockOutLongitude,
-        'voided': unSyncedAttend.voided,
-        'isUpdated': unSyncedAttend.isUpdated,
-        'noOfHours': unSyncedAttend.noOfHours,
-        'month': unSyncedAttend.month,
-        'durationWorked': unSyncedAttend.durationWorked,
-        'offDay': unSyncedAttend.offDay,
-        'comments':unSyncedAttend.comments
-      }).then((value) {
-        Fluttertoast.showToast(
-          msg: "Syncing to Server...",
-          toastLength: Toast.LENGTH_SHORT,
-          backgroundColor: Colors.black54,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-        widget.service.updateSyncStatus(
-            unSyncedAttend.id, AttendanceModel(), true); // Update Isar
-      })
-          .catchError((error) {
-        Fluttertoast.showToast(
-          msg: "Server Write Error: ${error.toString()}",
-          toastLength: Toast.LENGTH_SHORT,
-          backgroundColor: Colors.black54,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      })
-                // ----------------
-                // await _updateGoogleSheet(
-                //         state,
-                //         project,
-                //         firstName,
-                //         lastName,
-                //         designation,
-                //         department,
-                //         location,
-                //         staffCategory,
-                //         mobile,
-                //         unSyncedAttend.date.toString(),
-                //         emailAddress,
-                //         unSyncedAttend.clockIn.toString(),
-                //         unSyncedAttend.clockInLatitude.toString(),
-                //         unSyncedAttend.clockInLongitude.toString(),
-                //         unSyncedAttend.clockInLocation.toString(),
-                //         unSyncedAttend.clockOut.toString(),
-                //         unSyncedAttend.clockOutLatitude.toString(),
-                //         unSyncedAttend.clockOutLongitude.toString(),
-                //         unSyncedAttend.clockOutLocation.toString(),
-                //         unSyncedAttend.durationWorked.toString(),
-                //         unSyncedAttend.noOfHours.toString(),
-                //     unSyncedAttend.comments.toString()
-                // )
-                //      .then((value) async {
-                //
-                // })
+        await _updateEmptyClockInAndOutLocation().then((value) async => {
+          //Iterate through each queried loop
+          for (var unSyncedAttend in getAttendanceForPartialUnSynced)
+            {
 
-                // ---------------
-              }
-          });
+              await FirebaseFirestore.instance
+                  .collection("Staff")
+                  .doc(snap.docs[0].id)
+                  .collection("Record")
+                  .doc(unSyncedAttend.date)
+                  .set({
+                "Offline_DB_id": unSyncedAttend.id,
+                'clockIn': unSyncedAttend.clockIn,
+                'clockOut': unSyncedAttend.clockOut,
+                'clockInLocation': unSyncedAttend.clockInLocation,
+                'clockOutLocation': unSyncedAttend.clockOutLocation,
+                'date': unSyncedAttend.date,
+                'isSynced': true,
+                'clockInLatitude': unSyncedAttend.clockInLatitude,
+                'clockInLongitude': unSyncedAttend.clockInLongitude,
+                'clockOutLatitude': unSyncedAttend.clockOutLatitude,
+                'clockOutLongitude': unSyncedAttend.clockOutLongitude,
+                'voided': unSyncedAttend.voided,
+                'isUpdated': unSyncedAttend.isUpdated,
+                'noOfHours': unSyncedAttend.noOfHours,
+                'month': unSyncedAttend.month,
+                'durationWorked': unSyncedAttend.durationWorked,
+                'offDay': unSyncedAttend.offDay,
+                'comments':unSyncedAttend.comments
+              }).then((value) async {
+                Fluttertoast.showToast(
+                  msg: "Syncing to Server...",
+                  toastLength: Toast.LENGTH_SHORT,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                widget.service.updateSyncStatus(
+                    unSyncedAttend.id, AttendanceModel(), true); // Update Isar
+
+
+              })
+                  .catchError((error) {
+                Fluttertoast.showToast(
+                  msg: "Server Write Error: ${error.toString()}",
+                  toastLength: Toast.LENGTH_SHORT,
+                  backgroundColor: Colors.black54,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              })
+              // ----------------
+              // await _updateGoogleSheet(
+              //         state,
+              //         project,
+              //         firstName,
+              //         lastName,
+              //         designation,
+              //         department,
+              //         location,
+              //         staffCategory,
+              //         mobile,
+              //         unSyncedAttend.date.toString(),
+              //         emailAddress,
+              //         unSyncedAttend.clockIn.toString(),
+              //         unSyncedAttend.clockInLatitude.toString(),
+              //         unSyncedAttend.clockInLongitude.toString(),
+              //         unSyncedAttend.clockInLocation.toString(),
+              //         unSyncedAttend.clockOut.toString(),
+              //         unSyncedAttend.clockOutLatitude.toString(),
+              //         unSyncedAttend.clockOutLongitude.toString(),
+              //         unSyncedAttend.clockOutLocation.toString(),
+              //         unSyncedAttend.durationWorked.toString(),
+              //         unSyncedAttend.noOfHours.toString(),
+              //     unSyncedAttend.comments.toString()
+              // )
+              //      .then((value) async {
+              //
+              // })
+
+              // ---------------
+            }
+        });
+      });
+
+
 
       //Iterate through each queried loop
       for (var unSyncedBio in getBioForPartialUnSynced)
@@ -2315,7 +2414,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
        await  _updateEmptyLocationForTwelve();
       }).then((value) async {
         await syncCompleteData();
-        await checkForAppVersion();
+        await checkForAppVersion1();
       })
       .then((value) {
         Fluttertoast.showToast(

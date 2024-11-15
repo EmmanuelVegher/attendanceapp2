@@ -45,6 +45,8 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
   late TextEditingController _facilityControl;
   late TextEditingController _departmentControl;
   late TextEditingController _designationControl;
+  late TextEditingController _supervisorNameControl;
+  late TextEditingController _supervisorEmailControl;
   String stateName = "";
   String staffStateName = "";
   String facilityStateName = "";
@@ -63,6 +65,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
   String staffingCategory = "";
   bool? isVeriffied;
   DatabaseAdapter adapter = HiveService();
+
 
   List<DropdownMenuItem<String>> menuitems = [];
   List<DropdownMenuItem<String>> menuitems2 = [];
@@ -94,6 +97,53 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
   var mobile;
   var project;
 
+  final List<String> roles = ["User", "Facility Supervisor", "State Office Staff", "HQ Staff"];
+
+
+  String termsAndConditionsText = """
+  1. **Purpose:** This Attendance App is designed to track and monitor staff attendance.  By using this app, you agree to abide by the following terms and conditions.
+  2. **Accuracy:** You are responsible for ensuring the accuracy of your attendance records. Report any discrepancies to your supervisor immediately.
+  3. **Privacy:**  Attendance data collected through this app will be used solely for monitoring attendance and will be treated confidentially.  
+  4. **Misuse:**  Do not use the app for fraudulent purposes or to misrepresent your attendance. Any such misuse may result in disciplinary action.
+  5. **Updates:** The app may be updated periodically. You agree to install any updates to ensure proper functionality.
+  6. **Random Check-ins:** You agree to participate in random location check-ins during work hours. These check-ins are solely for monitoring purposes and to verify your presence at your designated work location.
+  7. **Support:** For technical support or questions about the app, please contact the technical teams in your individual state.
+""";
+
+  void _showTermsAndConditionsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Terms and Conditions"),
+          content: SingleChildScrollView( // Make content scrollable
+            child: Text(
+              termsAndConditionsText,  // Replace with your actual terms and conditions
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Disagree"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text("Agree"),
+              onPressed: () {
+                setState(() {
+                  checkboxValue = true; // Tick the checkbox
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     _formKey = GlobalKey<FormState>();
@@ -106,6 +156,8 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
     _facilityControl = TextEditingController();
     _departmentControl = TextEditingController();
     _designationControl = TextEditingController();
+    _supervisorEmailControl = TextEditingController();
+    _supervisorNameControl = TextEditingController();
     _getUserDetail();
     super.initState();
   }
@@ -121,6 +173,8 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
     _facilityControl.dispose();
     _departmentControl.dispose();
     _designationControl.dispose();
+    _supervisorEmailControl.dispose();
+    _supervisorNameControl.dispose();
     super.dispose();
   }
 
@@ -177,7 +231,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
   Future<List<DropdownMenuItem<String>>> _fetchDepartmentsForFacilityFromIsar() async {
     // Query Isar database for departments based on the selected location
     List<String?> departments = await IsarService().getDepartmentsFromIsar();
-    List<String> departmentFilterList = ['Care and Treatment','Laboratory','Pharmacy and Logistics','Preventions','Strategic Information'];
+    List<String> departmentFilterList = ['Care and Treatment','Laboratory','Pharmacy and Logistics','Preventions','Strategic Information','Orphan and Vulnerable Children (OVC)'];
 
     // Filter the departments based on the provided list
     List<String> filteredDepartments = departments.where((department) {
@@ -702,58 +756,54 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
 
                               return MyInputField(
                                 title: "Staff Category",
-                                hint: "Select Staff Category",
+                                hint: "",
                                 widget: Container(
-                                  width: MediaQuery.of(context).size.width*0.81,
-                                  //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                  //color:Colors.red,
-                                  child: SizedBox(
-                                      child:SizedBox(
-                                          child:
-                                          DropdownButtonFormField<String>(
+                                  width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                  child: DropdownButtonFormField<String>(
+                                    decoration: InputDecoration(
+                                      iconColor: Colors.blue,
+                                      labelText: "",
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
 
-                                            decoration: InputDecoration(
-                                              iconColor:Colors.blue,
-                                              labelText: "",
-                                              filled: true,
-                                              fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                              border: OutlineInputBorder(
-                                                borderRadius: BorderRadius.circular(8),
-                                                borderSide: BorderSide.none,
-                                              ),
-                                            ),
-                                            value: selectedStaffCategory,
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                            dropdownColor: Colors.white,
-                                            elevation: 4,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 16,
-                                              fontFamily: "NexaBold",
-                                            ),
-                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                              value: item.value,
-                                              child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                // width: MediaQuery.of(context).size.width * 0.66,
-                                                //color: Colors.pink,// Adjust this width as needed
-                                                child: Text(
-                                                  (item.child as Text).data!,
-                                                  softWrap: true,
-                                                ),
-                                              ),
-                                            )).toList(),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                //departmentName = value!;
-                                                value5 = value!;
-                                                disableddropdown = false;
-                                              });
-                                            },
-                                            isExpanded: true,
-                                          ))),
+                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                    dropdownColor: Colors.white,
+                                    elevation: 4,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontFamily: "NexaBold",
+                                    ),
+                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                      value: item.value,
+                                      child: SizedBox(
+                                        width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                        child: Text(
+                                          (item.child as Text).data!,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    )).toList(),
+                                    isExpanded: true, // Allow dropdown to expand and use available width
+                                    value: selectedStaffCategory,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        value5 = value!;
+                                        disableddropdown = false;
+                                      });
+                                    },
+
+                                  ),
                                 ),
                               );
+
+
 
                             } else {
                               return const CircularProgressIndicator();
@@ -802,54 +852,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "State Of Implementations",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedState,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        stateName = value!;
-                                                        facilityStateName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedState,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                stateName = value!;
+                                                facilityStateName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
                                     } else {
                                       return const CircularProgressIndicator();
                                     }
@@ -884,55 +932,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Location",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedLocation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        locationName = value!;
-                                                        //selectedLocation = value;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedLocation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                locationName = value!;
+                                                //selectedLocation = value;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
+
                                     } else {
                                       return const CircularProgressIndicator();
                                     }
@@ -980,56 +1025,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Department",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDepartment,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        departmentName = value!;
-                                                        facilitydepartmentName = value!;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDepartment,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                departmentName = value!;
+                                                facilitydepartmentName = value!;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -1065,56 +1106,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Designation",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDesignation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        designation = value!;
-                                                        facilitydesignationName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                designation = value!;
+                                                facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -1167,56 +1204,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Name of Supervisor",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDesignation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        supervisorName = value!;
-                                                        //facilitydesignationName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                supervisorName = value!;
+                                                //facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -1263,60 +1296,55 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         });
                                       }
 
-                                      return MyInputField(
+                                      return  MyInputField(
                                         title: "Email of Supervisor",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDesignation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        supervisorEmail = value!;
-                                                        //facilitydesignationName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                supervisorEmail = value!;
+                                                //facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -1344,7 +1372,645 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                             )
 // ---------------------------------------------------------------------------
                             // State of Cordination
-                                : value5 == "State Office Staff" ?
+                                : value5 == "Facility Supervisor"
+                                ?
+                            Column(
+                              // Add this line
+                              children: [
+
+                                FutureBuilder<List<DropdownMenuItem<String>>>(
+                                  future: _fetchStatesFromIsar("Federal Capital Territory"),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Text('Error: ${snapshot.error}');
+                                    } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                      // Check if facilityStateName is in the list of dropdown values
+                                      String? selectedState =
+                                      // snapshot.data!.any((item) => item.value == facilityStateName)
+                                      //     ? facilityStateName
+                                      //     :
+                                      null;
+
+                                      // If there's no valid state selected, set the first item as the default
+                                      if (selectedState == null) {
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          setState(() {
+                                            //facilityStateName = snapshot.data!.first.value!;
+                                            // facilityStateName = "Select your state";
+                                          });
+                                        });
+                                      }
+
+                                      return  MyInputField(
+                                        title: "State Of Implementations",
+                                        hint: "",
+                                        widget: Container(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
+
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedState,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                stateName = value!;
+                                                facilityStateName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
+                                        ),
+                                      );
+
+                                    } else {
+                                      return const CircularProgressIndicator();
+                                    }
+                                  },
+                                ),
+                                // Facility List
+                                stateName != null && stateName.isNotEmpty
+                                    ?FutureBuilder<List<DropdownMenuItem<String>>>(
+                                  future: _fetchLocationsFromIsar(stateName,"Facility"),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Text('Error: ${snapshot.error}');
+                                    } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                      // Check if facilityStateName is in the list of dropdown values
+                                      String? selectedLocation =
+                                      // snapshot.data!.any((item) => item.value == facilityLocationName)
+                                      //     ? facilityLocationName
+                                      //     :
+                                      null;
+
+                                      // If there's no valid state selected, set the first item as the default
+                                      if (selectedLocation == null) {
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          setState(() {
+                                            //facilityStateName = snapshot.data!.first.value!;
+                                            // facilityStateName = "Select your state";
+                                          });
+                                        });
+                                      }
+
+                                      return MyInputField(
+                                        title: "Location",
+                                        hint: "",
+                                        widget: Container(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
+
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedLocation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                locationName = value!;
+                                                //selectedLocation = value;
+                                              });
+                                            },
+
+                                          ),
+                                        ),
+                                      );
+
+
+                                    } else {
+                                      return const CircularProgressIndicator();
+                                    }
+                                  },
+                                )
+                                    : const MyInputField(
+                                  title: "Location",
+                                  hint: "",
+                                  widget: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    child: Text(
+                                      "First Select your state",
+                                      style: TextStyle(
+                                        fontSize: 15, // Optional: Adjust font size as needed
+                                        fontWeight: FontWeight.normal, // Optional: Adjust text weight
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Department
+                                FutureBuilder<List<DropdownMenuItem<String>>>(
+                                  future: _fetchDepartmentsForFacilityFromIsar(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Text('Error: ${snapshot.error}');
+                                    } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                      // Check if facilityStateName is in the list of dropdown values
+                                      String? selectedDepartment =
+                                      // snapshot.data!.any((item) => item.value == facilitydepartmentName)
+                                      //     ? facilitydepartmentName
+                                      //     :
+                                      null;
+
+                                      // If there's no valid state selected, set the first item as the default
+                                      if (selectedDepartment == null) {
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          setState(() {
+                                            //facilityStateName = snapshot.data!.first.value!;
+                                            // facilityStateName = "Select your state";
+                                          });
+                                        });
+                                      }
+
+                                      return MyInputField(
+                                        title: "Department",
+                                        hint: "",
+                                        widget: Container(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
+
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDepartment,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                departmentName = value!;
+                                                facilitydepartmentName = value!;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
+                                        ),
+                                      );
+
+
+                                    } else {
+                                      return const CircularProgressIndicator();
+                                    }
+                                  },
+                                ),
+                                // Designations
+                                facilitydepartmentName != null && facilitydepartmentName.isNotEmpty
+                                    ?FutureBuilder<List<DropdownMenuItem<String>>>(
+                                  future: _fetchDesignationsFromIsar(departmentName,"Facility Supervisor"),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Text('Error: ${snapshot.error}');
+                                    } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                      // Check if facilityStateName is in the list of dropdown values
+                                      String? selectedDesignation =
+                                      // snapshot.data!.any((item) => item.value == facilitydesignationName)
+                                      //     ? facilitydesignationName
+                                      //     :
+                                      null;
+
+                                      // If there's no valid state selected, set the first item as the default
+                                      if (selectedDesignation == null) {
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          setState(() {
+                                            //facilityStateName = snapshot.data!.first.value!;
+                                            // facilityStateName = "Select your state";
+                                          });
+                                        });
+                                      }
+
+                                      return MyInputField(
+                                        title: "Designation",
+                                        hint: "",
+                                        widget: Container(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
+
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                designation = value!;
+                                                facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
+                                        ),
+                                      );
+
+
+                                    } else {
+                                      return const CircularProgressIndicator();
+                                    }
+                                  },
+                                )
+                                    :const MyInputField(
+                                  title: "Designation",
+                                  hint: "",
+                                  widget: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    child: Text(
+                                      "First Select your department",
+                                      style: TextStyle(
+                                        fontSize: 15, // Optional: Adjust font size as needed
+                                        fontWeight: FontWeight.normal, // Optional: Adjust text weight
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                //_fetchProjectFromIsar
+
+                                // // Supervisor
+                                // facilitydepartmentName != null && facilitydepartmentName.isNotEmpty
+                                //     ?FutureBuilder<List<DropdownMenuItem<String>>>(
+                                //   future: _fetchSupervisorsFromIsar(departmentName,stateName),
+                                //   builder: (context, snapshot) {
+                                //     if (snapshot.hasError) {
+                                //       return Text('Error: ${snapshot.error}');
+                                //     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                //       // Check if facilityStateName is in the list of dropdown values
+                                //       String? selectedDesignation =
+                                //       // snapshot.data!.any((item) => item.value == supervisorName)
+                                //       //     ? supervisorName
+                                //       //     :
+                                //       null;
+                                //
+                                //       // If there's no valid state selected, set the first item as the default
+                                //       if (selectedDesignation == null) {
+                                //         WidgetsBinding.instance.addPostFrameCallback((_) {
+                                //           setState(() {
+                                //             //facilityStateName = snapshot.data!.first.value!;
+                                //             // facilityStateName = "Select your state";
+                                //           });
+                                //         });
+                                //       }
+                                //
+                                //       return MyInputField(
+                                //         title: "Name of Supervisor",
+                                //         hint: "",
+                                //         widget: Container(
+                                //           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                //           child: DropdownButtonFormField<String>(
+                                //             decoration: InputDecoration(
+                                //               iconColor: Colors.blue,
+                                //               labelText: "",
+                                //               filled: true,
+                                //               fillColor: Colors.white,
+                                //               contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                //               border: OutlineInputBorder(
+                                //                 borderRadius: BorderRadius.circular(8),
+                                //                 borderSide: BorderSide.none,
+                                //               ),
+                                //             ),
+                                //
+                                //             icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                //             dropdownColor: Colors.white,
+                                //             elevation: 4,
+                                //             style: TextStyle(
+                                //               color: Colors.black,
+                                //               fontSize: 16,
+                                //               fontFamily: "NexaBold",
+                                //             ),
+                                //             items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                //               value: item.value,
+                                //               child: SizedBox(
+                                //                 width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                //                 child: Text(
+                                //                   (item.child as Text).data!,
+                                //                   softWrap: true,
+                                //                 ),
+                                //               ),
+                                //             )).toList(),
+                                //             isExpanded: true, // Allow dropdown to expand and use available width
+                                //             value: selectedDesignation,
+                                //             onChanged: (value) {
+                                //               setState(() {
+                                //                 supervisorName = value!;
+                                //                 //facilitydesignationName = value;
+                                //                 disableddropdown = false;
+                                //               });
+                                //             },
+                                //
+                                //           ),
+                                //         ),
+                                //       );
+                                //
+                                //
+                                //     } else {
+                                //       return const CircularProgressIndicator();
+                                //     }
+                                //   },
+                                // )
+                                //     :const MyInputField(
+                                //   title: "Name of Supervisor",
+                                //   hint: "",
+                                //   widget: Padding(
+                                //     padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                //     child: Text(
+                                //       "First Select your department",
+                                //       style: TextStyle(
+                                //         fontSize: 15, // Optional: Adjust font size as needed
+                                //         fontWeight: FontWeight.normal, // Optional: Adjust text weight
+                                //       ),
+                                //     ),
+                                //   ),
+                                // ),
+
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.015),
+                                ),
+
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Name of Supervisor",
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Container(
+                                      decoration:
+                                      ThemeHelper().inputBoxDecorationShaddow(),
+                                      child: TextFormField(
+                                        controller: _supervisorNameControl,
+                                        decoration: ThemeHelper().textInputDecoration(
+                                          "",
+                                          "Enter your Supervisor's Name",
+                                          IconButton(
+                                            onPressed: () {},
+                                            icon: Icon(
+                                              Icons.person,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ),
+                                        keyboardType: TextInputType.text,
+                                        validator: (value) =>
+                                        value != null && value.isEmpty
+                                            ? "Enter Supervisor's Name"
+                                            : null,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.015),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Email of Supervisor",
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Container(
+                                      decoration:
+                                      ThemeHelper().inputBoxDecorationShaddow(),
+                                      child: TextFormField(
+                                        controller: _supervisorEmailControl,
+                                        decoration: ThemeHelper().textInputDecoration(
+                                          "",
+                                          "Enter your Supervisor's Email",
+                                          IconButton(
+                                            onPressed: () {},
+                                            icon: Icon(
+                                              Icons.person,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ),
+                                        keyboardType: TextInputType.text,
+                                        validator: (value) =>
+                                        value != null && value.isEmpty
+                                            ? "Enter Supervisor's Email"
+                                            : null,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                // Supervisor Email
+                                // supervisorName != null && supervisorName.isNotEmpty
+                                //     ?FutureBuilder<List<DropdownMenuItem<String>>>(
+                                //   future: _fetchSupervisorEmailFromIsar(departmentName,supervisorName),
+                                //   builder: (context, snapshot) {
+                                //     if (snapshot.hasError) {
+                                //       return Text('Error: ${snapshot.error}');
+                                //     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                //       // Check if facilityStateName is in the list of dropdown values
+                                //       String? selectedDesignation =
+                                //       // snapshot.data!.any((item) => item.value == supervisorEmail)
+                                //       //     ? supervisorEmail
+                                //       //     :
+                                //       null;
+                                //
+                                //       // If there's no valid state selected, set the first item as the default
+                                //       if (selectedDesignation == null) {
+                                //         WidgetsBinding.instance.addPostFrameCallback((_) {
+                                //           setState(() {
+                                //             //facilityStateName = snapshot.data!.first.value!;
+                                //             // facilityStateName = "Select your state";
+                                //           });
+                                //         });
+                                //       }
+                                //
+                                //       return  MyInputField(
+                                //         title: "Email of Supervisor",
+                                //         hint: "",
+                                //         widget: Container(
+                                //           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                //           child: DropdownButtonFormField<String>(
+                                //             decoration: InputDecoration(
+                                //               iconColor: Colors.blue,
+                                //               labelText: "",
+                                //               filled: true,
+                                //               fillColor: Colors.white,
+                                //               contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                //               border: OutlineInputBorder(
+                                //                 borderRadius: BorderRadius.circular(8),
+                                //                 borderSide: BorderSide.none,
+                                //               ),
+                                //             ),
+                                //
+                                //             icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                //             dropdownColor: Colors.white,
+                                //             elevation: 4,
+                                //             style: TextStyle(
+                                //               color: Colors.black,
+                                //               fontSize: 16,
+                                //               fontFamily: "NexaBold",
+                                //             ),
+                                //             items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                //               value: item.value,
+                                //               child: SizedBox(
+                                //                 width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                //                 child: Text(
+                                //                   (item.child as Text).data!,
+                                //                   softWrap: true,
+                                //                 ),
+                                //               ),
+                                //             )).toList(),
+                                //             isExpanded: true, // Allow dropdown to expand and use available width
+                                //             value: selectedDesignation,
+                                //             onChanged: (value) {
+                                //               setState(() {
+                                //                 supervisorEmail = value!;
+                                //                 //facilitydesignationName = value;
+                                //                 disableddropdown = false;
+                                //               });
+                                //             },
+                                //           ),
+                                //         ),
+                                //       );
+                                //
+                                //
+                                //     } else {
+                                //       return const CircularProgressIndicator();
+                                //     }
+                                //   },
+                                // )
+                                //     :const MyInputField(
+                                //   title: "  Email of Supervisor",
+                                //   hint: "",
+                                //   widget: Padding(
+                                //     padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                //     child: Text(
+                                //       "First Select your Supervisor",
+                                //       style: TextStyle(
+                                //         fontSize: 15, // Optional: Adjust font size as needed
+                                //         fontWeight: FontWeight.normal, // Optional: Adjust text weight
+                                //       ),
+                                //     ),
+                                //   ),
+                                // ),
+
+
+
+                              ],
+                            )
+// ---------------------------------------------------------------------------
+                            // State of Cordination
+                                :
+                            value5 == "State Office Staff" ?
                             Column(
                               // Add this line
 
@@ -1377,54 +2043,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "State",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedState,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        stateName = value!;
-                                                        facilityStateName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedState,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                stateName = value!;
+                                                facilityStateName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
                                     } else {
                                       return const CircularProgressIndicator();
                                     }
@@ -1459,55 +2123,51 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Office",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedLocation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        locationName = value!;
-                                                        //selectedLocation = value;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedLocation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                locationName = value!;
+                                                //selectedLocation = value;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
                                     } else {
                                       return const CircularProgressIndicator();
                                     }
@@ -1555,56 +2215,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Department",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDepartment,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        departmentName = value!;
-                                                        facilitydepartmentName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDepartment,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                departmentName = value!;
+                                                facilitydepartmentName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -1640,56 +2296,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Designation",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDesignation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        designation = value!;
-                                                        facilitydesignationName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                designation = value!;
+                                                facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -1741,56 +2393,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Name of Supervisor",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDesignation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        supervisorName = value!;
-                                                        //facilitydesignationName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                supervisorName = value!;
+                                                //facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -1837,60 +2485,56 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         });
                                       }
 
-                                      return MyInputField(
+                                      return  MyInputField(
                                         title: "Email of Supervisor",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDesignation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        supervisorEmail = value!;
-                                                        //facilitydesignationName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                supervisorEmail = value!;
+                                                //facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -1947,57 +2591,55 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       }
 
                                       return  MyInputField(
-                                        title: "State (HQ)",
+                                        title: "HQ State",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedState,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        stateName = value!;
-                                                        facilityStateName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedState,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                stateName = value!;
+                                                facilityStateName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
                                     } else {
                                       return const CircularProgressIndicator();
                                     }
@@ -2032,55 +2674,51 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Office",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedLocation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        locationName = value!;
-                                                        selectedLocation = value;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedLocation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                locationName = value!;
+                                                selectedLocation = value;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
                                     } else {
                                       return const CircularProgressIndicator();
                                     }
@@ -2128,56 +2766,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Department",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDepartment,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        departmentName = value!;
-                                                        facilitydepartmentName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDepartment,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                departmentName = value!;
+                                                facilitydepartmentName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -2213,54 +2847,49 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Designation",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDesignation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        designation = value!;
-                                                        facilitydesignationName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                designation = value!;
+                                                facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
 
@@ -2315,56 +2944,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Name of Supervisor",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDesignation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        supervisorName = value!;
-                                                        //facilitydesignationName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                supervisorName = value!;
+                                                //facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -2415,56 +3040,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                         title: "Email of Supervisor",
                                         hint: "",
                                         widget: Container(
-                                          width: MediaQuery.of(context).size.width*0.81,
-                                          //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                          //color:Colors.red,
-                                          child: SizedBox(
-                                              child:SizedBox(
-                                                  child:
-                                                  DropdownButtonFormField<String>(
+                                          width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                          child: DropdownButtonFormField<String>(
+                                            decoration: InputDecoration(
+                                              iconColor: Colors.blue,
+                                              labelText: "",
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
 
-                                                    decoration: InputDecoration(
-                                                      iconColor:Colors.blue,
-                                                      labelText: "",
-                                                      filled: true,
-                                                      fillColor: Colors.white,
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        borderSide: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    value: selectedDesignation,
-                                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                                    dropdownColor: Colors.white,
-                                                    elevation: 4,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontFamily: "NexaBold",
-                                                    ),
-                                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                                      value: item.value,
-                                                      child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                        // width: MediaQuery.of(context).size.width * 0.66,
-                                                        //color: Colors.pink,// Adjust this width as needed
-                                                        child: Text(
-                                                          (item.child as Text).data!,
-                                                          softWrap: true,
-                                                        ),
-                                                      ),
-                                                    )).toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        supervisorEmail = value!;
-                                                        //facilitydesignationName = value;
-                                                        disableddropdown = false;
-                                                      });
-                                                    },
-                                                    isExpanded: true,
-                                                  ))),
+                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            dropdownColor: Colors.white,
+                                            elevation: 4,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontFamily: "NexaBold",
+                                            ),
+                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                              value: item.value,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                                child: Text(
+                                                  (item.child as Text).data!,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            isExpanded: true, // Allow dropdown to expand and use available width
+                                            value: selectedDesignation,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                supervisorEmail = value!;
+                                                //facilitydesignationName = value;
+                                                disableddropdown = false;
+                                              });
+                                            },
+
+                                          ),
                                         ),
                                       );
+
 
                                     } else {
                                       return const CircularProgressIndicator();
@@ -2522,56 +3143,52 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 title: "Project",
                                 hint: "",
                                 widget: Container(
-                                  width: MediaQuery.of(context).size.width*0.81,
-                                  //height: MediaQuery.of(context).size.height * 1,// Set your desired width
-                                  //color:Colors.red,
-                                  child: SizedBox(
-                                      child:SizedBox(
-                                          child:
-                                          DropdownButtonFormField<String>(
+                                  width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                  child: DropdownButtonFormField<String>(
+                                    decoration: InputDecoration(
+                                      iconColor: Colors.blue,
+                                      labelText: "",
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
 
-                                            decoration: InputDecoration(
-                                              iconColor:Colors.blue,
-                                              labelText: "",
-                                              filled: true,
-                                              fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                                              border: OutlineInputBorder(
-                                                borderRadius: BorderRadius.circular(8),
-                                                borderSide: BorderSide.none,
-                                              ),
-                                            ),
-                                            value: selectedProject,
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-                                            dropdownColor: Colors.white,
-                                            elevation: 4,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 16,
-                                              fontFamily: "NexaBold",
-                                            ),
-                                            items: snapshot.data!.map((item) => DropdownMenuItem<String>(
-                                              value: item.value,
-                                              child: Container( // Wrap the Text inside the DropdownMenuItem
-                                                // width: MediaQuery.of(context).size.width * 0.66,
-                                                //color: Colors.pink,// Adjust this width as needed
-                                                child: Text(
-                                                  (item.child as Text).data!,
-                                                  softWrap: true,
-                                                ),
-                                              ),
-                                            )).toList(),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                projectName = value!;
-                                                //staffingCategory = value!;
-                                                disableddropdown = false;
-                                              });
-                                            },
-                                            isExpanded: true,
-                                          ))),
+                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                    dropdownColor: Colors.white,
+                                    elevation: 4,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontFamily: "NexaBold",
+                                    ),
+                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                      value: item.value,
+                                      child: SizedBox(
+                                        width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                        child: Text(
+                                          (item.child as Text).data!,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    )).toList(),
+                                    isExpanded: true, // Allow dropdown to expand and use available width
+                                    value: selectedProject,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        projectName = value!;
+                                        //staffingCategory = value!;
+                                        disableddropdown = false;
+                                      });
+                                    },
+
+                                  ),
                                 ),
                               );
+
 
                             } else {
                               return const CircularProgressIndicator();
@@ -2579,40 +3196,82 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                           },
                         ),
 
-                        //Project
-
-
                         //Roles
                         MyInputField(
                           title: "Role",
-                          hint: "${value4}",
-                          widget: Row(
-                            children: <Widget>[
-                              SizedBox(
-                                height: 100,
-                                child: DropdownButton<String>(
-                                  //value: value,
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_down,
-                                    color: Colors.grey,
-                                  ),
-                                  iconSize: 32,
-                                  elevation: 4,
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontFamily: "NexaBold"),
-                                  underline: Container(
-                                    height: 0,
-                                  ),
-                                  items: Roles.map(buildMenuItem).toList(),
-                                  onChanged: (value4) =>
-                                      setState(() => this.value4 = value4!),
+                          hint: "",
+                          widget: Container(
+                            width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                            child: DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                iconColor: Colors.blue,
+                                labelText: "",
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide.none,
                                 ),
                               ),
-                            ],
+                              icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                              dropdownColor: Colors.white,
+                              elevation: 4,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontFamily: "NexaBold",
+                              ),
+                              items: roles.map((role) => DropdownMenuItem<String>(
+                                value: role,
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                  child: Text(
+                                    role,
+                                    softWrap: true,
+                                  ),
+                                ),
+                              )).toList(),
+                              isExpanded: true, // Allow dropdown to expand and use available width
+                              value: roles.first, // Set the first role as the default selected value
+                                onChanged: (value4) =>
+                                    setState(() => this.value4 = value4!),
+                            ),
                           ),
                         ),
+
+
+                        //Roles
+                        // MyInputField(
+                        //   title: "Role",
+                        //   hint: "${value4}",
+                        //   widget: Row(
+                        //     children: <Widget>[
+                        //       SizedBox(
+                        //         height: 100,
+                        //         child: DropdownButton<String>(
+                        //           //value: value,
+                        //           icon: Icon(
+                        //             Icons.keyboard_arrow_down,
+                        //             color: Colors.grey,
+                        //           ),
+                        //           iconSize: 32,
+                        //           elevation: 4,
+                        //           style: TextStyle(
+                        //               color: Colors.black,
+                        //               fontSize: 15,
+                        //               fontFamily: "NexaBold"),
+                        //           underline: Container(
+                        //             height: 0,
+                        //           ),
+                        //           items: Roles.map(buildMenuItem).toList(),
+                        //           onChanged: (value4) =>
+                        //               setState(() => this.value4 = value4!),
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
                         const SizedBox(height: 20.0),
 
                         Column(
@@ -2665,21 +3324,24 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                           builder: (state) {
                             return Column(
                               children: <Widget>[
-                                Row(
-                                  children: <Widget>[
-                                    Checkbox(
+                                InkWell( // Make the whole row tappable
+                                  onTap: _showTermsAndConditionsDialog,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Checkbox(
                                         value: checkboxValue,
                                         onChanged: (value) {
-                                          setState(() {
-                                            checkboxValue = value!;
-                                            state.didChange(value);
-                                          });
-                                        }),
-                                    Text(
-                                      "I accept all terms and conditions.",
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ],
+                                          // Instead of directly changing checkboxValue here,
+                                          // the _showTermsAndConditionsDialog will handle it.
+                                          _showTermsAndConditionsDialog(); // Show dialog on tap
+                                        },
+                                      ),
+                                      const Text(
+                                        "I accept all terms and conditions.",
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 Container(
                                   alignment: Alignment.centerLeft,
@@ -2747,8 +3409,8 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   String project = projectName;
                                   String role = value4 == ""?"User":value4;
                                   String password = _passwordControl.text;
-                                  String supervsorName = supervisorName;
-                                  String supervsorEmail = supervisorEmail;
+                                  String supervsorName = value5 == "Facility Supervisor"?_supervisorNameControl.text:supervisorName;
+                                  String supervsorEmail = value5 == "Facility Supervisor"?_supervisorEmailControl.text:supervisorEmail;
 
                                   if(firstName == "" ||lastName == "" ||emailAddress == "" ||mobile == "" ||staffCategory == "" ||state == "" ||location == "" ||department == "" ||designatn == "" ||project == "" ||role == "" ||password == "" ||supervsorName == "" ||supervsorEmail == ""){
                                     Fluttertoast.showToast(
