@@ -1,6 +1,5 @@
 import 'dart:io';
-import 'dart:math';
-import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
+
 import 'package:attendanceapp/Pages/Dashboard/super_admin_dashboard.dart';
 import 'package:attendanceapp/model/user_model.dart';
 import 'package:attendanceapp/services/database_adapter.dart';
@@ -14,10 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:refreshable_widget/refreshable_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../model/bio_model.dart';
 import '../widgets/constants.dart';
 import '../widgets/editable_department.dart';
@@ -27,7 +24,7 @@ import '../widgets/editable_project.dart';
 import '../widgets/editable_staffcategory.dart';
 import '../widgets/editable_state.dart';
 import '../widgets/editable_supervisor.dart';
-import '../widgets/input_field.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -67,12 +64,15 @@ class _ProfilePageState extends State<ProfilePage> {
   // Controllers for editable fields
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  File? _signatureImage; // Store the selected signature image
+  String? _signatureLink; // Store the Firebase Storage link
 
   @override
   void initState() {
     super.initState();
     _getUserDetail().then((_){
      // _fetchLocationsFromIsar(state, newstaffCategory);
+      _checkSignature(); // Check for existing signature on startup
     });
     // getCurrentDateRecordCount();
   }
@@ -84,6 +84,125 @@ class _ProfilePageState extends State<ProfilePage> {
 
   //   return attendanceLast.length;
   // }
+
+  Future<void> _checkSignature() async {
+    final bioModel = await IsarService().getBioInfoWithFirebaseAuth();
+    setState(() {
+      _signatureLink = bioModel?.signatureLink;
+    });
+  }
+
+  Future<void> _pickSignatureImage() async {
+    try {
+      final imagePicker = ImagePicker();
+      final image = await imagePicker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        setState(() {
+          _signatureImage = File(image.path);
+          newSynced = false;
+          isSynced = false;
+        });
+      }
+    } catch (e) {
+      // Handle error
+      print('Error picking image: $e');
+    }
+  }
+
+
+
+  Future<void> _uploadSignatureAndSync() async {
+
+    List<Uint8List> images =
+        await adapter.getSignatureImages() ?? [];
+    String bucketName = "attendanceapp-a6853.appspot.com";
+    String storagePath =
+        'signatures/${firebaseAuthId}_signature.jpg';
+
+    if (images.isNotEmpty) {
+      await firebase_storage
+          .FirebaseStorage.instance
+          .ref('$bucketName/$storagePath')
+          .putData(images.first)
+          .then((value) async {
+        String downloadURL =
+        await firebase_storage
+            .FirebaseStorage.instance
+            .ref('$bucketName/$storagePath')
+            .getDownloadURL();
+        //Save Profile Pic link to firebase
+        await FirebaseFirestore.instance
+            .collection("Staff")
+            .doc("$firebaseAuthId")
+            .update({
+          "signatureLink": downloadURL,
+        });
+
+        final bioModel = BioModel()..signatureLink = downloadURL;
+        await IsarService().updateBioSignatureLink(2, bioModel, false);
+        setState(() {
+          _signatureLink = downloadURL;
+          _signatureImage = null; // Clear the image after upload
+          newSynced = true;
+          isSynced = true;
+        });
+
+        Fluttertoast.showToast(msg: "Signature Updated successfully!");
+      });
+
+
+
+    } else{
+      // Handle the case where no image is selected (e.g., skip image upload)
+      print("No image selected. Skipping image upload.");
+      Fluttertoast.showToast(
+        msg: "No image selected. Skipping image upload.",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.black54,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+
+    // if (_signatureImage == null) {
+    //   Fluttertoast.showToast(msg: "Please select a signature image.");
+    //   return;
+    // }
+    //
+    // try {
+    //   // Upload image to Firebase Storage
+    //   final storageRef = FirebaseStorage.instance.ref().child(
+    //       'signatures/${firebaseAuthId}_signature.jpg'); // Use a unique filename
+    //   final uploadTask = await storageRef.putFile(_signatureImage!);
+    //   final downloadUrl = await uploadTask.ref.getDownloadURL();
+    //
+    //   // Update signatureLink in Isar and Firebase
+    //   final bioModel = BioModel()..signatureLink = downloadUrl;
+    //   await IsarService().updateBioSignatureLink(2, bioModel, false);
+    //
+    //   await FirebaseFirestore.instance
+    //       .collection("Staff")
+    //       .doc(firebaseAuthId)
+    //       .update({'signatureLink': downloadUrl});
+    //
+    //   setState(() {
+    //     _signatureLink = downloadUrl;
+    //     _signatureImage = null; // Clear the image after upload
+    //     newSynced = true;
+    //     isSynced = true;
+    //   });
+    //
+    //   Fluttertoast.showToast(msg: "Signature saved successfully!");
+    // } catch (e) {
+    //   // Handle error
+    //   print('Error uploading signature: $e');
+    //   Fluttertoast.showToast(msg: "Error saving signature.");
+    // }
+  }
+
 
   Future<void> _getUserDetail() async {
     final userDetail = await IsarService().getBioInfoWithFirebaseAuth();
@@ -518,6 +637,135 @@ class _ProfilePageState extends State<ProfilePage> {
                                                 "${supervisorEmail.toString()}"),
                                           )
                                           ,
+                                          // Signature section
+
+                                    StreamBuilder<List<BioModel>>(
+                                      stream: IsarService().listenToBiometric1(),
+                                      builder: (context, snapshot) {
+                                        // ... handle loading, error, and no data states
+
+                                        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                                          final bioModel = snapshot.data!.first;
+                                          return Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children:[
+                                                Row(
+                                                    children:[
+                                                      Icon(Icons.draw),
+                                                      Text("Is Signature saved?"),
+                                                      Text(bioModel.signatureLink != null ? "Yes" : "No"),
+                                                    ]
+                                                ),
+                                                Row(
+                                                    children:[
+                                                      //  if (_signatureLink == null)
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          showModalBottomSheet(
+                                                            context: context,
+                                                            builder: (context) => Container(
+                                                              height: MediaQuery.of(context).size.width *
+                                                                  (MediaQuery.of(context).size.shortestSide < 600 ? 0.30 : 0.60), // Adjust height as needed
+                                                              padding: EdgeInsets.all(16),
+                                                              child:Column(
+                                                                  children:[
+                                                                    Container(
+                                                                      height: MediaQuery.of(context).size.width *
+                                                                          (MediaQuery.of(context).size.shortestSide < 600 ? 0.30 : 0.50),
+                                                                      child:GestureDetector(
+                                                                        onTap: () {
+                                                                          _pickSignatureImage();
+                                                                        },
+
+                                                                        child: Container(
+                                                                          margin: const EdgeInsets.only(
+                                                                            top: 20,
+                                                                            bottom: 24,
+                                                                          ),
+                                                                          height: MediaQuery.of(context).size.width *
+                                                                              (MediaQuery.of(context).size.shortestSide < 600 ? 0.30 : 0.15),
+                                                                          width: MediaQuery.of(context).size.width *
+                                                                              (MediaQuery.of(context).size.shortestSide < 600 ? 0.30 : 0.30),
+                                                                          alignment: Alignment.center,
+                                                                          decoration: BoxDecoration(
+                                                                            borderRadius: BorderRadius.circular(20),
+                                                                            //color: Colors.grey.shade300,
+                                                                          ),
+                                                                          child: RefreshableWidget<List<Uint8List>?>(
+                                                                            refreshCall: () async {
+                                                                              return await _readSignatureImagesFromDatabase();
+                                                                            },
+                                                                            refreshRate: const Duration(seconds: 1),
+                                                                            errorWidget: Icon(
+                                                                              Icons.upload_file,
+                                                                              size: 80,
+                                                                              color: Colors.grey.shade300,
+                                                                            ),
+                                                                            loadingWidget: Icon(
+                                                                              Icons.upload_file,
+                                                                              size: 80,
+                                                                              color: Colors.grey.shade300,
+                                                                            ),
+                                                                            builder: (context, value) {
+                                                                              if (value != null && value.isNotEmpty) {
+                                                                                return ListView.builder(
+                                                                                  itemCount: value.length,
+                                                                                  itemBuilder: (context, index) => Image.memory(value.first),
+                                                                                );
+                                                                              } else {
+                                                                                return Column(
+                                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                                  children: [
+                                                                                    Icon(
+                                                                                      Icons.upload_file,
+                                                                                      size: MediaQuery.of(context).size.width *
+                                                                                          (MediaQuery.of(context).size.shortestSide < 600 ? 0.075 : 0.05),
+                                                                                      color: Colors.grey.shade600,
+                                                                                    ),
+                                                                                    const SizedBox(height: 8),
+                                                                                    const Text(
+                                                                                      "Click to Upload Signature Image Here",
+                                                                                      style: TextStyle(
+                                                                                        fontSize: 14,
+                                                                                        color: Colors.grey,
+                                                                                        fontWeight: FontWeight.bold,
+                                                                                      ),
+                                                                                      textAlign: TextAlign.center,
+                                                                                    ),
+                                                                                  ],
+                                                                                );
+                                                                              }
+                                                                            },
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+
+                                                                    ElevatedButton(
+                                                                        onPressed: () { Navigator.pop(context); },
+                                                                        child:Text("Save Signature")
+                                                                    ),
+                                                                  ]
+                                                              ),
+
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: _signatureLink == null? Text("Add"):Text("Update"),
+                                                      ),
+                                                    ]
+                                                ),
+                                              ]
+                                          );
+                                        } else {
+                                          return Center(child: CircularProgressIndicator()); // Or other placeholder
+                                        }
+                                      },
+                                    ),
+
+
+
+
                                         ],
                                       ),
                                     ],
@@ -534,7 +782,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: GestureDetector(
                           onTap: () async {
                             // TODO: Add your sync logic here
-                            await syncCompleteData();
+                            await syncCompleteData().then((_) async {
+                              await _uploadSignatureAndSync();
+                            });
                             setState(() {
                               isSynced = newSynced;
                             });
@@ -1006,5 +1256,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<List<Uint8List>?> _readImagesFromDatabase() async {
     return adapter.getImages();
+  }
+
+  Future<List<Uint8List>?> _readSignatureImagesFromDatabase() async {
+    DatabaseAdapter adapter = HiveService();
+    return adapter.getSignatureImages();
   }
 }

@@ -5,6 +5,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:get/get.dart'; // If you are using GetX for navigation
 import '../Pages/auth_check.dart'; // Replace with your actual navigation target
 import '../main.dart';
+import '../model/task.dart';
 import 'isar_service.dart'; // Replace with your actual service
 
 // Function for Handling background notification taps
@@ -85,6 +86,68 @@ class NotifyHelper {
       // Handle notification taps when the app is in the background.
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
+  }
+
+  // Future<void> _configureLocalTimezone() async {
+  //   tz.initializeTimeZones();
+  //   tz.setLocalLocation(tz.getLocation('Africa/Lagos')); // Use setLocalLocation
+  // }
+
+  // Schedules a notification based on the Task object
+  Future<void> scheduledNotification(int hour, int minute, Task task) async {
+    await _configureLocalTimezone(); // Ensure timezone is configured
+
+    try {
+      var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+          'your channel id', 'your channel name',
+          channelDescription: 'your channel description',
+          importance: Importance.max, priority: Priority.high, ticker: 'ticker');
+      var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
+
+      NotificationDetails platformChannelSpecifics = NotificationDetails(
+          android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
+
+
+      tz.TZDateTime scheduledDate = _calculateScheduledTime(hour, minute, task.repeat!);
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        task.id!.toInt(),
+        task.title,
+        task.note,
+        scheduledDate,
+        platformChannelSpecifics,
+        androidAllowWhileIdle: true,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time, // Match only time components for daily repeats
+        payload: "${task.title}|${task.note}|", // Use task details as payload
+      );
+    } catch (e) {
+      print('Error scheduling notification: $e');
+    }
+
+
+
+
+  }
+
+  tz.TZDateTime _calculateScheduledTime(int hour, int minute, String repeat) {
+    final now = DateTime.now();
+    tz.Location nigeriaTimeZone = tz.getLocation('Africa/Lagos');
+
+    var scheduledDate = tz.TZDateTime(nigeriaTimeZone, now.year, now.month, now.day, hour, minute);
+
+    // Adjust scheduled date for future notifications
+    if (scheduledDate.isBefore(tz.TZDateTime.now(nigeriaTimeZone))) {
+      if (repeat == 'Daily') {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      } else { // For other repeat types (e.g., Weekly, Monthly), add appropriate duration
+        // Example for weekly:
+        // scheduledDate = scheduledDate.add(const Duration(days: 7));
+      }
+    }
+
+    return scheduledDate;
   }
 
   // // Schedule daily notifications for clock-out reminders (example).

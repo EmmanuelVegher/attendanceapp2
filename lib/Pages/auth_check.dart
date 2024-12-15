@@ -4,10 +4,8 @@ import 'dart:developer';
 import 'package:attendanceapp/Pages/login_page.dart';
 import 'package:attendanceapp/services/isar_service.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:attendanceapp/Pages/Dashboard/user_dashboard.dart';
-import 'home.dart';
 
 class AuthCheck extends StatelessWidget {
   final IsarService service;

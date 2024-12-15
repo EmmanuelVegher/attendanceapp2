@@ -1,26 +1,14 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:attendanceapp/Pages/OffDays/update_attendance.dart';
-import 'package:attendanceapp/api/Attendance_gsheet_api.dart';
 import 'package:attendanceapp/model/attendance_gsheet_model.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
-// import 'package:attendanceapp/model/user_model.dart';
 import 'package:attendanceapp/services/isar_service.dart';
 import 'package:attendanceapp/widgets/drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:attendanceapp/widgets/progress_dialog.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:connectivity_plus/connectivity_plus.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-// import 'package:geocoding/geocoding.dart';
-// import 'package:get_storage/get_storage.dart';
-// import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:month_year_picker/month_year_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AttendanceServer extends StatefulWidget {
   final IsarService service;

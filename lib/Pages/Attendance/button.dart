@@ -1,6 +1,3 @@
-import 'dart:ffi';
-
-import 'package:attendanceapp/widgets/theme.dart';
 import 'package:flutter/material.dart';
 
 class MyButton extends StatelessWidget {

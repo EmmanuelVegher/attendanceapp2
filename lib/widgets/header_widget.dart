@@ -15,9 +15,9 @@ class HeaderWidget extends StatefulWidget {
 }
 
 class _HeaderWidgetState extends State<HeaderWidget> {
-  double _height;
+  final double _height;
   bool _showIcon;
-  IconData _icon;
+  final IconData _icon;
 
   _HeaderWidgetState(this._height, this._showIcon, this._icon);
 
@@ -47,7 +47,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     ],
                     begin: const FractionalOffset(0.0, 0.0),
                     end: const FractionalOffset(1.0, 0.0),
-                    stops: [0.0, 1.0],
+                    stops: const [0.0, 1.0],
                     tileMode: TileMode.clamp),
               ),
             ),
@@ -70,7 +70,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     ],
                     begin: const FractionalOffset(0.0, 0.0),
                     end: const FractionalOffset(1.0, 0.0),
-                    stops: [0.0, 1.0],
+                    stops: const [0.0, 1.0],
                     tileMode: TileMode.clamp),
               ),
             ),
@@ -100,7 +100,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
           ),
           Visibility(
             visible: _showIcon,
-            child: Container(
+            child: SizedBox(
               height: _height - 40,
               child: Center(
                 child: Container(

@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:developer';
 
-import 'package:attendanceapp/Pages/Attendance/button.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
 import 'package:attendanceapp/services/isar_service.dart';
 import 'package:attendanceapp/widgets/dashboard_widget.dart';
@@ -14,17 +12,19 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 import '../../model/appversion.dart';
 import '../../model/bio_model.dart';
 import '../../model/departmentmodel.dart';
 import '../../model/designationmodel.dart';
+import '../../model/facility_staff_model.dart';
 import '../../model/last_update_date.dart';
 import '../../model/locationmodel.dart';
 import '../../model/projectmodel.dart';
+import '../../model/psychological_metrics.dart';
 import '../../model/reasonfordaysoff.dart';
 import '../../model/staffcategory.dart';
 import '../../model/statemodel.dart';
@@ -52,6 +52,8 @@ class _UserDashBoardState extends State<UserDashBoard> {
   var lastName;
   var firebaseAuthId;
   var role;
+  var state;
+  var location;
   List<FlSpot> dataSet = [];
   List clockInSet = [];
   List clockOutSet = [];
@@ -171,6 +173,8 @@ class _UserDashBoardState extends State<UserDashBoard> {
       firstName = userDetail?.firstName;
       lastName = userDetail?.lastName;
       role = userDetail?.role;
+      state = userDetail?.state;
+      location = userDetail?.location;
     });
   }
 
@@ -288,7 +292,9 @@ class _UserDashBoardState extends State<UserDashBoard> {
                     return ListView(
                       children: [
                         SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.025,
+                          height:
+                          //MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.025),
+                          MediaQuery.of(context).size.height * 0.025,
                         ),
                         Stack(
                           children: [
@@ -782,10 +788,59 @@ class _UserDashBoardState extends State<UserDashBoard> {
     );
   }
 
+  Future<void> fetchPsychologicalMetricsAndSaveToIsar(Isar isar) async {
+    print("PsychologicalMetrics here");
+    try {
+      // Fetch the document from Firestore
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('PsychologicalMetrics')
+          .doc('PsychologicalMetrics')
+          .get();
+
+      print("PsychologicalMetrics docSnapshot == $docSnapshot");
+
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data();
+        print("PsychologicalMetrics data == $data");
+
+        if (data != null) {
+          // Extract the arrays from Firestore, ensuring proper transformation
+          final teamSpirit = (data['Team_Spirit'] as List<dynamic>? ?? [])
+              .map((item) => Map<String, String>.from(item as Map))
+              .toList();
+
+          final attitudeToWork = (data['Attitude_to_work'] as List<dynamic>? ?? [])
+              .map((item) => Map<String, String>.from(item as Map))
+              .toList();
+
+          print("PsychologicalMetrics teamSpirit == $teamSpirit");
+          print("PsychologicalMetrics attitudeToWork == $attitudeToWork");
+
+          // Prepare the data for Isar
+          final psychologicalMetrics = PsychologicalMetricsModel()
+            ..sections = [
+              {'team_spirit': teamSpirit},
+              {'attitude_to_work': attitudeToWork},
+            ];
+
+          // Save to Isar
+          await isar.writeTxn(() async {
+            await isar.psychologicalMetricsModels.put(psychologicalMetrics);
+          });
+
+          print('Data successfully saved to Isar!');
+        }
+      } else {
+        print('Document does not exist!');
+      }
+    } catch (e) {
+      print('Error fetching data from Firestore: $e');
+    }
+  }
+
+
   _checkForUpdates() async {
-
-    try{
-
+    try {
       Fluttertoast.showToast(
         msg: "Checking For updates..",
         toastLength: Toast.LENGTH_LONG,
@@ -796,7 +851,11 @@ class _UserDashBoardState extends State<UserDashBoard> {
         fontSize: 16.0,
       );
 
-
+      // Ensure Isar is initialized
+      final isar = Isar.getInstance();
+      if (isar == null) {
+        throw Exception("Isar instance is null!  Make sure it's opened.");
+      }
 
       final firestore = FirebaseFirestore.instance;
       List<LastUpdateDateModel> getlastUpdateDate =
@@ -820,21 +879,69 @@ class _UserDashBoardState extends State<UserDashBoard> {
           .doc(snap.docs[0].id)
           .get();
 
+      // Fetch all facility staff based on the same state and facility name
+      QuerySnapshot allFacilityStaffs = await firestore
+          .collection("Staff")
+          .where('staffCategory', isEqualTo: 'Facility Staff')
+         // .where('state', isEqualTo: state) // same state as current user
+          //.where('location', isEqualTo: location) // same facility as current user
+          .get();
+
+      print("Number of documents in allFacilityStaffs: ${allFacilityStaffs.docs.length}");
+      if (allFacilityStaffs.docs.isEmpty) {
+        print("No documents found in allFacilityStaffs.");
+      } else {
+        print("allFacilityStaffs ==== $allFacilityStaffs");
+      }
+
+      await IsarService().cleanFacilityStaffListCollection();
+      await IsarService().PsychologicalMetricsCollection().then((_) async {
+        await fetchPsychologicalMetricsAndSaveToIsar(isar);
+      });
+
+      for (var doc in allFacilityStaffs.docs) {
+        final staffData = doc.data() as Map<String, dynamic>?;  // Explicitly cast to Map<String, dynamic>
+        if (staffData == null) {
+          print("No staff data found.");
+          return;  // Exit early if no staff data found
+        }
+
+
+        // Check if required fields are available before using them
+        final lastName = staffData['lastName'];
+        final firstName = staffData['firstName'];
+        final state = staffData['state'];
+        final location = staffData['location'];
+        final id = staffData['id'];
+        final designation = staffData['designation'];
+
+        if (lastName == null || state == null || location == null || id == null || designation == null) {
+          print("Missing required staff data.");
+          continue; // Skip this iteration if any essential field is missing
+        }
+
+        final attendance = FacilityStaffModel()
+          ..name = lastName+" "+firstName
+          ..state = state
+          ..facilityName = location
+          ..userId = id
+          ..designation = designation;
+
+        await IsarService().saveFacilityStaffList(attendance);
+      }
+
+
 
       if (lastUpdateDateDoc.exists) {
-        // Get the data from the document
         final data = lastUpdateDateDoc.data();
-
-
         if (data != null && data.containsKey('LastUpdateDate')) {
-          // Safely extract the timestamp and convert to DateTime
           final timestamp = data['LastUpdateDate'] as Timestamp;
           final LastUpdateDate = timestamp.toDate();
-
           print("appVersionDate ====${LastUpdateDate}");
 
-          if (LastUpdateDate.isAfter(
-              getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
+          if (LastUpdateDate.isAfter(getlastUpdateDate[0].lastUpdateDate!) ||
+              DateFormat('dd/MM/yyyy').format(LastUpdateDate) ==
+                  DateFormat('dd/MM/yyyy').format(DateTime.now())) {
             Fluttertoast.showToast(
               msg: "Updating Local Database!",
               toastLength: Toast.LENGTH_LONG,
@@ -861,6 +968,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                               await fetchLastUpdateDateAndInsertIntoIsar(IsarService());
                               await fetchProjectAndInsertIntoIsar(IsarService());
                               await fetchAppVersionAndInsertIntoIsar(IsarService());
+
                               Fluttertoast.showToast(
                                 msg: "Updates on Database Completed",
                                 toastLength: Toast.LENGTH_LONG,
@@ -888,7 +996,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
               textColor: Colors.white,
               fontSize: 16.0,
             );
-          }else{
+          } else {
             Fluttertoast.showToast(
               msg: "No Recent updates..",
               toastLength: Toast.LENGTH_LONG,
@@ -899,7 +1007,6 @@ class _UserDashBoardState extends State<UserDashBoard> {
               fontSize: 16.0,
             );
           }
-          // print("Last appVersionDate saved: $appVersionDate");
         } else {
           print("Document does not contain 'LastUpdateDate' field.");
         }
@@ -908,18 +1015,15 @@ class _UserDashBoardState extends State<UserDashBoard> {
       }
 
       if (lastUpdateDatebio.exists) {
-        // Get the data from the document
         final data = lastUpdateDatebio.data();
-
-
         if (data != null && data.containsKey('lastUpdateDate')) {
-          // Safely extract the timestamp and convert to DateTime
           final timestamp = data['lastUpdateDate'] as Timestamp;
           final LastUpdateDate = timestamp.toDate();
           final isRemoteDelete = data['isRemoteDelete'];
 
-
-          if (LastUpdateDate.isAfter(getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
+          if (LastUpdateDate.isAfter(getlastUpdateDate[0].lastUpdateDate!) ||
+              DateFormat('dd/MM/yyyy').format(LastUpdateDate) ==
+                  DateFormat('dd/MM/yyyy').format(DateTime.now())) {
             Fluttertoast.showToast(
               msg: "Updating Local Database!",
               toastLength: Toast.LENGTH_LONG,
@@ -955,7 +1059,6 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                 textColor: Colors.white,
                                 fontSize: 16.0,
                               );
-
                             });
                           });
                         });
@@ -974,8 +1077,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
               textColor: Colors.white,
               fontSize: 16.0,
             );
-          }
-          else{
+          } else {
             Fluttertoast.showToast(
               msg: "No Recent updates..",
               toastLength: Toast.LENGTH_LONG,
@@ -987,10 +1089,9 @@ class _UserDashBoardState extends State<UserDashBoard> {
             );
           }
 
-          // Remote Delete once there is internet);
-          if(isRemoteDelete == true){
+          if (isRemoteDelete == true) {
             Fluttertoast.showToast(
-              msg: "Clearing Database..",
+              msg: "Deleting Facility Staff..",
               toastLength: Toast.LENGTH_LONG,
               backgroundColor: Colors.black54,
               gravity: ToastGravity.BOTTOM,
@@ -998,20 +1099,23 @@ class _UserDashBoardState extends State<UserDashBoard> {
               textColor: Colors.white,
               fontSize: 16.0,
             );
-            await IsarService().cleanDB();
+           // await IsarService().deleteFacilityStaff(snap.docs[0].id);
+            Fluttertoast.showToast(
+              msg: "Deleting Facility Staff Completed..",
+              toastLength: Toast.LENGTH_LONG,
+              backgroundColor: Colors.black54,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
           }
-
-        } else {
-          print("Document does not contain 'lastUpdateDate' field.");
         }
-      } else {
-        print("Document 'LastUpdateDate' not found.");
       }
-
-    }catch(e){
-      print("Error checking for Updates: $e..");
+    } catch (e) {
+      print('Error during update process: $e');
       Fluttertoast.showToast(
-        msg: "Error checking for Updates: $e..",
+        msg: "Error during update: $e",
         toastLength: Toast.LENGTH_LONG,
         backgroundColor: Colors.black54,
         gravity: ToastGravity.BOTTOM,
@@ -1019,13 +1123,11 @@ class _UserDashBoardState extends State<UserDashBoard> {
         textColor: Colors.white,
         fontSize: 16.0,
       );
-
     }
-
-
-
-
   }
+
+
+
 
   checkForIsSyncedForBio() async {
 

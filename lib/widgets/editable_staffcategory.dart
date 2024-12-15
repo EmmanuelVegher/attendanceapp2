@@ -50,8 +50,8 @@ class _EditableStaffCategoryTileState extends State<EditableStaffCategoryTile> {
         } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           return DropdownButtonFormField<String>(
             value: _selectedStaffCategory, // Start with no selected value
-            hint: Text('Select Staff Category'),
-            decoration: InputDecoration(
+            hint: const Text('Select Staff Category'),
+            decoration: const InputDecoration(
               labelText: null,
             ),
             items: snapshot.data!.map((item) {
@@ -83,7 +83,7 @@ class _EditableStaffCategoryTileState extends State<EditableStaffCategoryTile> {
 
   Widget buildEditIcon() {
     return IconButton(
-      icon: Icon(Icons.edit),
+      icon: const Icon(Icons.edit),
       onPressed: () {
         setState(() {
           _isEditing = true;
@@ -102,7 +102,7 @@ class _EditableStaffCategoryTileState extends State<EditableStaffCategoryTile> {
           });
         }
       },
-      child: Text("Save"),
+      child: const Text("Save"),
     );
   }
 }

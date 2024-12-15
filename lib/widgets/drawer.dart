@@ -1,17 +1,11 @@
-import 'package:attendanceapp/Pages/Attendance/attendance_clock.dart';
+
 import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
 import 'package:attendanceapp/Pages/Attendance/button.dart';
-import 'package:attendanceapp/Pages/Attendance/calendar_screen.dart';
 import 'package:attendanceapp/Pages/Dashboard/user_dashboard.dart';
 import 'package:attendanceapp/Pages/OffDays/days_off.dart';
-import 'package:attendanceapp/Pages/OffDays/days_off_manager.dart';
 import 'package:attendanceapp/Pages/forgot_password.dart';
 import 'package:attendanceapp/Pages/login_page.dart';
 import 'package:attendanceapp/Pages/login_page_superUser.dart';
-import 'package:attendanceapp/Pages/profile_page.dart';
-import 'package:attendanceapp/face_recognition/face_recognition_home.dart';
-import 'package:attendanceapp/mapbox/screens/offices_map.dart';
-import 'package:attendanceapp/model/bio_model.dart';
 import 'package:attendanceapp/services/database_adapter.dart';
 import 'package:attendanceapp/services/hive_service.dart';
 import 'package:attendanceapp/services/isar_service.dart';
@@ -20,14 +14,20 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
 import 'package:refreshable_widget/refreshable_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Pages/Leave_Request/Pending_Approvals.dart';
 import '../Pages/Leave_Request/out_of_office_request_page.dart';
 import '../Pages/Timesheet/pending_timesheet.dart';
 import '../Pages/Timesheet/timesheet.dart';
+import '../Pages/performance_metrics/best_player_page.dart';
+import '../Pages/performance_metrics/psychological_metrics_page.dart';
+import '../Pages/upload_signature.dart';
+import '../Tasks/task_manager_homepage.dart';
+import '../google_map/google_map.dart';
+import '../mapbox/screens/office_management.dart';
+import '../survey/team_survey_page.dart';
 import 'my_app.dart';
 
 Widget drawer(
@@ -35,6 +35,10 @@ Widget drawer(
   IsarService service,
 ) {
   final IsarService service = IsarService();
+  final isar = Isar.getInstance();
+  if (isar == null) {
+    throw Exception("Isar instance is null!  Make sure it's opened.");
+  }
 
   //final DataBaseService _dataBaseService = DataBaseService();
   double _drawerIconSize = 24;
@@ -175,7 +179,7 @@ Widget drawer(
             height: 1,
           ),
           ListTile(
-            leading: Icon(Icons.person_add_alt_1,
+            leading: Icon(Icons.pending,
                 size: _drawerIconSize, color: Colors.red),
             title: Text(
               'Pending Approval',
@@ -191,15 +195,16 @@ Widget drawer(
             },
           ),
 
+
           Divider(
             color: Colors.grey,
             height: 1,
           ),
           ListTile(
-            leading: Icon(Icons.person_add_alt_1,
+            leading: Icon(Icons.holiday_village_sharp,
                 size: _drawerIconSize, color: Colors.red),
             title: Text(
-              'Leave Request',
+              'Out of Office Leave Request',
               style: TextStyle(
                   fontSize: _drawerFontSize,
                   color: Get.isDarkMode ? Colors.white : Colors.brown),
@@ -211,6 +216,110 @@ Widget drawer(
               );
             },
           ),
+
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+          ListTile(
+            leading: Icon(Icons.task,
+                size: _drawerIconSize, color: Colors.brown),
+            title: Text(
+              'Task Management',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TaskManagerHomePage()),
+              );
+            },
+          ),
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.local_post_office,
+              size: _drawerIconSize,
+              color: Colors.blue,
+            ),
+            title: Text(
+              'Team Work Survey',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TeamSurveyPage(
+
+                    )),
+              );
+            },
+          ),
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+
+          ListTile(
+            leading: Icon(
+              Icons.local_post_office,
+              size: _drawerIconSize,
+              color: Colors.blue,
+            ),
+            title: Text(
+              'Psychological Survey',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => PsychologicalMetricsPage(
+                      isar: isar,
+
+                    )),
+              );
+            },
+          ),
+
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+
+          ListTile(
+            leading: Icon(
+              Icons.local_post_office,
+              size: _drawerIconSize,
+              color: Colors.blue,
+            ),
+            title: Text(
+              'Metrics Evaluation',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => BestPlayerChartPage(
+
+                    )),
+              );
+            },
+          ),
+
 
 
           Divider(
@@ -224,7 +333,7 @@ Widget drawer(
               color: Colors.blue,
             ),
             title: Text(
-              'Out Of Office',
+              'Office Management',
               style: TextStyle(
                   fontSize: _drawerFontSize,
                   color: Get.isDarkMode ? Colors.white : Colors.brown),
@@ -233,8 +342,8 @@ Widget drawer(
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => DaysOffPage(
-                          service: IsarService(),
+                    builder: (context) => GoogleMapPage(
+
                         )),
               );
             },
@@ -264,30 +373,30 @@ Widget drawer(
             },
           ),
 
-          Divider(
-            color: Colors.grey,
-            height: 1,
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.access_time,
-              size: _drawerIconSize,
-              color: Colors.blue,
-            ),
-            title: Text(
-              'Pending TimeSheet',
-              style: TextStyle(
-                  fontSize: _drawerFontSize,
-                  color: Get.isDarkMode ? Colors.white : Colors.brown),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => PendingTimesheetsScreen()),
-              );
-            },
-          ),
+          // Divider(
+          //   color: Colors.grey,
+          //   height: 1,
+          // ),
+          // ListTile(
+          //   leading: Icon(
+          //     Icons.access_time,
+          //     size: _drawerIconSize,
+          //     color: Colors.blue,
+          //   ),
+          //   title: Text(
+          //     'Pending TimeSheet',
+          //     style: TextStyle(
+          //         fontSize: _drawerFontSize,
+          //         color: Get.isDarkMode ? Colors.white : Colors.brown),
+          //   ),
+          //   onTap: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //           builder: (context) => PendingTimesheetsScreen()),
+          //     );
+          //   },
+          // ),
 
           Divider(
             color: Colors.grey,
@@ -337,6 +446,35 @@ Widget drawer(
                     builder: (context) => LoginPageSuperUser(
                           service: IsarService(),
                         )),
+              );
+
+              //_showBottomSheet2(context);
+            },
+          ),
+
+          Divider(
+            color: Colors.grey,
+            height: 1,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.draw,
+              size: _drawerIconSize,
+              color: Colors.blue,
+            ),
+            title: Text(
+              'Upload Signature',
+              style: TextStyle(
+                  fontSize: _drawerFontSize,
+                  color: Get.isDarkMode ? Colors.white : Colors.brown),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => UploadSignaturePage(
+
+                    )),
               );
 
               //_showBottomSheet2(context);

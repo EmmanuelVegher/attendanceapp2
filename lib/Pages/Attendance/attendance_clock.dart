@@ -397,7 +397,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
 
   getLocationStatus() async {
     Timer.periodic(const Duration(seconds: 1), (timer) async {
-      isLocationTurnedOn = (await LocationService().getLocationStatus())!;
+      isLocationTurnedOn = (await LocationService().getLocationStatus());
       //log("Location status ====== $isLocationTurnedOn");
 
       if (!isLocationTurnedOn && isAlertSet == false) {
@@ -2628,7 +2628,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                     isAlertSet = false;
                   });
                   isLocationTurnedOn =
-                      (await LocationService().getLocationStatus())!;
+                      (await LocationService().getLocationStatus());
                   //     await InternetConnectionChecker().hasConnection;
                   if (!isLocationTurnedOn) {
                     showDialogBox();

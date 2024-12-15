@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:attendanceapp/Pages/Attendance/button.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';

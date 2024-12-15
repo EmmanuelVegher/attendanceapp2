@@ -1,17 +1,14 @@
 import 'dart:developer';
 
-import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
 import 'package:attendanceapp/Pages/Attendance/attendance_local_db.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
 import 'package:attendanceapp/model/user_model.dart';
 import 'package:attendanceapp/services/isar_service.dart';
-import 'package:attendanceapp/services/location_services.dart';
 import 'package:attendanceapp/widgets/drawer.dart';
 import 'package:attendanceapp/widgets/drawer2.dart';
 import 'package:attendanceapp/widgets/drawer3.dart';
 import 'package:attendanceapp/widgets/input_field.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

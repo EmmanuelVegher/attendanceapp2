@@ -3,32 +3,18 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:attendanceapp/Pages/Dashboard/super_admin_dashboard.dart';
-import 'package:attendanceapp/Pages/auth_exceptions.dart';
-import 'package:attendanceapp/Pages/forgot_password.dart';
-import 'package:attendanceapp/Pages/register_page.dart';
-import 'package:attendanceapp/Pages/routing.dart';
-import 'package:attendanceapp/Pages/verify_email.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
-import 'package:attendanceapp/model/bio_model.dart';
-import 'package:attendanceapp/model/user_model.dart';
 import 'package:attendanceapp/services/database_adapter.dart';
 import 'package:attendanceapp/services/hive_service.dart';
 import 'package:attendanceapp/services/isar_service.dart';
-import 'package:attendanceapp/widgets/constants.dart';
 import 'package:attendanceapp/widgets/header_widget.dart';
-import 'package:attendanceapp/widgets/progress_dialog.dart';
-import 'package:attendanceapp/widgets/show_error_dialog.dart';
 import 'package:attendanceapp/widgets/theme_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPageSuperUser extends StatefulWidget {

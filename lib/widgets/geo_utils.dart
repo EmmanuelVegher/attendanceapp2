@@ -20,7 +20,7 @@ class GeoUtils {
 
     // Convert distance to meters
     distance *= 1000;
-    print('Distance between the two points: $distance meters');
+   // log('Distance between the two points: $distance meters');
     return distance;
   }
 
@@ -70,7 +70,7 @@ class GeoUtils {
     // Convert distance to meters
     distance *= 1000;
 
-    print(distance);
+    //print(distance);
     return distance;
   }
 

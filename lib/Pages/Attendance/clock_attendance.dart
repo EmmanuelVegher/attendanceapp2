@@ -1,44 +1,29 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:action_slider/action_slider.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gps_connectivity/gps_connectivity.dart';
 import 'package:location/location.dart' as locationPkg;
 import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
-import 'package:attendanceapp/Pages/auth_exceptions.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
 import 'package:attendanceapp/model/bio_model.dart';
 import 'package:attendanceapp/model/locationmodel.dart';
-import 'package:attendanceapp/model/statemodel.dart';
-import 'package:attendanceapp/services/database_adapter.dart';
-import 'package:attendanceapp/services/hive_service.dart';
 import 'package:attendanceapp/services/isar_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:get/get.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:location/location.dart'; // Use location package for location updates
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
-import 'package:path/path.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../Pages/Dashboard/admin_dashboard.dart';
 import '../../Pages/Dashboard/user_dashboard.dart';
-import '../../main.dart';
-import '../../model/attendance.dart';
 import '../../model/user_model.dart';
 import '../../services/location_services.dart';
 import '../../widgets/drawer.dart';
@@ -46,11 +31,7 @@ import '../../widgets/drawer2.dart';
 import '../../widgets/geo_utils.dart';
 import '../../widgets/header_widget.dart';
 import '../../widgets/input_field.dart';
-import '../../widgets/my_slider_widget.dart';
-import '../../widgets/show_error_dialog.dart';
 import '../OffDays/days_off.dart';
-import '../OffDays/update_attendance.dart';
-import 'button.dart';
 
 class GeofenceModel {
   final String name;
@@ -164,23 +145,27 @@ class ClockAttendance extends StatelessWidget {
               ,Container(
                 alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.only(top: 32),
+                width: MediaQuery.of(context).size.width * 1,
+                height: MediaQuery.of(context).size.height * 0.65,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                   //  Text("Text Lat and long = ${UserModel.lat} and ${UserModel.long}"),
-                    Text(
+                    IntrinsicWidth(child: Text(
                       "Today's Status:",
                       style: TextStyle(
                         fontFamily: "NexaBold",
                         fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.030),
                       ),
-                    ),
+                    ),),
                     SizedBox(height: 10), // Spacing between status and coordinates
                     Obx(() =>
                         Card(
-                          elevation: 3,
+
+                          elevation: 4,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           child: Container(
+
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
@@ -198,61 +183,61 @@ class ClockAttendance extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                IntrinsicWidth(child: Text(
                                   "Geo-Cordinates Information:",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
                                     fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.030),
                                     color: Colors.blueGrey, // Change color to blueGrey
                                   ),
-                                ),
+                                ),),
                                 SizedBox(height: 10),
                                 // ... Add other location-related Obx Text widgets here ...
 
-                                Text(
+                            IntrinsicWidth(child:Text(
                                   "GPS is: ${controller.isGpsEnabled.value ? 'On' : 'Off'}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.023),
                                   ),
-                                ),
+                                ),),
                                 SizedBox(height: 10), // Spacing between status and coordinates
 
-                                Text(
+                            IntrinsicWidth(child: Text(
                                   "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.023),
                                   ),
-                                ),
+                                ),),
                                 SizedBox(height: 10), // Spacing between status and coordinates
 
-                                Text(
+                            IntrinsicWidth(child: Text(
                                   "Coordinates Accuracy: ${controller.accuracy.value}, Altitude: ${controller.altitude.value} , Speed: ${controller.speed.value}, Speed Accuracy: ${controller.speedAccuracy.value}, Location Data Timestamp: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(controller.time.value.toInt()))} , Is Location Mocked?: ${controller.isMock.value}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.023),
                                   ),
-                                ),
+                                ),),
                                 SizedBox(height: 10),
 
-                                Text(
+                            IntrinsicWidth(child:Text(
                                   "Current State: ${controller.administrativeArea.value}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.023),
                                   ),
-                                ),
+                                ),),
 
                                 SizedBox(height: 10),
 
-                            Obx(() => Text(
+                            IntrinsicWidth(child: Obx(() => Text(
                                   "Current Location: ${controller.location.value}",
                                   style: TextStyle(
                                     fontFamily: "NexaBold",
-                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.025),
+                                    fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.023),
                                   ),
-                                ),),
+                                ),),),
                                   //:CircularProgressIndicator()
 
 
@@ -2213,14 +2198,14 @@ class ClockAttendanceController extends GetxController {
               );
             }
           }else
-          if (lastAttend?.date != currentDate) {
+          if (lastAttend.date != currentDate) {
             // final time = isDeviceConnected
             //     ? DateTime.now().add(Duration(
             //     milliseconds: await NTP.getNtpOffset(
             //         localTime: DateTime.now(), lookUpAddress: "time.google.com")))
             //     : DateTime.now();
             final clockInDateTime = DateFormat('dd-MMMM-yyyy hh:mm a').parse(
-                '${lastAttend!.date} ${lastAttend.clockIn}');
+                '${lastAttend.date} ${lastAttend.clockIn}');
 
             final now = DateTime.now();
             final difference = now.difference(clockInDateTime);
@@ -2240,7 +2225,7 @@ class ClockAttendanceController extends GetxController {
               false; // Set loading state to false after handling the error
 
             } else {
-              if (lastAttend?.clockIn ==
+              if (lastAttend.clockIn ==
                   DateFormat('hh:mm a').format(DateTime.now())) {
                 // Prevent clock-out if time is the same as clock-in
                 Fluttertoast.showToast(
@@ -2375,7 +2360,7 @@ class ClockAttendanceController extends GetxController {
               false; // Set loading state to false after handling the error
 
             } else {
-              if (lastAttend?.clockIn ==
+              if (lastAttend.clockIn ==
                   DateFormat('hh:mm a').format(DateTime.now())) {
                 // Prevent clock-out if time is the same as clock-in
                 Fluttertoast.showToast(
@@ -2732,26 +2717,7 @@ class ClockAttendanceController extends GetxController {
     ),
   );
 
-  // showDialogBox2(BuildContext context) => showCupertinoDialog<String>( // Add BuildContext parameter
-  //   context: context, // Pass the same context
-  //   builder: (BuildContext builderContext) => CupertinoAlertDialog( // You can use builderContext here
-  //     // ...
-  //     actions: <Widget>[
-  //       TextButton(
-  //         onPressed: () async {
-  //           Get.back();
-  //           isAlertSet2.value = false;
-  //           isLocationPermissionGranted.value = await LocationService().getPermissionStatus();
-  //           if (isLocationPermissionGranted.value == LocationPermission.denied ||
-  //               isLocationPermissionGranted.value == LocationPermission.deniedForever) {
-  //             showDialogBox2(context); // Pass the context here
-  //           }
-  //         },
-  //         child: const Text("OK"),
-  //       ),
-  //     ],
-  //   ),
-  // );
+
 
   showDialogBox2() => showCupertinoDialog<String>(
   context: Get.context!, // Retrieve BuildContext from Get

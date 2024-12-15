@@ -9,6 +9,7 @@ class RemainingLeaveModel {
   int? maternityLeaveBalance;
   int? annualLeaveBalance;
   int? holidayLeaveBalance;
+  DateTime? dateUpdated;
 
 
   Map<String, dynamic> toJson() {
@@ -18,6 +19,7 @@ class RemainingLeaveModel {
       'maternityLeaveBalance': maternityLeaveBalance,
       'annualLeaveBalance': annualLeaveBalance,
       'holidayLeaveBalance': holidayLeaveBalance,
+      'dateUpdated':dateUpdated
 
     };
   }

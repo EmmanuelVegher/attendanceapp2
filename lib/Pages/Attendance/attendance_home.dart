@@ -2,13 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
-import 'package:attendanceapp/Pages/Attendance/attendance_clock.dart';
 import 'package:attendanceapp/Pages/Attendance/button.dart';
 import 'package:attendanceapp/Pages/Attendance/calendar_screen.dart';
 import 'package:attendanceapp/Pages/Attendance/clock_attendance.dart';
-import 'package:attendanceapp/Pages/Attendance/profile_screen.dart';
-import 'package:attendanceapp/Pages/backup_and_restore/AES_encryption.dart';
 import 'package:attendanceapp/api/Attendance_gsheet_api.dart';
 import 'package:attendanceapp/model/attendance_gsheet_model.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
@@ -53,7 +49,6 @@ import '../../widgets/constants.dart';
 import '../../widgets/geo_utils.dart';
 import '../profile_page.dart';
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 
 import 'attendance_report.dart';
 
@@ -100,7 +95,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
   SourceType _sourceType = SourceType.photoLibrary;
   bool _allowEditing = false;
   File? _currentFile;
-  String? _savedFilePath;
+
   bool _localOnly = false;
   bool _copyFileToCacheDir = true;
   bool isAppCheckShown = false;
@@ -1741,10 +1736,10 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
       List<BioModel> getAttendanceForBio =
       await widget.service.getBioInfoWithUserBio();
 
-      QuerySnapshot snap = await firestore
-          .collection("Staff")
-          .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
-          .get();
+      // QuerySnapshot snap = await firestore
+      //     .collection("Staff")
+      //     .where("id", isEqualTo: getAttendanceForBio[0].firebaseAuthId)
+      //     .get();
 
 
 

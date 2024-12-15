@@ -10,6 +10,9 @@
     <uses-feature  android:name="android.hardware.camera"  android:required="true"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <!-- For apps with targetSDK 31 (Android 12) and newer -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     
@@ -52,6 +55,9 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyBW6PsaCWNq2iV01quSEyXU4JUF3-bEnKk" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

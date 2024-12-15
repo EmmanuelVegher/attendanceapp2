@@ -208,6 +208,8 @@
 //   }
 // }
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -257,7 +259,7 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
       try {
         attendanceDate = DateTime.parse(attendance.date ?? '');
       } catch (e) {
-        print("Error parsing date: $e");
+        log("Error parsing date: $e");
         return false;
       }
 
@@ -286,7 +288,7 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
       }
       catch (e)
       {
-        print("Error parsing date");
+        log("Error parsing date");
         return false;
       }
       return attendance.durationWorked == category &&
@@ -478,10 +480,10 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
                   Container(
                     width: 150, // Keep the fixed width if you need it
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     color: Colors.white,
                     child: projectNames.isEmpty
-                        ? Text('No projects found')
+                        ? const Text('No projects found')
                         : DropdownButton<String>(
                       value: selectedProjectName,
                       isExpanded: true, // This will expand the dropdown to the Container's width
@@ -501,7 +503,7 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
                           _loadAttendanceData();
                         });
                       },
-                      hint: Text('Select Project'),
+                      hint: const Text('Select Project'),
                     ),
                   ),
 
@@ -557,7 +559,7 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(8.0),
                     color: Colors.grey.shade200,
-                    child: Column(children: const [
+                    child: const Column(children: [
                       Text('Name of Staff',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       SizedBox(height: 20.0),
@@ -569,7 +571,7 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
                   Container(
                     width: 300,
                     padding: const EdgeInsets.all(8.0),
-                    child: Column(children: const [
+                    child: const Column(children: [
                       Text('Facility Supervisor Name',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       SizedBox(height: 20.0),
@@ -585,7 +587,7 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
                       const Text('Date',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 20.0),
-                      Text("${formattedDate}",
+                      Text(formattedDate,
                           style: const TextStyle(fontWeight: FontWeight.bold))
                     ]),
                   )
@@ -599,7 +601,7 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(8.0),
                     color: Colors.grey.shade200,
-                    child: Column(children: const [
+                    child: const Column(children: [
                       Text('User Name',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       SizedBox(height: 8.0),

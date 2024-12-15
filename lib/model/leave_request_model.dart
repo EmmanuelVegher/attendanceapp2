@@ -15,6 +15,17 @@ class LeaveRequestModel {
   String? selectedSupervisor;
   String? selectedSupervisorEmail;
   int? leaveDuration;
+  String? firstName;
+  String? lastName;
+  String? staffCategory;
+  String? staffState;
+  String? staffLocation;
+  String? staffEmail;
+  String? staffPhone;
+  String? staffDepartment;
+  String? staffDesignation;
+  String? reasonsForRejectedLeave;
+
 
 
 
@@ -29,6 +40,19 @@ class LeaveRequestModel {
       'selectedSupervisor': selectedSupervisor,
       'selectedSupervisorEmail': selectedSupervisorEmail,
       'leaveDuration':leaveDuration,
+      'firstName':firstName,
+      'lastName':lastName,
+      'staffCategory':staffCategory,
+      'staffState':staffState,
+      'staffLocation':staffLocation,
+      'staffEmail':staffEmail,
+      'staffPhone':staffPhone,
+      'staffDepartment':staffDepartment,
+      'staffDesignation':staffDesignation,
+      'reasonsForRejectedLeave':reasonsForRejectedLeave
+
+
+
 
 
     };

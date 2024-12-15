@@ -26,6 +26,7 @@ class BioModel {
   bool? isRemoteDelete;
   bool? isRemoteUpdate;
   DateTime? lastUpdateDate;
+  String? signatureLink;
 
   BioModel({
     this.firstName,
@@ -48,6 +49,7 @@ class BioModel {
     this.isRemoteDelete,
     this.isRemoteUpdate,
     this.lastUpdateDate,
+    this.signatureLink
   });
 
   factory BioModel.fromJson(json) {
@@ -72,6 +74,7 @@ class BioModel {
       isRemoteDelete:json['isRemoteDelete'],
       isRemoteUpdate:json['isRemoteUpdate'],
       lastUpdateDate:json['lastUpdateDate'],
+        signatureLink:json['signatureLink']
     );
   }
 

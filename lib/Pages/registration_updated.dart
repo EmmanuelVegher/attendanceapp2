@@ -63,6 +63,8 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
   String facilitydesignationName = "";
   String projectName = "";
   String staffingCategory = "";
+  String staffGender = "";
+  String staffMaritalStatus = "";
   bool? isVeriffied;
   DatabaseAdapter adapter = HiveService();
 
@@ -289,6 +291,28 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
     return staffCategory.map((staffCategory) => DropdownMenuItem<String>(
       value: staffCategory,
       child: Text(staffCategory!),
+    )).toList();
+  }
+
+  Future<List<DropdownMenuItem<String>>> _fetchGenderFromIsar() async {
+    // Query Isar database for designations based on the selected department
+    List<String?> gender = await IsarService().getGenderFromIsar();
+
+    // Convert the designations list to DropdownMenuItem list
+    return gender.map((gender) => DropdownMenuItem<String>(
+      value: gender,
+      child: Text(gender!),
+    )).toList();
+  }
+
+  Future<List<DropdownMenuItem<String>>> _fetchMaritalStatusFromIsar() async {
+    // Query Isar database for designations based on the selected department
+    List<String?> maritalStatus = await IsarService().getMaritalStatusFromIsar();
+
+    // Convert the designations list to DropdownMenuItem list
+    return maritalStatus.map((maritalStatus) => DropdownMenuItem<String>(
+      value: maritalStatus,
+      child: Text(maritalStatus!),
     )).toList();
   }
 
@@ -731,6 +755,170 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                           ],
                         ),
 
+                        //Gender
+                        FutureBuilder<List<DropdownMenuItem<String>>>(
+                          future: _fetchGenderFromIsar(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+                              // Check if facilityStateName is in the list of dropdown values
+                              String? selectedGender =
+                              // snapshot.data!.any((item) => item.value == value5)
+                              //     ? value5
+                              //     :
+                              null;
+
+                              // If there's no valid state selected, set the first item as the default
+                              if (selectedGender == null) {
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  setState(() {
+                                    //facilityStateName = snapshot.data!.first.value!;
+                                    // facilityStateName = "Select your state";
+                                  });
+                                });
+                              }
+
+                              return MyInputField(
+                                title: "Gender",
+                                hint: "",
+                                widget: Container(
+                                  width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                  child: DropdownButtonFormField<String>(
+                                    decoration: InputDecoration(
+                                      iconColor: Colors.blue,
+                                      labelText: "",
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+
+                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                    dropdownColor: Colors.white,
+                                    elevation: 4,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontFamily: "NexaBold",
+                                    ),
+                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                      value: item.value,
+                                      child: SizedBox(
+                                        width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                        child: Text(
+                                          (item.child as Text).data!,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    )).toList(),
+                                    isExpanded: true, // Allow dropdown to expand and use available width
+                                    value: selectedGender,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        staffGender = value!;
+                                        disableddropdown = false;
+                                      });
+                                    },
+
+                                  ),
+                                ),
+                              );
+
+
+
+                            } else {
+                              return const CircularProgressIndicator();
+                            }
+                          },
+                        ),
+
+                        //Marital Status
+                        //Gender
+                        FutureBuilder<List<DropdownMenuItem<String>>>(
+                          future: _fetchMaritalStatusFromIsar(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+                              // Check if facilityStateName is in the list of dropdown values
+                              String? selectedMaritalStatus =
+                              // snapshot.data!.any((item) => item.value == value5)
+                              //     ? value5
+                              //     :
+                              null;
+
+                              // If there's no valid state selected, set the first item as the default
+                              if (selectedMaritalStatus == null) {
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  setState(() {
+                                    //facilityStateName = snapshot.data!.first.value!;
+                                    // facilityStateName = "Select your state";
+                                  });
+                                });
+                              }
+
+                              return MyInputField(
+                                title: "Marital Status",
+                                hint: "",
+                                widget: Container(
+                                  width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
+                                  child: DropdownButtonFormField<String>(
+                                    decoration: InputDecoration(
+                                      iconColor: Colors.blue,
+                                      labelText: "",
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+
+                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                    dropdownColor: Colors.white,
+                                    elevation: 4,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontFamily: "NexaBold",
+                                    ),
+                                    items: snapshot.data!.map((item) => DropdownMenuItem<String>(
+                                      value: item.value,
+                                      child: SizedBox(
+                                        width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.8), // Control dropdown item width based on screen size
+                                        child: Text(
+                                          (item.child as Text).data!,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    )).toList(),
+                                    isExpanded: true, // Allow dropdown to expand and use available width
+                                    value: selectedMaritalStatus,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        staffMaritalStatus = value!;
+                                        disableddropdown = false;
+                                      });
+                                    },
+
+                                  ),
+                                ),
+                              );
+
+
+
+                            } else {
+                              return const CircularProgressIndicator();
+                            }
+                          },
+                        ),
+
+                        //Staff Category
                         FutureBuilder<List<DropdownMenuItem<String>>>(
                           future: _fetchStaffCategoryFromIsar(),
                           builder: (context, snapshot) {
@@ -3411,6 +3599,8 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   String password = _passwordControl.text;
                                   String supervsorName = value5 == "Facility Supervisor"?_supervisorNameControl.text:supervisorName;
                                   String supervsorEmail = value5 == "Facility Supervisor"?_supervisorEmailControl.text:supervisorEmail;
+                                  String gender = staffGender;
+                                  String maritalStatus = staffMaritalStatus;
 
                                   if(firstName == "" ||lastName == "" ||emailAddress == "" ||mobile == "" ||staffCategory == "" ||state == "" ||location == "" ||department == "" ||designatn == "" ||project == "" ||role == "" ||password == "" ||supervsorName == "" ||supervsorEmail == ""){
                                     Fluttertoast.showToast(
@@ -3467,6 +3657,8 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       'isRemoteDelete':false,
                                       'isRemoteUpdate':false,
                                       'lastUpdateDate':DateTime.now(),
+                                      'gender':gender,
+                                      'maritalStatus': maritalStatus,
                                     }).then((value) async {
 
                                       try{}catch(e){}
@@ -3478,6 +3670,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       //String storagePath = "profile_pics/${DateTime.now().millisecondsSinceEpoch}.jpg";
                                       String storagePath =
                                           "profile_pics/${firstName.toLowerCase()}_${lastName.toLowerCase()}_${user?.uid}_profilepic.jpg";
+
 
 
                                       if (images.isNotEmpty) {

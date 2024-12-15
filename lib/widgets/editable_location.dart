@@ -50,8 +50,8 @@ class _EditableLocationTileState extends State<EditableLocationTile> {
         } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           return DropdownButtonFormField<String>(
             value: _selectedLocation, // Start with no selected value
-            hint: Text('Select Location'),
-            decoration: InputDecoration(
+            hint: const Text('Select Location'),
+            decoration: const InputDecoration(
               labelText: null,
             ),
             items: snapshot.data!.map((item) {
@@ -83,7 +83,7 @@ class _EditableLocationTileState extends State<EditableLocationTile> {
 
   Widget buildEditIcon() {
     return IconButton(
-      icon: Icon(Icons.edit),
+      icon: const Icon(Icons.edit),
       onPressed: () {
         setState(() {
           _isEditing = true;
@@ -102,7 +102,7 @@ class _EditableLocationTileState extends State<EditableLocationTile> {
           });
         }
       },
-      child: Text("Save"),
+      child: const Text("Save"),
     );
   }
 }

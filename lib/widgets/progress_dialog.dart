@@ -12,7 +12,7 @@ class ProgressDialog extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.all(0.0),
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -26,18 +26,18 @@ class ProgressDialog extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 6.0,
               ),
-              CircularProgressIndicator(
+              const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 26.0,
               ),
               Text(
                 message,
-                style: TextStyle(color: Colors.white, fontFamily: "NexaBold"),
+                style: const TextStyle(color: Colors.white, fontFamily: "NexaBold"),
               )
             ],
           ),

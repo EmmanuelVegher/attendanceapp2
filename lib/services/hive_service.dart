@@ -35,6 +35,8 @@ class HiveService extends DatabaseAdapter {
     await box.delete('images');
   }
 
+
+
   // Store Signature Images
 
   @override
@@ -66,5 +68,10 @@ class HiveService extends DatabaseAdapter {
   Future<void> clearSignatureImages() async {
     var box = await Hive.openBox('imageSignatureBox');
     await box.delete('imagesSignature');
+  }
+
+  Future<void> clearSignatureImages1() async {
+    var box = await Hive.openBox('imageSignatureBox');
+    await box.clear();
   }
 }

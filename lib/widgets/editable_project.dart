@@ -52,8 +52,8 @@ class _EditableProjectTileState extends State<EditableProjectTile> {
           return
             DropdownButtonFormField<String>(
               value: _selectedProjects,
-              hint: Text('Select Project'),
-              decoration: InputDecoration(
+              hint: const Text('Select Project'),
+              decoration: const InputDecoration(
                 labelText:null,
                 // contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               ),
@@ -87,7 +87,7 @@ class _EditableProjectTileState extends State<EditableProjectTile> {
 
   Widget buildEditIcon() {
     return IconButton(
-      icon: Icon(Icons.edit),
+      icon: const Icon(Icons.edit),
       onPressed: () {
         setState(() {
           _isEditing = true;
@@ -106,7 +106,7 @@ class _EditableProjectTileState extends State<EditableProjectTile> {
           });
         }
       },
-      child: Text("Save"),
+      child: const Text("Save"),
     );
   }
 }

@@ -1,42 +1,23 @@
 import 'dart:async';
-import 'dart:developer';
-import 'dart:typed_data';
-import 'package:attendanceapp/Pages/Dashboard/super_admin_dashboard.dart';
-import 'package:attendanceapp/Pages/auth_exceptions.dart';
+
 import 'package:attendanceapp/Pages/forgot_password.dart';
-import 'package:attendanceapp/Pages/register.dart';
-import 'package:attendanceapp/Pages/register_page.dart';
+
 import 'package:attendanceapp/Pages/registration_updated.dart';
-import 'package:attendanceapp/Pages/routing.dart';
 import 'package:attendanceapp/controllers/login_controller.dart';
-import 'package:attendanceapp/model/attendancemodel.dart';
-import 'package:attendanceapp/model/bio_model.dart';
 import 'package:attendanceapp/model/locationmodel.dart';
 import 'package:attendanceapp/model/statemodel.dart';
-import 'package:attendanceapp/services/database_adapter.dart';
-import 'package:attendanceapp/services/hive_service.dart';
 import 'package:attendanceapp/services/isar_service.dart';
-import 'package:attendanceapp/widgets/constants.dart';
 import 'package:attendanceapp/widgets/header_widget.dart';
-import 'package:attendanceapp/widgets/progress_dialog.dart';
-import 'package:attendanceapp/widgets/show_error_dialog.dart';
 import 'package:attendanceapp/widgets/theme_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../model/appversion.dart';
 import '../model/departmentmodel.dart';
 import '../model/designationmodel.dart';
+import '../model/gendercategory.dart';
+import '../model/marital_status_model.dart';
 import '../model/projectmodel.dart';
 import '../model/reasonfordaysoff.dart';
 import '../model/staffcategory.dart';
@@ -56,13 +37,24 @@ class LoginPage extends StatelessWidget {
             await IsarService().cleanReasonsForDayOffCollection().then((_) async {
               await IsarService().cleanDesignationCollection().then((_) async {
                 await IsarService().cleanDepartmentCollection().then((_) async {
-                  await IsarService().cleanSupervisorCollection().then((_){
-                    fetchDataAndInsertIntoIsar();
-                    fetchSupervisorAndInsertIntoIsar();
-                    fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
-                    fetchProjectAndInsertIntoIsar(IsarService());
-                    fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
-                    fetchStaffCategoryAndInsertIntoIsar(IsarService());
+                  await IsarService().cleanSupervisorCollection().then((_) async {
+                    await IsarService().cleanMaritalStatusCollection().then((_) async {
+                      await IsarService().cleanGenderCollection().then((_) async {
+
+                        await IsarService().cleanProjectCollection().then((_){
+                          fetchDataAndInsertIntoIsar();
+                          fetchSupervisorAndInsertIntoIsar();
+                          fetchDepartmentAndDesignationAndInsertIntoIsar(IsarService());
+                          fetchProjectAndInsertIntoIsar(IsarService());
+                          fetchGenderAndInsertIntoIsar(IsarService());
+                          fetchMaritalStatusAndInsertIntoIsar(IsarService());
+                          fetchReasonsForDaysOffAndInsertIntoIsar(IsarService());
+                          fetchStaffCategoryAndInsertIntoIsar(IsarService());
+                        });
+
+                      });
+                    });
+
                   });
                 });
               });
@@ -70,6 +62,7 @@ class LoginPage extends StatelessWidget {
           });
         });
       });
+
 
     }catch(e){
       Fluttertoast.showToast(
@@ -187,6 +180,53 @@ class LoginPage extends StatelessWidget {
       }
     }
   }
+
+  Future<void> fetchGenderAndInsertIntoIsar(IsarService service) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      print("Fetching Gender collection...");
+      final genderCollection = await firestore.collection('Gender').get();
+      print("Fetched ${genderCollection.docs.length} genders.");
+
+      if (genderCollection.docs.isEmpty) {
+        print("No documents found in the Gender collection.");
+      } else {
+        for (final genderDoc in genderCollection.docs) {
+          final gender = genderDoc.id;
+          print("Processing gender: $gender");
+          final genderSave = GenderCategoryModel()..gender = gender;
+          await service.saveGender(genderSave); // Ensure this method is asynchronous
+          print("Saved gender: $gender");
+        }
+        }
+
+
+    } catch (e) {
+      print("Error in fetchGenderAndInsertIntoIsar: $e");
+    }
+  }
+
+  Future<void> fetchMaritalStatusAndInsertIntoIsar(IsarService service) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      print("Fetching Marital Status collection...");
+      final maritalStatusCollection = await firestore.collection('MaritalStatus').get();
+      print("Fetched ${maritalStatusCollection.docs.length} marital statuses.");
+
+      for (final maritalStatusDoc in maritalStatusCollection.docs) {
+        final maritalStatus = maritalStatusDoc.id;
+        print("Processing marital status: $maritalStatus");
+        final maritalStatusSave = MaritalStatusModel()..maritalStatus = maritalStatus;
+        await service.saveMaritalStatus(maritalStatusSave); // Ensure this method is asynchronous
+        print("Saved marital status: $maritalStatus");
+      }
+    } catch (e) {
+      print("Error in fetchMaritalStatusAndInsertIntoIsar: $e");
+    }
+  }
+
+
+
 
   void fetchProjectAndInsertIntoIsar(IsarService service) async {
     final firestore = FirebaseFirestore.instance;

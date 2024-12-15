@@ -21,7 +21,7 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
               style: TextStyle(
                   color: Colors.brown,
                   fontFamily: "NexaBold",
-                  fontSize: MediaQuery.of(context).size.width / 18,
+                  fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.025),
                   fontWeight: FontWeight.bold),
             ),
           ),
@@ -33,7 +33,7 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
               style: TextStyle(
                   color: Colors.red,
                   fontFamily: "NexaBold",
-                  fontSize: MediaQuery.of(context).size.width / 25,
+                  fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.025),
                   fontWeight: FontWeight.bold),
             ),
 
@@ -212,7 +212,7 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
         child: Text(
           "Out-Of-Office History:",
           style: TextStyle(
-              fontSize: MediaQuery.of(context).size.width * 0.06,
+              fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.025),
               fontWeight: FontWeight.w900,
               color: Colors.brown),
         ),

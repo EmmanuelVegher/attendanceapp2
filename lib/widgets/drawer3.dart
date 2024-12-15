@@ -1,19 +1,11 @@
-import 'package:attendanceapp/Pages/Attendance/attendance_clock.dart';
+
 import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
 import 'package:attendanceapp/Pages/Attendance/attendance_local_db.dart';
 import 'package:attendanceapp/Pages/Attendance/attendance_server.dart';
 import 'package:attendanceapp/Pages/Attendance/button.dart';
-import 'package:attendanceapp/Pages/Attendance/calendar_screen.dart';
 import 'package:attendanceapp/Pages/Dashboard/super_admin_dashboard.dart';
-import 'package:attendanceapp/Pages/OffDays/days_off.dart';
-import 'package:attendanceapp/Pages/OffDays/days_off_manager.dart';
 import 'package:attendanceapp/Pages/forgot_password.dart';
 import 'package:attendanceapp/Pages/login_page.dart';
-import 'package:attendanceapp/Pages/profile_page.dart';
-import 'package:attendanceapp/Pages/register_page.dart';
-import 'package:attendanceapp/face_recognition/face_recognition_home.dart';
-import 'package:attendanceapp/mapbox/screens/offices_map.dart';
-import 'package:attendanceapp/model/bio_model.dart';
 import 'package:attendanceapp/model/user_query.dart';
 import 'package:attendanceapp/services/database_adapter.dart';
 import 'package:attendanceapp/services/hive_service.dart';
@@ -23,9 +15,9 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:intl/intl.dart';
 import 'package:refreshable_widget/refreshable_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Pages/registration_updated.dart';
 
 Widget drawer3(
   BuildContext context,
@@ -177,7 +169,7 @@ Widget drawer3(
             ),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return RegistrationPage();
+                return RegistrationPageUpdated();
               }));
             },
           ),
@@ -415,7 +407,7 @@ _showBottomSheet2(BuildContext context) {
                   color: Colors.deepOrange,
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               _bottomSheetButton(
                 label: "Local Backup",
                 onTap: () async {
@@ -441,7 +433,7 @@ _showBottomSheet2(BuildContext context) {
                 clr: Colors.orange,
                 context: context,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               _bottomSheetButton(
@@ -485,7 +477,7 @@ _bottomSheetButton(
       ),
       child: Center(
         child: Text(label,
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 16, color: Colors.white, fontFamily: "NexaBold")),
       ),
     ),

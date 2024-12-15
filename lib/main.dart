@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:ui';
 import 'package:attendanceapp/Pages/splash_screen.dart';
 import 'package:attendanceapp/api/Attendance_gsheet_api.dart';
@@ -18,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -46,19 +48,67 @@ late SharedPreferences pref;
 RxBool isDeviceConnected = false.obs;
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: "assets/config/.env"); // Load environment variables
+ // Initialize time zones
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase and other services
-  await initializeServices();
-  tz.initializeTimeZones();  // Initialize time zones
+    // Initialize Firebase and other services
+    await initializeServices();
+    tz.initializeTimeZones();
+   //await dotenv.load(fileName: "/.env"); // Explicitly load .env
+    //print("Current directory: ${Directory.current.path}");
+    //checkEnvFile();
+    debugEnvironment();
 
-  runApp(MyApp());
+    runApp(MyApp());
+    // Initialize and start the background service
+    await initializeService();
+  } catch (e) {
+    print("Error loading .env file: $e");
+  }
+
+
+//  runApp(MyApp());
 
   // Initialize and start background services
   //await initializeBackgroundService();
 
-  // Initialize and start the background service
-  await initializeService();
+
+}
+
+void debugEnvironment() {
+  final currentDir = Directory.current.path;
+  print("Current directory2: $currentDir");
+
+  try {
+    final files = Directory(currentDir).listSync();
+    print("Files in current directory:");
+    files.forEach((file) {
+      print(file.path);
+    });
+  } catch (e) {
+    print("Error accessing directory: $e");
+  }
+}
+
+void checkEnvFile() {
+  final currentDir = Directory.current.path;
+  print("Current directory: $currentDir");
+
+  // Check if .env file exists
+  final envFile = File('$currentDir/.env');
+  if (envFile.existsSync()) {
+    print(".env file found!");
+  } else {
+    print(".env file not found in $currentDir");
+  }
+
+  // List all files in the directory
+  print("Files in the directory:");
+  Directory(currentDir)
+      .listSync()
+      .forEach((file) => print(file.path));
 }
 
 Future<void> initializeServices() async {

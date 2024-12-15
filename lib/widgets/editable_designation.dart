@@ -52,8 +52,8 @@ class _EditableDesignationTileState extends State<EditableDesignationTile> {
           return
             DropdownButtonFormField<String>(
               value: _selectedDesignation,
-              hint: Text('Select Designation'),
-              decoration: InputDecoration(
+              hint: const Text('Select Designation'),
+              decoration: const InputDecoration(
                 labelText:null,
                 // contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               ),
@@ -87,7 +87,7 @@ class _EditableDesignationTileState extends State<EditableDesignationTile> {
 
   Widget buildEditIcon() {
     return IconButton(
-      icon: Icon(Icons.edit),
+      icon: const Icon(Icons.edit),
       onPressed: () {
         setState(() {
           _isEditing = true;
@@ -106,7 +106,7 @@ class _EditableDesignationTileState extends State<EditableDesignationTile> {
           });
         }
       },
-      child: Text("Save"),
+      child: const Text("Save"),
     );
   }
 }

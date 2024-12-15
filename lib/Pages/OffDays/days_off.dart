@@ -1,23 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
-import 'dart:isolate';
 import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
-import 'package:attendanceapp/Pages/OffDays/days_off_manager.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
-import 'package:attendanceapp/model/user_model.dart';
 import 'package:attendanceapp/services/isar_service.dart';
-import 'package:attendanceapp/services/location_services.dart';
 import 'package:attendanceapp/widgets/drawer.dart';
-import 'package:attendanceapp/widgets/drawer2.dart';
-import 'package:attendanceapp/widgets/drawer3.dart';
-import 'package:attendanceapp/widgets/geo_utils.dart';
 import 'package:attendanceapp/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -108,9 +98,9 @@ class _DaysOffPageState extends State<DaysOffPage> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = 0;
+
     double screenWidth = 0;
-    screenHeight = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
@@ -144,7 +134,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
       drawer: Obx(
             () => controller.role.value == "User"
             ? drawer(context, IsarService())
-            : drawer2(context, IsarService()),
+            : drawer(context, IsarService()),
       ),
       body: Container(
         padding: const EdgeInsets.only(left: 20, right: 20),

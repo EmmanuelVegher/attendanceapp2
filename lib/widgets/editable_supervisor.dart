@@ -52,8 +52,8 @@ class _EditableSupervisorTileState extends State<EditableSupervisorTile> {
           return
             DropdownButtonFormField<String>(
               value: _selectedSupervisor,
-              hint: Text('Select Supervisor'),
-              decoration: InputDecoration(
+              hint: const Text('Select Supervisor'),
+              decoration: const InputDecoration(
                 labelText:null,
                 // contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               ),
@@ -87,7 +87,7 @@ class _EditableSupervisorTileState extends State<EditableSupervisorTile> {
 
   Widget buildEditIcon() {
     return IconButton(
-      icon: Icon(Icons.edit),
+      icon: const Icon(Icons.edit),
       onPressed: () {
         setState(() {
           _isEditing = true;
@@ -106,7 +106,7 @@ class _EditableSupervisorTileState extends State<EditableSupervisorTile> {
           });
         }
       },
-      child: Text("Save"),
+      child: const Text("Save"),
     );
   }
 }

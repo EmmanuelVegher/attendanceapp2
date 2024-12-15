@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 
-MaterialColor PrimaryMaterialColor = MaterialColor(
+MaterialColor PrimaryMaterialColor = const MaterialColor(
   4294934399,
   <int, Color>{
     50: Color.fromRGBO(
@@ -81,8 +81,8 @@ class Themes{
 
   static final light = ThemeData(
     fontFamily: "customFont",
-    primaryColor: Color(0xffeef444c),
-    brightness: Brightness.light, colorScheme: ColorScheme.fromSwatch(primarySwatch: PrimaryMaterialColor).copyWith(background: Colors.white),
+    primaryColor: const Color(0xffeef444c),
+    brightness: Brightness.light, colorScheme: ColorScheme.fromSwatch(primarySwatch: PrimaryMaterialColor).copyWith(surface: Colors.white),
 
     /*
   elevatedButtonTheme: ElevatedButtonThemeData(
