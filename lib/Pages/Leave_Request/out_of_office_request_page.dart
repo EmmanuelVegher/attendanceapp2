@@ -410,10 +410,10 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
 //     //final bccEmail2 = dotenv.env['CC_EMAIL2']!;
 //
 //
-//     const String senderEmail1 = 'caritas.appteam@outlook.com';
-//     const String bccEmail2 = 'appsuport@ccfng.org';
-//     const String senderPassword1 = 'btcpusvwjeddcbpa';
-//     //const String senderPassword1 = 'Caritas@2024';
+//     const String senderEmail1 = '';
+//     const String bccEmail2 = '';
+//     const String senderPassword1 = '';
+//     //const String senderPassword1 = '';
 //
 //     // Gmail SMTP configuration
 //   //final smtpServer = gmail(senderEmail1, senderPassword1)
