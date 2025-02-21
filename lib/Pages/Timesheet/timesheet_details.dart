@@ -9,7 +9,6 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,7 +26,7 @@ class TimesheetDetailsScreen extends StatefulWidget {
   //final String timesheetId;
   final String staffId;
 
-  TimesheetDetailsScreen({
+  const TimesheetDetailsScreen({super.key, 
     required this.timesheetData,
     //required this.timesheetId,
     required this.staffId,
@@ -523,13 +522,13 @@ class _TimesheetDetailsScreenState extends State<TimesheetDetailsScreen> {
       body: '''
 Greetings !!!,
 
-Please find attached the completely signed timesheet for $staffName for ${monthYear}.
+Please find attached the completely signed timesheet for $staffName for $monthYear.
 
 Best regards,
-${selectedBioFirstName} ${selectedBioLastName}
+$selectedBioFirstName $selectedBioLastName
 
 ''',
-      subject: 'Timesheet for $staffName for ${monthYear}',
+      subject: 'Timesheet for $staffName for $monthYear',
       recipients: [selectedBioEmail!],
       attachmentPaths: attachments,
       isHTML: false,
@@ -1134,7 +1133,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
     final categories = ['Annual leave', 'Holiday', 'Paternity', 'Maternity'];
 
     // Helper function to build table cells with weekend styling
-    pw.Widget _buildTableCell(String text, bool isWeekend) {
+    pw.Widget buildTableCell(String text, bool isWeekend) {
       return pw.Container(
         width: 80, // Fixed width for data cells
         alignment: pw.Alignment.center,
@@ -1160,7 +1159,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
         double duration = _getDurationForDate3(date, projectName, category, data);
         rowTotal += duration;
         rowDataList.add(duration);
-        rowChildren.add(_buildTableCell(duration.round().toString(), isWeekend(date)));
+        rowChildren.add(buildTableCell(duration.round().toString(), isWeekend(date)));
       }
 
       rowData[category] = rowDataList;  // Store data row for totals calculation
@@ -1481,23 +1480,6 @@ ${selectedBioFirstName} ${selectedBioLastName}
           });
         });
 
-
-
-        if (downloadURL == null) {
-          // Handle case where signature is not present (e.g., show a message)
-          Fluttertoast.showToast(
-            msg: "Cannot send timesheet without signature of CARITAS Supervisor.",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-          print("Cannot send timesheet without staff signature.");
-          return;
-        }
-
         final dateFormat = DateFormat('MMMM dd, yyyy');
         DateTime timesheetDate;
         try {
@@ -1622,7 +1604,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
     DateTime endDate = DateTime(timesheetDate.year, timesheetDate.month, 20);
 
     List<DateTime> days = [];
-    for (DateTime date = startDate; date.isBefore(endDate); date = date.add(Duration(days: 1))) {
+    for (DateTime date = startDate; date.isBefore(endDate); date = date.add(const Duration(days: 1))) {
       days.add(date);
     }
     return days;
@@ -1659,7 +1641,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Reject Timesheet'),
+          title: const Text('Reject Timesheet'),
           content: TextFormField(
             onChanged: (value) {
               rejectionReason = value;
@@ -1679,13 +1661,12 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Save'),
               onPressed: !isValidReason // Enable only if reason is valid
                   ? () async {
                 try {
@@ -1738,7 +1719,8 @@ ${selectedBioFirstName} ${selectedBioLastName}
                   Fluttertoast.showToast(msg: 'Error rejecting timesheet');
                 }
               }
-                  : null, // Disable if invalid
+                  : null,
+              child: const Text('Save'), // Disable if invalid
             ),
           ],
         );
@@ -1770,8 +1752,8 @@ ${selectedBioFirstName} ${selectedBioLastName}
       print("No bio data found!");
     }
     try{
-      facilitySupervisorSignature = widget.timesheetData['facilitySupervisorSignature'] ?? null;
-      caritasSupervisorSignature = widget.timesheetData['caritasSupervisorSignature'] ?? null;
+      facilitySupervisorSignature = widget.timesheetData['facilitySupervisorSignature'];
+      caritasSupervisorSignature = widget.timesheetData['caritasSupervisorSignature'];
     }catch(e){}
   }
 
@@ -2052,7 +2034,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
     return Container(
       width: 100,
       alignment: Alignment.center,
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       color: backgroundColor,
       child: Text(text, style: TextStyle(color: color, fontWeight: fontWeight)),
     );
@@ -2116,7 +2098,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
         print("Error processing attendance data: $e"); // More general error message
       }
     }
-    return "${totalHoursForDate.toStringAsFixed(2)}";
+    return totalHoursForDate.toStringAsFixed(2);
   }
 
   List initializeDateRange(int month, int year) {
@@ -2213,7 +2195,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Timesheet Details'),
+        title: const Text('Timesheet Details'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.save_alt),
@@ -2256,7 +2238,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                           .of(context)
                           .size
                           .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text('Department: $department',
                       style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: MediaQuery
@@ -2266,7 +2248,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                           .of(context)
                           .size
                           .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text('Designation: $designation',
                       style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: MediaQuery
@@ -2276,7 +2258,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                           .of(context)
                           .size
                           .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text('Location: $location', style: TextStyle(
                       fontWeight: FontWeight.bold, fontSize: MediaQuery
                         .of(context)
@@ -2285,7 +2267,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                         .of(context)
                         .size
                         .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text('State: $state', style: TextStyle(
                       fontWeight: FontWeight.bold, fontSize: MediaQuery
                         .of(context)
@@ -2294,7 +2276,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                         .of(context)
                         .size
                         .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     // Add some spacing
                   ]
               ),),
@@ -2302,21 +2284,21 @@ ${selectedBioFirstName} ${selectedBioLastName}
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  Text(
+                  const Text(
                     'Month of Timesheet:',
                     style: TextStyle(fontWeight: FontWeight.bold,fontSize:12),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
 
                   Text(
                     monthYear,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
 
                 ],
               ),
             ),
-            Divider(),
+            const Divider(),
             SingleChildScrollView(
               scrollDirection:Axis.horizontal,
              // padding: const EdgeInsets.all(16.0),
@@ -2335,9 +2317,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               Container(
                                 width: 150, // Set a width for the "Project Name" header
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.blue.shade100,
-                                child: Text(
+                                child: const Text(
                                   'Project Name',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
@@ -2346,20 +2328,20 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                 return Container(
                                   width: 50,
                                   alignment: Alignment.center,
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   color: isWeekend(date) ? Colors.grey.shade300 : Colors.blue.shade100,
                                   child: Text(
                                     DateFormat('dd MMM').format(date),
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 );
                               }).toList(),
                               Container(
                                 width: 100,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.blue.shade100,
-                                child: Text(
+                                child: const Text(
                                   'Total Hours',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
@@ -2367,22 +2349,22 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               Container(
                                 width: 100,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.blue.shade100,
-                                child: Text(
+                                child: const Text(
                                   'Percentage',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
                           ),
-                          Divider(),
+                          const Divider(),
                           Row(
                             children: [
                               Container(
                                 width: 150, // Keep the fixed width if you need it
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.white,
                                 child: Text(projectName),
                               ),
@@ -2399,10 +2381,10 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       weekend
-                                          ? SizedBox.shrink() // No hours on weekends
+                                          ? const SizedBox.shrink() // No hours on weekends
                                           : Text(
-                                        '${hours}', // Placeholder, replace with Isar data
-                                        style: TextStyle(color: Colors.blueAccent),
+                                        hours, // Placeholder, replace with Isar data
+                                        style: const TextStyle(color: Colors.blueAccent),
                                       ),
                                     ],
                                   ),
@@ -2411,38 +2393,37 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               Container(
                                 width: 100,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.white,
                                 child: Text(
-                                  calculateTotalHours1()
-                                      .round()
-                                      .toString() + " hrs",
-                                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                                  "${calculateTotalHours1()
+                                      .round()} hrs",
+                                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               Container(
                                 width: 100,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.white,
                                 child: Text(
                                   '${calculatePercentageWorked1(
                                       ).round()}%',
-                                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
                           ),
-                          Divider(),
+                          const Divider(),
                           // "Out-of-office" Header Row
                           Row(
                             children: [
                               Container(
                                 width: 150,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.white,
-                                child: Text(
+                                child: const Text(
                                   'Out-of-office',
                                   style: TextStyle(fontWeight: FontWeight.bold,fontSize:18),
                                 ),
@@ -2451,9 +2432,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                 return Container(
                                   width: 50,
                                   alignment: Alignment.center,
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   color: Colors.white,
-                                  child: Text(
+                                  child: const Text(
                                     '', // Placeholder for out-of-office data, can be replaced later
                                   ),
                                 );
@@ -2461,18 +2442,18 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               Container(
                                 width: 100,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.white,
-                                child: Text(
+                                child: const Text(
                                   '', // Placeholder for total hours
                                 ),
                               ),
                               Container(
                                 width: 100,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.white,
-                                child: Text(
+                                child: const Text(
                                   '', // Placeholder for percentage
                                 ),
                               ),
@@ -2487,16 +2468,16 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                 Container(
                                   width: 150,
                                   alignment: Alignment.center,
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   color: Colors.white,
                                   child: Text(
                                     category,
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 ...daysInRange2.map((date) {
                                   bool weekend = isWeekend(date);
-                                  String offDayHours = _getDurationForDate(date, projectName, category!,widget.timesheetData['timesheetEntries'].cast<Map<String, dynamic>>() );
+                                  String offDayHours = _getDurationForDate(date, projectName, category,widget.timesheetData['timesheetEntries'].cast<Map<String, dynamic>>() );
 
 
                                   return Container(
@@ -2509,10 +2490,10 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         weekend
-                                            ? SizedBox.shrink() // No hours on weekends
+                                            ? const SizedBox.shrink() // No hours on weekends
                                             : Text(
                                           offDayHours, // Placeholder, replace with Isar data
-                                          style: TextStyle(color: Colors.blueAccent),
+                                          style: const TextStyle(color: Colors.blueAccent),
                                         ),
                                       ],
                                     ),
@@ -2522,26 +2503,25 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                 Container(
                                   width: 100,
                                   alignment: Alignment.center,
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   color: Colors.white,
                                   child: Text(
                                     //'${outOfOfficeHours.toStringAsFixed(2)} hrs',
-                                    calculateCategoryHours1(category)
-                                        .round()
-                                        .toString() + " hrs",
-                                    style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                                    "${calculateCategoryHours1(category)
+                                        .round()} hrs",
+                                    style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 Container(
                                   width: 100,
                                   alignment: Alignment.center,
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   color: Colors.white,
                                   child: Text(
                                     //'${outOfOfficePercentage.toStringAsFixed(2)}%',
                                     '${calculateCategoryPercentage(category
                                     ).round()}%',
-                                    style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
@@ -2554,9 +2534,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               Container(
                                 width: 150,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.white,
-                                child: Text(
+                                child: const Text(
                                   'Total',
                                   style: TextStyle(fontWeight: FontWeight.bold,fontSize:20),
                                 ),
@@ -2565,9 +2545,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                 return Container(
                                   width: 50,
                                   alignment: Alignment.center,
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   color: Colors.white,
-                                  child: Text(
+                                  child: const Text(
                                     '', // Placeholder for out-of-office data, can be replaced later
                                   ),
                                 );
@@ -2575,19 +2555,19 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               Container(
                                 width: 100,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.white,
                                 child: Text(
-                                  calculateGrandTotalHours1()
-                                      .toStringAsFixed(0) + " hrs",
+                                  "${calculateGrandTotalHours1()
+                                      .toStringAsFixed(0)} hrs",
                                   //'$totalGrandHours hrs',
-                                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               Container(
                                 width: 100,
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
                                 color: Colors.white,
                                 child: Text(
                                   '${calculateGrandPercentageWorked()
@@ -2595,7 +2575,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
                                   // '${grandPercentageWorked.toStringAsFixed(2)}%',
 
-                                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -2605,7 +2585,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
                         ],
                       ),
-                      Divider(),
+                      const Divider(),
                       // buildCategoryRows(projectName, daysInRange),
                       // Row(
                       //   children: [
@@ -2623,9 +2603,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
             ),
 
             //Signature and Details
-            Divider(),
+            const Divider(),
             Text('Signature & Date', style: TextStyle(fontWeight: FontWeight.bold,fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.030),)),
-            Divider(),
+            const Divider(),
             Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children:[
@@ -2636,7 +2616,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                       Container(
                         width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.25 : 0.25),
                         alignment: Alignment.center,
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         //color: Colors.white,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center, // Vertically center the content
@@ -2661,7 +2641,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                       Container(
                         width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.35 : 0.35),
                         alignment: Alignment.center,
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         //  color: Colors.grey.shade200,
                         child: Column(
                           children: [
@@ -2691,12 +2671,12 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
                       Container(
                         width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.30 : 0.30),
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         child: Column(
                           children: [
-                            Text('Date', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const Text('Date', style: TextStyle(fontWeight: FontWeight.bold)),
                             SizedBox(height: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.07 : 0.05)),
-                            Text("$timeSheetDate", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text("$timeSheetDate", style: const TextStyle(fontWeight: FontWeight.bold)),
                             SizedBox(height: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.13 : 0.10)),
                           ],
                         ),
@@ -2707,7 +2687,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                     ],
                   ),
                   SizedBox(width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.005 : 0.005)),
-                  Divider(),
+                  const Divider(),
                   //Second - Project Coordinator Section
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -2760,7 +2740,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                       Container(
                         width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.35 : 0.35),
                         alignment: Alignment.center,
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         //color: Colors.grey.shade200,
                         child: Column(
                           children: [
@@ -2809,15 +2789,15 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                               fit: BoxFit.contain,
                                             ),
                                           ),
-                                          SizedBox(height: 8),
+                                          const SizedBox(height: 8),
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                              Icon(Icons.check_circle, color: Colors.green),
-                                              SizedBox(width: 8),
+                                              const Icon(Icons.check_circle, color: Colors.green),
+                                              const SizedBox(width: 8),
                                               Text(
                                                 "$facilitySupervisorSignatureStatus",
-                                                style: TextStyle(fontWeight: FontWeight.bold),
+                                                style: const TextStyle(fontWeight: FontWeight.bold),
                                               ),
                                             ],
                                           ),
@@ -2932,22 +2912,22 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           ),
                                           child: Image.network(selectedSignatureLink!),
                                         ),
-                                        SizedBox(height: 8),
+                                        const SizedBox(height: 8),
                                         facilitySupervisorSignatureStatus == "Pending"
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.access_time, color: Colors.orange),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus (Awaiting Approval)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -2959,17 +2939,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.cancel, color: Colors.red),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -2980,17 +2960,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             : Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.check_circle, color: Colors.green),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus (Approved)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3021,21 +3001,21 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           ),
                                           child: Image.network(selectedSignatureLink!),
                                         ),
-                                        SizedBox(height:8),
+                                        const SizedBox(height:8),
                                         facilitySupervisorSignatureStatus == "Pending"?
                                         Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.access_time, color: Colors.orange),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus (Awaiting Approval)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
@@ -3043,34 +3023,34 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         facilitySupervisorSignatureStatus == "Rejected"?
                                         Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.cancel, color: Colors.red),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
                                         )
                                             :Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.check_circle, color: Colors.green),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus (Approved)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
@@ -3082,56 +3062,56 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                   else if(facilitySupervisorSignature == null && facilitySupervisorSignatureStatus =="Pending" && selectedBioStaffCategory == "Facility Supervisor" ){
                                     return Column(
                                       children: [
-                                        Text("Awaiting Facility Supervisor Signature"),
-                                        SizedBox(height:8),
+                                        const Text("Awaiting Facility Supervisor Signature"),
+                                        const SizedBox(height:8),
                                         facilitySupervisorSignatureStatus == "Pending"?
                                         Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.access_time, color: Colors.orange),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
                                         ):facilitySupervisorSignatureStatus == "Rejected"?
                                         Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.cancel, color: Colors.red),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
                                         )
                                             :Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.check_circle, color: Colors.green),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
@@ -3160,22 +3140,22 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           ),
                                           child: Image.network(selectedSignatureLink!),
                                         ),
-                                        SizedBox(height: 8),
+                                        const SizedBox(height: 8),
                                         facilitySupervisorSignatureStatus == "Pending"
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.access_time, color: Colors.orange),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus (Awaiting Approval)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3187,17 +3167,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.cancel, color: Colors.red),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3209,17 +3189,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.check_circle, color: Colors.green),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3230,17 +3210,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             : Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.check_circle, color: Colors.green),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$facilitySupervisorSignatureStatus (Approved)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3253,11 +3233,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                   }
 
                                   else {
-                                  return SizedBox.shrink();
+                                  return const SizedBox.shrink();
 
                                 }
                                 } else {
-                                  return Text("Timesheet Yet to be submitted for Project Cordinator's Signature");
+                                  return const Text("Timesheet Yet to be submitted for Project Cordinator's Signature");
                                 }
                               },
                             ),
@@ -3272,11 +3252,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
                       Container(
                         width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.30 : 0.30),
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         child: Column(
                           children: [
-                            Text('Date', style: TextStyle(fontWeight: FontWeight.bold)),
-                            SizedBox(height: 20.0),
+                            const Text('Date', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 20.0),
                             StreamBuilder<DocumentSnapshot>(
                               // Stream the supervisor signature
                               stream: FirebaseFirestore.instance
@@ -3294,16 +3274,16 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
                                   if (facilitySupervisorSignatureDate != null) {
                                     // caritasSupervisorSignature is a URL/path to the image
-                                    return Text("$facilitySupervisorSignatureDate", style: TextStyle(fontWeight: FontWeight.bold));
+                                    return Text("$facilitySupervisorSignatureDate", style: const TextStyle(fontWeight: FontWeight.bold));
 
                                   }
 
                                   else {
-                                    return Text("$formattedDate", style: TextStyle(fontWeight: FontWeight.bold));
+                                    return Text(formattedDate, style: const TextStyle(fontWeight: FontWeight.bold));
 
                                   }
                                 } else {
-                                  return Text("Timesheet Yet to be submitted for Project Cordinator's Signature");
+                                  return const Text("Timesheet Yet to be submitted for Project Cordinator's Signature");
                                 }
                               },
                             ),
@@ -3314,7 +3294,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                     ],
                   ),
                   SizedBox(width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.005 : 0.005)),
-                  Divider(),
+                  const Divider(),
                   // Third - CARITAS Supervisor Section
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -3363,7 +3343,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                       Container(
                         width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.35 : 0.35),
                         alignment: Alignment.center,
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         //color: Colors.grey.shade200,
                         child: Column(
                           children: [
@@ -3433,15 +3413,15 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                               fit: BoxFit.contain,
                                             ),
                                           ),
-                                          SizedBox(height: 8),
+                                          const SizedBox(height: 8),
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                              Icon(Icons.check_circle, color: Colors.green),
-                                              SizedBox(width: 8),
+                                              const Icon(Icons.check_circle, color: Colors.green),
+                                              const SizedBox(width: 8),
                                               Text(
                                                 "$caritasSupervisorSignatureStatus",
-                                                style: TextStyle(fontWeight: FontWeight.bold),
+                                                style: const TextStyle(fontWeight: FontWeight.bold),
                                               ),
                                             ],
                                           ),
@@ -3554,22 +3534,22 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           ),
                                           child: Image.network(selectedSignatureLink!),
                                         ),
-                                        SizedBox(height: 8),
+                                        const SizedBox(height: 8),
                                         caritasSupervisorSignatureStatus == "Pending"
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.access_time, color: Colors.orange),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus (Awaiting Approval)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3581,17 +3561,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.cancel, color: Colors.red),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3602,17 +3582,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             : Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.check_circle, color: Colors.green),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus (Approved)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3643,21 +3623,21 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           ),
                                           child: Image.network(selectedSignatureLink!),
                                         ),
-                                        SizedBox(height:8),
+                                        const SizedBox(height:8),
                                         caritasSupervisorSignatureStatus == "Pending"?
                                         Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.access_time, color: Colors.orange),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus (Awaiting Approval)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
@@ -3665,34 +3645,34 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         caritasSupervisorSignatureStatus == "Rejected"?
                                         Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.cancel, color: Colors.red),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
                                         )
                                             :Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.check_circle, color: Colors.green),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus (Approved)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
@@ -3704,56 +3684,56 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                   else if(caritasSupervisorSignature == null && caritasSupervisorSignatureStatus =="Pending" && selectedBioStaffCategory != "Facility Supervisor"  ){
                                     return Column(
                                       children: [
-                                        Text("Awaiting Facility Supervisor Signature"),
-                                        SizedBox(height:8),
+                                        const Text("Awaiting Facility Supervisor Signature"),
+                                        const SizedBox(height:8),
                                         caritasSupervisorSignatureStatus == "Pending"?
                                         Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.access_time, color: Colors.orange),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
                                         ):caritasSupervisorSignatureStatus == "Rejected"?
                                         Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.cancel, color: Colors.red),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
                                         )
                                             :Row(
                                             children:[
-                                              Padding(
+                                              const Padding(
                                                 padding: EdgeInsets.only(top: 0.0),
                                                 child:
                                                 Icon(Icons.check_circle, color: Colors.green),
                                               ),
-                                              SizedBox(width:8),
+                                              const SizedBox(width:8),
                                               Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ]
@@ -3782,22 +3762,22 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           ),
                                           child: Image.network(selectedSignatureLink!),
                                         ),
-                                        SizedBox(height: 8),
+                                        const SizedBox(height: 8),
                                         caritasSupervisorSignatureStatus == "Pending"
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.access_time, color: Colors.orange),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus (Awaiting Approval)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3809,17 +3789,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.cancel, color: Colors.red),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3831,17 +3811,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             ? Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.check_circle, color: Colors.green),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3852,17 +3832,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                             : Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
+                                            const Padding(
                                               padding: EdgeInsets.only(top: 0.0),
                                               child: Icon(Icons.check_circle, color: Colors.green),
                                             ),
-                                            SizedBox(width: 8),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Padding(
-                                                padding: EdgeInsets.only(bottom: 0.0),
+                                                padding: const EdgeInsets.only(bottom: 0.0),
                                                 child: Text(
                                                   "$caritasSupervisorSignatureStatus (Approved)",
-                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                   softWrap: true,
                                                   overflow: TextOverflow.visible,
                                                 ),
@@ -3876,11 +3856,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
                                   }
                                 else {
-                                  return Text("Awaiting Signature from Facility Supervisor");
+                                  return const Text("Awaiting Signature from Facility Supervisor");
 
                                 }
                                 } else {
-                                  return Text("Timesheet Yet to be submitted for Project Cordinator's Signature");
+                                  return const Text("Timesheet Yet to be submitted for Project Cordinator's Signature");
                                 }
                               },
                             ),
@@ -3892,19 +3872,19 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
                       Container(
                         width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.30 : 0.30),
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         child: Column(
                           children: [
-                            Text('Date', style: TextStyle(fontWeight: FontWeight.bold)),
-                            SizedBox(height: 20.0),
-                            Text("${formattedDate}", style: TextStyle(fontWeight: FontWeight.bold)),
+                            const Text('Date', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 20.0),
+                            Text(formattedDate, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
                     ],
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.005 : 0.005)),
-                  Divider(),
+                  const Divider(),
                   SizedBox(height: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.020 : 0.020)),
 
                   StreamBuilder<DocumentSnapshot>(
@@ -3936,12 +3916,12 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               onPressed: () {
                                 sendEmailToProjectManagementTeam();
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.email, // Add an appropriate icon
                                 color: Colors.white, // Icon color
                                 size: 16, // Reduce the size of the icon
                               ),
-                              label: Flexible(
+                              label: const Flexible(
                                 child: Text(
                                   'Email Signed Timesheet to Project Managament Team',
                                   style: TextStyle(
@@ -3955,8 +3935,8 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue, // Button background color
                                 foregroundColor: Colors.white, // Text and icon color
-                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
-                                minimumSize: Size(100, 30), // Set minimum size for the button
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
+                                minimumSize: const Size(100, 30), // Set minimum size for the button
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Minimize touch target size
                               ),
                             );
@@ -3969,12 +3949,12 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                   onPressed: () {
                                     _uploadSignatureAndSync();
                                   },
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.credit_score, // Add an appropriate icon
                                     color: Colors.white, // Icon color
                                     size: 16, // Reduce the size of the icon
                                   ),
-                                  label: Flexible(
+                                  label: const Flexible(
                                     child: Text(
                                       'Approve Timesheet',
                                       style: TextStyle(
@@ -3988,23 +3968,23 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.green, // Button background color
                                     foregroundColor: Colors.white, // Text and icon color
-                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
-                                    minimumSize: Size(100, 30), // Set minimum size for the button
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
+                                    minimumSize: const Size(100, 30), // Set minimum size for the button
                                     tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Minimize touch target size
                                   ),
                                 ),
 
-                                SizedBox(width:8),
+                                const SizedBox(width:8),
                                 ElevatedButton.icon(
                                   onPressed: () {
                                     _rejectTimesheet(staffId, filteredMonthYear,selectedBioStaffCategory!);
                                   },
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.cancel, // Add an appropriate icon
                                     color: Colors.white, // Icon color
                                     size: 16, // Reduce the size of the icon
                                   ),
-                                  label: Flexible(
+                                  label: const Flexible(
                                     child: Text(
                                       'Reject Timesheet',
                                       style: TextStyle(
@@ -4018,8 +3998,8 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red, // Button background color
                                     foregroundColor: Colors.white, // Text and icon color
-                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
-                                    minimumSize: Size(100, 30), // Set minimum size for the button
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
+                                    minimumSize: const Size(100, 30), // Set minimum size for the button
                                     tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Minimize touch target size
                                   ),
                                 ),
@@ -4038,12 +4018,12 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                 onPressed: () {
                                   _uploadSignatureAndSync();
                                 },
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.credit_score, // Add an appropriate icon
                                   color: Colors.white, // Icon color
                                   size: 16, // Reduce the size of the icon
                                 ),
-                                label: Flexible(
+                                label: const Flexible(
                                   child: Text(
                                     'Approve Timesheet',
                                     style: TextStyle(
@@ -4057,23 +4037,23 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green, // Button background color
                                   foregroundColor: Colors.white, // Text and icon color
-                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
-                                  minimumSize: Size(100, 30), // Set minimum size for the button
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
+                                  minimumSize: const Size(100, 30), // Set minimum size for the button
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Minimize touch target size
                                 ),
                               ),
 
-                              SizedBox(width:8),
+                              const SizedBox(width:8),
                               ElevatedButton.icon(
                                 onPressed: () {
                                   _rejectTimesheet(staffId, filteredMonthYear,selectedBioStaffCategory!);
                                 },
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.cancel, // Add an appropriate icon
                                   color: Colors.white, // Icon color
                                   size: 16, // Reduce the size of the icon
                                 ),
-                                label: Flexible(
+                                label: const Flexible(
                                   child: Text(
                                     'Reject Timesheet',
                                     style: TextStyle(
@@ -4087,8 +4067,8 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red, // Button background color
                                   foregroundColor: Colors.white, // Text and icon color
-                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
-                                  minimumSize: Size(100, 30), // Set minimum size for the button
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Reduce button padding
+                                  minimumSize: const Size(100, 30), // Set minimum size for the button
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Minimize touch target size
                                 ),
                               ),

@@ -44,14 +44,14 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveAttendance(AttendanceModel newattendance) async {
     final isar = await db;
     //we return an int int thr writeTxnSync because we want to get the id of the saved attendance
-    await isar
+    isar
         .writeTxnSync<int>(() => isar.attendanceModels.putSync(newattendance));
   }
 
   Future<void> saveFacilityStaffList(FacilityStaffModel newfacilityStaffList) async {
     final isar = await db;
     //we return an int int thr writeTxnSync because we want to get the id of the saved attendance
-    await isar
+    isar
         .writeTxnSync<int>(() => isar.facilityStaffModels.putSync(newfacilityStaffList));
   }
 
@@ -74,7 +74,7 @@ class IsarService extends DatabaseAdapter {
     final isar = await db;
     try{
 
-      await isar
+      isar
           .writeTxnSync<int>(() => isar.locationModels.putSync(newlocation));
     }catch(e){
       log("Error on save location:$e");
@@ -166,7 +166,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveState(StateModel newstate) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.stateModels.putSync(newstate));
+      isar.writeTxnSync<int>(() => isar.stateModels.putSync(newstate));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -182,7 +182,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveSupervisor(SupervisorModel newsupervisor) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.supervisorModels.putSync(newsupervisor));
+      isar.writeTxnSync<int>(() => isar.supervisorModels.putSync(newsupervisor));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -198,7 +198,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveDepartment(DepartmentModel newdepartment) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.departmentModels.putSync(newdepartment));
+      isar.writeTxnSync<int>(() => isar.departmentModels.putSync(newdepartment));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -214,7 +214,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveDesignation(DesignationModel newdesignation) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.designationModels.putSync(newdesignation));
+      isar.writeTxnSync<int>(() => isar.designationModels.putSync(newdesignation));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -232,7 +232,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveProject(ProjectModel newproject) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.projectModels.putSync(newproject));
+      isar.writeTxnSync<int>(() => isar.projectModels.putSync(newproject));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -248,7 +248,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveGender(GenderCategoryModel newgender) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.genderCategoryModels.putSync(newgender));
+      isar.writeTxnSync<int>(() => isar.genderCategoryModels.putSync(newgender));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -266,7 +266,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveMaritalStatus(MaritalStatusModel newmaritalstatus) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.maritalStatusModels.putSync(newmaritalstatus));
+      isar.writeTxnSync<int>(() => isar.maritalStatusModels.putSync(newmaritalstatus));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -282,7 +282,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveAppVersion(AppVersionModel newappversion) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.appVersionModels.putSync(newappversion));
+      isar.writeTxnSync<int>(() => isar.appVersionModels.putSync(newappversion));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -298,7 +298,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveLastUpdateDate(LastUpdateDateModel newlastupdatedate) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.lastUpdateDateModels.putSync(newlastupdatedate));
+      isar.writeTxnSync<int>(() => isar.lastUpdateDateModels.putSync(newlastupdatedate));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -314,7 +314,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveStaffCategory(StaffCategoryModel newstaffcategory) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.staffCategoryModels.putSync(newstaffcategory));
+      isar.writeTxnSync<int>(() => isar.staffCategoryModels.putSync(newstaffcategory));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -330,7 +330,7 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveReasonForDaysOff(ReasonForDaysOffModel newreasonfordaysoff) async {
     final isar = await db;
     try {
-      await isar.writeTxnSync<int>(() => isar.reasonForDaysOffModels.putSync(newreasonfordaysoff));
+      isar.writeTxnSync<int>(() => isar.reasonForDaysOffModels.putSync(newreasonfordaysoff));
     } catch (e) {
       if (e is IsarError && e.message.contains("Unique index violated")) {
         // Handle unique index violation
@@ -345,7 +345,7 @@ class IsarService extends DatabaseAdapter {
 
   Future<void> saveLocationData(TrackLocationModel newtracklocationdata) async {
     final isar = await db;
-    await isar.writeTxnSync<int>(() => isar.trackLocationModels.putSync(newtracklocationdata));
+    isar.writeTxnSync<int>(() => isar.trackLocationModels.putSync(newtracklocationdata));
   }
 
   Future<List<TrackLocationModel>> getAttendanceForEmptyLocationFor12() async {
@@ -385,7 +385,7 @@ class IsarService extends DatabaseAdapter {
     final isar = await db;
     final updateSyncStatus = await isar.trackLocationModels.get(id);
 
-    updateSyncStatus!..isSynched = isSynched;
+    updateSyncStatus!.isSynched = isSynched;
 
     await isar.writeTxn(() async {
       await isar.trackLocationModels.put(updateSyncStatus);
@@ -416,8 +416,7 @@ class IsarService extends DatabaseAdapter {
     final isar = await db;
     final reasonsForRejectedLeave = await isar.leaveRequestModels.get(id);
 
-    reasonsForRejectedLeave!..reasonsForRejectedLeave = reasonsForRejectedLeaves;
-;
+    reasonsForRejectedLeave!.reasonsForRejectedLeave = reasonsForRejectedLeaves;
 
     await isar.writeTxn(() async {
       await isar.leaveRequestModels.put(reasonsForRejectedLeave);
@@ -472,7 +471,7 @@ class IsarService extends DatabaseAdapter {
     final emptyLocationUpdate = await isar.trackLocationModels.get(id);
 
     emptyLocationUpdate!
-      ..locationName = locationName;
+      .locationName = locationName;
 
     await isar.writeTxn(() async {
       await isar.trackLocationModels.put(emptyLocationUpdate);
@@ -481,17 +480,17 @@ class IsarService extends DatabaseAdapter {
 
   Future<void> saveBioData(BioModel newbiodata) async {
     final isar = await db;
-    await isar.writeTxnSync<int>(() => isar.bioModels.putSync(newbiodata));
+    isar.writeTxnSync<int>(() => isar.bioModels.putSync(newbiodata));
   }
 
   Future<void> saveAppVersionData(AppVersionModel newappversiondata) async {
     final isar = await db;
-    await isar.writeTxnSync<int>(() => isar.appVersionModels.putSync(newappversiondata));
+    isar.writeTxnSync<int>(() => isar.appVersionModels.putSync(newappversiondata));
   }
 
   Future<void> saveUserFace(UserFace newbiodata) async {
     final isar = await db;
-    await isar.writeTxnSync<int>(() => isar.userFaces.putSync(newbiodata));
+    isar.writeTxnSync<int>(() => isar.userFaces.putSync(newbiodata));
   }
 
   Future<List<UserFace>> getAllUserFace() async {
@@ -886,7 +885,7 @@ class IsarService extends DatabaseAdapter {
     final isar = await db;
     return await isar.leaveRequestModels
         .filter()
-        .staffIdEqualTo(firebaseAuthId!) // Correct filter method
+        .staffIdEqualTo(firebaseAuthId) // Correct filter method
         .findAll();
 
   }
@@ -922,7 +921,7 @@ class IsarService extends DatabaseAdapter {
   Stream<List<AttendanceModel?>> listenToLastAttendance(String month) async* {
     final isar = await db;
 
-    final query = await isar.attendanceModels
+    final query = isar.attendanceModels
         .where()
         .filter()
         .monthEqualTo(month)
@@ -1247,7 +1246,7 @@ class IsarService extends DatabaseAdapter {
     final bioUpdate = await isar.bioModels.get(2);
 
     bioUpdate!
-      ..signatureLink = null;
+      .signatureLink = null;
 
     await isar.writeTxn(() async {
       await isar.bioModels.put(bioUpdate);
@@ -1405,7 +1404,7 @@ class IsarService extends DatabaseAdapter {
     final attendanceUpdate = await isar.attendanceModels.get(id);
 
     attendanceUpdate!
-      ..comments = comments;
+      .comments = comments;
 
     await isar.writeTxn(() async {
       await isar.attendanceModels.put(attendanceUpdate);
@@ -1676,7 +1675,7 @@ class IsarService extends DatabaseAdapter {
     final isar = await db;
     final updateSyncStatus = await isar.attendanceModels.get(id);
 
-    updateSyncStatus!..isSynced = isSynced;
+    updateSyncStatus!.isSynced = isSynced;
 
     await isar.writeTxn(() async {
       await isar.attendanceModels.put(updateSyncStatus);
@@ -1691,7 +1690,7 @@ class IsarService extends DatabaseAdapter {
     final isar = await db;
     final updateSyncStatus = await isar.bioModels.get(id);
 
-    updateSyncStatus!..isSynced = isSynced;
+    updateSyncStatus!.isSynced = isSynced;
 
     await isar.writeTxn(() async {
       await isar.bioModels.put(updateSyncStatus);
@@ -1738,13 +1737,13 @@ class IsarService extends DatabaseAdapter {
   Future<void> saveTask(Task newtask) async {
     // Save the current date in Isar (implementation depends on your Isar setup)
     final isar = await db;
-    await isar.writeTxnSync<int>(() => isar.tasks.putSync(newtask));
+    isar.writeTxnSync<int>(() => isar.tasks.putSync(newtask));
   }
 
   Future<void> saveLastUsedDate(AppUsageModel newappusagemodel) async {
     // Save the current date in Isar (implementation depends on your Isar setup)
     final isar = await db;
-    await isar.writeTxnSync<int>(() => isar.appUsageModels.putSync(newappusagemodel));
+    isar.writeTxnSync<int>(() => isar.appUsageModels.putSync(newappusagemodel));
   }
 
   Future<void> saveLeaveRequest(LeaveRequestModel leaveRequest) async {

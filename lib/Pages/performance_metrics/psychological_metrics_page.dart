@@ -19,7 +19,7 @@ import 'best_player_page.dart';
 class PsychologicalMetricsPage extends StatefulWidget {
   final Isar isar;
 
-  PsychologicalMetricsPage({required this.isar});
+  const PsychologicalMetricsPage({super.key, required this.isar});
 
   @override
   _PsychologicalMetricsPageState createState() =>
@@ -54,7 +54,7 @@ class _PsychologicalMetricsPageState extends State<PsychologicalMetricsPage> {
     bioData = await IsarService().getBioData();
     if (bioData !=
         null) {
-      String fullName = bioData!.firstName! + " " + bioData!.lastName!; // Check if bioData is not null before accessing its properties
+      String fullName = "${bioData!.firstName!} ${bioData!.lastName!}"; // Check if bioData is not null before accessing its properties
       setState(() {
         // Initialize selectedBioDepartment
         BioState = bioData!.state;
@@ -172,7 +172,7 @@ class _PsychologicalMetricsPageState extends State<PsychologicalMetricsPage> {
           // Navigate after successful sync
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => BestPlayerChartPage()),
+            MaterialPageRoute(builder: (context) => const BestPlayerChartPage()),
           ); // Navigate to next page
 
         } catch (e) {
@@ -184,7 +184,7 @@ class _PsychologicalMetricsPageState extends State<PsychologicalMetricsPage> {
 
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => BestPlayerChartPage()),
+            MaterialPageRoute(builder: (context) => const BestPlayerChartPage()),
           );
 
         }
@@ -196,7 +196,7 @@ class _PsychologicalMetricsPageState extends State<PsychologicalMetricsPage> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BestPlayerChartPage()),
+          MaterialPageRoute(builder: (context) => const BestPlayerChartPage()),
         );
 
 
@@ -425,7 +425,7 @@ class _PsychologicalMetricsPageState extends State<PsychologicalMetricsPage> {
         children: [
           Text('$index. $question', style: const TextStyle(fontSize: 16)),
           ExpansionTile(
-            title: const Text("Instructions: Click HERE to expand the list of all staff member in your facility (Excluding yourself).From the list, Press and Hold and Drag the cards either Upward or Downward to re-arrange the Best team player from top to down", style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: const Text("Instructions: Click HERE to expand the list of all staff member in your facility (Excluding yourself).From the list, Press and Hold and Drag the cards either Upward or Downward to re-arrange the Best team player from top to down", style: TextStyle(fontWeight: FontWeight.bold)),
             children: [
               _isLoadingStaffList // Show loading indicator while fetching staff list
                   ? const Center(child: CircularProgressIndicator())
@@ -513,7 +513,7 @@ class _PsychologicalMetricsPageState extends State<PsychologicalMetricsPage> {
       String challengeResponse = _responses['Do you have any challenge carrying out your duties?'];
       String neededMaterialsResponse = _responses['Do you have the needed materials to do your job?'];
 
-      if (collaborationResponse != null && supportResponse != null && collaborationResponse != supportResponse) {
+      if (collaborationResponse != supportResponse) {
         if (collaborationResponse == "Yes" && supportResponse == "No"){
           Fluttertoast.showToast(
             msg: 'You responded that there is good collaboration among your team members BUT Do you get good support from your team members. Please review your answers.',
@@ -534,7 +534,7 @@ class _PsychologicalMetricsPageState extends State<PsychologicalMetricsPage> {
 
       }
 
-      if (challengeResponse != null && neededMaterialsResponse != null && challengeResponse == neededMaterialsResponse) {
+      if (challengeResponse == neededMaterialsResponse) {
         if (challengeResponse == "No" && neededMaterialsResponse == "No"){
           Fluttertoast.showToast(
             msg: 'You responded that you DO NOT HAVE any challenge carrying out your duties BUT YOU ALSO DO NOT HAVE the needed materials to do your job.Not having the needed materials is also a challenge. Please review your answers.',
@@ -592,7 +592,7 @@ class _PsychologicalMetricsPageState extends State<PsychologicalMetricsPage> {
                 final questionId = question['id'] ?? '';
                 final questionType = question['type'] ?? '';
                 final questionText = question['question'] ?? '';
-                final answer = _responses?[questionText] ?? [];
+                final answer = _responses[questionText] ?? [];
 
                 return {
                   questionText: answer,

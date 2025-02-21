@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:attendanceapp/Pages/Attendance/button.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
 import 'package:attendanceapp/services/isar_service.dart';
 import 'package:attendanceapp/widgets/dashboard_widget.dart';
@@ -76,7 +75,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
 
   void _checkTimeAndTriggerNotification() {
     final now = DateTime.now();
-    print("Current Time === ${now}");
+    print("Current Time === $now");
     // if (now.hour == 8 && now.minute == 0) {
     //   notifyHelper.displayNotification(
     //       title: "Clock In Notification", body: "It's 8 AM, don't forget to clock in!");
@@ -108,7 +107,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
         clockInSet.add(clockLength.clockIn);
       }
     }
-    return clockInSet.length == 0 ? 0 : clockInSet.length;
+    return clockInSet.isEmpty ? 0 : clockInSet.length;
   }
 
   // Future<int> getCurrentDateRecordCount() async {
@@ -127,7 +126,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
         clockOutSet.add(clockLength.clockOut);
       }
     }
-    return clockOutSet.length == 0 ? 0 : clockOutSet.length;
+    return clockOutSet.isEmpty ? 0 : clockOutSet.length;
   }
 
   getTotalHoursWorked(List entireData) {
@@ -173,7 +172,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             "Admin DashBoard",
             style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
           ),
@@ -199,7 +198,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MyFlutterApp()),
+                        builder: (context) => const MyFlutterApp()),
                   );
                 } else if (value == 'option2') {
                   // Do something for option 2
@@ -208,10 +207,10 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
               },
               itemBuilder: (BuildContext context) {
                 return [
-                  PopupMenuItem<String>(
+                  const PopupMenuItem<String>(
                     value: 'option1',
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(Icons.access_alarm, color: Colors.red,),
                         SizedBox(width: 8),
                         Text('Background Service'),
@@ -246,14 +245,14 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
             stream: widget.service.getHourWorkedForMonth(_month),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Center(
+                return const Center(
                   child: Text("Unexpected Error!"),
                 );
               }
 
               if (snapshot.hasData) {
                 if (snapshot.data!.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Text("No Attendance Yet for the Month"),
                   );
                 }
@@ -291,7 +290,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                                   builder: (context, child) {
                                     return Theme(
                                       data: Theme.of(context).copyWith(
-                                        colorScheme: ColorScheme.light(
+                                        colorScheme: const ColorScheme.light(
                                           primary: Colors.red,
                                           secondary: Colors.red,
                                           onSecondary: Colors.white,
@@ -341,9 +340,9 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                     // Next Create card
                     Container(
                       width: MediaQuery.of(context).size.width * 0.9,
-                      margin: EdgeInsets.all(12.0),
+                      margin: const EdgeInsets.all(12.0),
                       child: Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
                               Colors.red,
@@ -354,11 +353,11 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                             Radius.circular(24),
                           ),
                         ),
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                             vertical: 12.0, horizontal: 8.0),
                         child: Column(
                           children: [
-                            Text(
+                            const Text(
                               "Attendance Summary",
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -367,23 +366,23 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 12.0,
                             ),
                             Text(
                               "Total Hours Worked = ${getTotalHoursandMins(getTotalHoursWorked(snapshot.data!))}",
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16.0,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 12.0,
                             ),
                             Padding(
-                              padding: EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -403,9 +402,9 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                     dataSet.isEmpty
                         ? Container(
                             //height: MediaQuery.of(context).size.width*0.95,//300
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 8.0, vertical: 20.0),
-                            margin: EdgeInsets.all(12),
+                            margin: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8.0),
                               boxShadow: [
@@ -413,7 +412,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                                   color: Colors.grey.withOpacity(0.4),
                                   spreadRadius: 5,
                                   blurRadius: 6,
-                                  offset: Offset(0, 4),
+                                  offset: const Offset(0, 4),
                                 )
                               ],
                               color: Colors.white,
@@ -430,9 +429,9 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                           )
                         : Container(
                             height: MediaQuery.of(context).size.width * 0.95,
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 8.0, vertical: 20.0),
-                            margin: EdgeInsets.all(12),
+                            margin: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8.0),
                               boxShadow: [
@@ -440,7 +439,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                                   color: Colors.grey.withOpacity(0.4),
                                   spreadRadius: 5,
                                   blurRadius: 6,
-                                  offset: Offset(0, 4),
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                               color: Colors.white,
@@ -453,7 +452,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                                       spots: getPlotPoints(snapshot.data!),
                                       isCurved: false,
                                       barWidth: 2.5,
-                                      color: Color.fromARGB(255, 63, 7, 3),
+                                      color: const Color.fromARGB(255, 63, 7, 3),
                                     )
                                   ]),
                             ),
@@ -475,13 +474,13 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                         stream: widget.service.getDaysOffForMonth(_month),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
-                            return Center(
+                            return const Center(
                               child: Text("UnExpected Error!"),
                             );
                           }
                           if (snapshot.hasData) {
                             if (snapshot.data!.isEmpty) {
-                              return Center(
+                              return const Center(
                                 child: Text("No Day Off for the Month"),
                               );
                             }
@@ -517,7 +516,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                                             Expanded(
                                               child: Container(
                                                 margin: const EdgeInsets.only(),
-                                                decoration: BoxDecoration(
+                                                decoration: const BoxDecoration(
                                                   gradient: LinearGradient(
                                                     colors: [
                                                       Colors.red,
@@ -549,7 +548,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                                                         ),
                                                       ),
                                                     ),
-                                                    SizedBox(height: 2),
+                                                    const SizedBox(height: 2),
                                                     Center(
                                                       // Reasons For Day Off
 
@@ -663,7 +662,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                               },
                             );
                           } else {
-                            return Center(
+                            return const Center(
                                 child: Text("No Day Off Recorded !!"));
                           }
                         },
@@ -691,24 +690,24 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20.0),
           ),
-          padding: EdgeInsets.all(6.0),
+          padding: const EdgeInsets.all(6.0),
+          margin: const EdgeInsets.only(right: 8.0),
           child: Icon(
             Icons.arrow_downward,
             size: 28.0,
             color: Colors.green[700],
           ),
-          margin: EdgeInsets.only(right: 8.0),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Clock-In Total",
               style: TextStyle(fontSize: 14.0, color: Colors.white),
             ),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w700,
                   color: Colors.white),
@@ -727,24 +726,24 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20.0),
           ),
-          padding: EdgeInsets.all(6.0),
+          padding: const EdgeInsets.all(6.0),
+          margin: const EdgeInsets.only(right: 8.0),
           child: Icon(
             Icons.arrow_upward,
             size: 28.0,
             color: Colors.red[700],
           ),
-          margin: EdgeInsets.only(right: 8.0),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Clock-Out Total",
               style: TextStyle(fontSize: 14.0, color: Colors.white),
             ),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w700,
                   color: Colors.white),
@@ -778,7 +777,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
         ),
         child: Center(
           child: Text(label,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 16, color: Colors.white, fontFamily: "NexaBold")),
         ),
       ),
@@ -807,7 +806,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                     color: Colors.deepOrange,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 _bottomSheetButton(
                   label: "Local Backup",
                   onTap: () async {
@@ -833,7 +832,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                   clr: Colors.orange,
                   context: context,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 _bottomSheetButton(
@@ -845,7 +844,7 @@ class _AdminDashBoardState extends State<AdminDashBoard> {
                   isClose: true,
                   context: context,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
               ],

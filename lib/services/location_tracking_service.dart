@@ -46,7 +46,7 @@ class LocationTrackingService {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
 
-    print("New Position LocationTrackingService ==== ${position}");
+    print("New Position LocationTrackingService ==== $position");
 
     // Store in Isar Database
     // Assuming you have a model for location data and a method to save it in Isar

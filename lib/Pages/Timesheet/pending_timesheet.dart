@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PendingTimesheetsScreen extends StatefulWidget {
+  const PendingTimesheetsScreen({super.key});
+
   @override
   _PendingTimesheetsScreenState createState() => _PendingTimesheetsScreenState();
 }
@@ -12,7 +14,7 @@ class _PendingTimesheetsScreenState extends State<PendingTimesheetsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pending Timesheets'),
+        title: const Text('Pending Timesheets'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -22,11 +24,11 @@ class _PendingTimesheetsScreenState extends State<PendingTimesheetsScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No pending timesheets.'));
+            return const Center(child: Text('No pending timesheets.'));
           } else {
             return ListView.builder(
               itemCount: snapshot.data!.docs.length,

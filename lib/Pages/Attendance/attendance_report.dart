@@ -15,16 +15,18 @@ class LocationRecord {
 }
 
 class AttendanceReportPage extends StatefulWidget {
+  const AttendanceReportPage({super.key});
+
   @override
   _AttendanceReportPageState createState() => _AttendanceReportPageState();
 }
 
 class _AttendanceReportPageState extends State<AttendanceReportPage> {
-  DateTime _startDate = DateTime.now().subtract(Duration(days: 5));
+  DateTime _startDate = DateTime.now().subtract(const Duration(days: 5));
   DateTime _endDate = DateTime.now();
 
   late Stream<List<AttendanceModel>> _attendanceStream;
-  DateRangePickerController _datePickerController = DateRangePickerController();
+  final DateRangePickerController _datePickerController = DateRangePickerController();
 
   @override
   void initState() {
@@ -32,7 +34,7 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
     //_attendanceStream = _listenToAttendance();
     _testIsarQuery();
     _attendanceStream = _getAttendanceStream(_startDate, _endDate);
-    print("_attendanceStream ==${_attendanceStream}");
+    print("_attendanceStream ==$_attendanceStream");
     _datePickerController.selectedRange = PickerDateRange(_startDate, _endDate);
   }
 
@@ -73,7 +75,7 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
         children: [
           // Date Range Picker Section
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Card(
               elevation: 5,
               shape: RoundedRectangleBorder(
@@ -87,11 +89,11 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
                 onSelectionChanged: _onSelectionChanged,
                 selectionMode: DateRangePickerSelectionMode.range,
                 initialSelectedRange: PickerDateRange(_startDate, _endDate),
-                headerStyle: DateRangePickerHeaderStyle(
+                headerStyle: const DateRangePickerHeaderStyle(
                   backgroundColor: Colors.black38,
                   textStyle: TextStyle(color: Colors.white),
                 ),
-                monthViewSettings: DateRangePickerMonthViewSettings(
+                monthViewSettings: const DateRangePickerMonthViewSettings(
                   showTrailingAndLeadingDates: false,
                 ),
               ),),
@@ -122,29 +124,29 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
                       children: [
                         // Summary Card
                         _buildSummaryCard(attendance),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
 
                         // Charts Section
                         _buildChartCard(
                           'Clock-In and Clock-Out Trends',
                           _buildClockInOutTrendsChart(attendance),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         _buildChartCard(
                           'Distribution of Hours Worked',
                           _buildDurationWorkedDistributionChart(attendance),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         _buildChartCard(
                           'Attendance by Location',
                           _buildAttendanceByLocationChart(attendance),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         _buildChartCard(
                           'Early or Late Clock-Ins',
                           _buildEarlyLateClockInsChart(attendance),
                         ),
-                        SizedBox(height: 20), // Add bottom padding
+                        const SizedBox(height: 20), // Add bottom padding
                       ],
                     ),
                   );
@@ -188,7 +190,7 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Summary',
               style: TextStyle(
                 fontSize: 20,
@@ -196,7 +198,7 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
                 color: Colors.black87, // Darker text color for contrast
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             _buildSummaryRow('Total Days Selected:', '${(_endDate.difference(_startDate).inDays) + 1}'),
             _buildSummaryRow('Total Days Worked: ', '${attendance.length}'),
             _buildSummaryRow('Total Hours Worked:', '${totalHoursWorked.toStringAsFixed(1)} hours'),
@@ -213,16 +215,16 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         height: 400, // Set an explicit height for the chart containers
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Expanded(child: chart),
           ],
         ),
@@ -237,10 +239,10 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
         .toList();
 
     return SfCartesianChart(
-      primaryXAxis: CategoryAxis(
+      primaryXAxis: const CategoryAxis(
         title: AxisTitle(text: 'Days'),
       ),
-      primaryYAxis: NumericAxis(
+      primaryYAxis: const NumericAxis(
         title: AxisTitle(text: 'Time of Day'),
       ),
       tooltipBehavior: TooltipBehavior(
@@ -262,7 +264,7 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
             builder: (data, point, series, pointIndex, seriesIndex) {
               return Text(
                 timeFormat.format(timeFormat.parse(data.clockIn)),
-                style: TextStyle(fontSize: 10),
+                style: const TextStyle(fontSize: 10),
               );
             },
           ),
@@ -281,7 +283,7 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
             builder: (data, point, series, pointIndex, seriesIndex) {
               return Text(
                 timeFormat.format(timeFormat.parse(data.clockOut)),
-                style: TextStyle(fontSize: 10),
+                style: const TextStyle(fontSize: 10),
               );
             },
           ),
@@ -292,10 +294,10 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
 
   Widget _buildDurationWorkedDistributionChart(List<AttendanceModel> attendanceData) {
     return SfCartesianChart(
-      primaryXAxis: NumericAxis(
+      primaryXAxis: const NumericAxis(
         title: AxisTitle(text: 'Duration of Hours Worked'),
       ),
-      primaryYAxis: NumericAxis(
+      primaryYAxis: const NumericAxis(
         title: AxisTitle(text: 'Frequency'),
       ),
       tooltipBehavior: TooltipBehavior(enable: true),
@@ -305,7 +307,7 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
           yValueMapper: (data, _) => DateHelper.calculateHoursWorked(data.clockIn!, data.clockOut ?? ''),
           binInterval: 1,
           color: Colors.purple,
-          dataLabelSettings: DataLabelSettings(
+          dataLabelSettings: const DataLabelSettings(
             isVisible: true,
           ),
         ),
@@ -329,14 +331,14 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
   Widget _buildAttendanceByLocationChart(List<AttendanceModel> attendanceData) {
     List<LocationRecord> locationData = _getLocationData(attendanceData);
     return SfCircularChart(
-      title: ChartTitle(text: 'Attendance by Location'),
-      legend: Legend(isVisible: true),
+      title: const ChartTitle(text: 'Attendance by Location'),
+      legend: const Legend(isVisible: true),
       series: <CircularSeries>[
         PieSeries<LocationRecord, String>(
           dataSource: locationData,
           xValueMapper: (LocationRecord data, _) => data.location,
           yValueMapper: (LocationRecord data, _) => data.attendanceCount,
-          dataLabelSettings: DataLabelSettings(isVisible: true),
+          dataLabelSettings: const DataLabelSettings(isVisible: true),
         ),
       ],
     );
@@ -354,11 +356,11 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
       };
     }).toList();
     return SfCartesianChart(
-      primaryXAxis: CategoryAxis(
+      primaryXAxis: const CategoryAxis(
         title: AxisTitle(text: 'Days'),
       ),
       primaryYAxis: NumericAxis(
-        title: AxisTitle(text: 'Minutes Before/After 8:00 AM'),
+        title: const AxisTitle(text: 'Minutes Before/After 8:00 AM'),
         minimum: chartData.map((data) => data['earlyLateMinutes'] as int).reduce((a, b) => a < b ? a : b) < 0
             ? chartData.map((data) => data['earlyLateMinutes'] as int).reduce((a, b) => a < b ? a : b).toDouble()
             : null,
@@ -379,7 +381,7 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
             builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
               return Text(
                 '${data['clockInTime']} (${data['earlyLateMinutes']} mins)',
-                style: TextStyle(fontSize: 10),
+                style: const TextStyle(fontSize: 10),
               );
             },
           ),
@@ -392,8 +394,8 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('$label: ', style: TextStyle(fontSize: 16)),
-        Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('$label: ', style: const TextStyle(fontSize: 16)),
+        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }

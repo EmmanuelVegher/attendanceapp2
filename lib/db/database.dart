@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 class DataBaseService {
@@ -19,8 +17,8 @@ class DataBaseService {
   late File jsonFile;
 
   // Data learned on memory
-  Map<String, dynamic> _db = Map<String, dynamic>();
-  Map<String, dynamic> get db => this._db;
+  Map<String, dynamic> _db = <String, dynamic>{};
+  Map<String, dynamic> get db => _db;
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -38,7 +36,7 @@ class DataBaseService {
 
   Future<File> get _localFile async {
     final path = await _localPath;
-    print('path ${path}');
+    print('path $path');
     return File('$path//emb.json');
   }
 
@@ -50,12 +48,13 @@ class DataBaseService {
     } catch (e) {
       return 0;
     }
+    return null;
   }
 
   // loads a simple json file.
   Future loadDB() async {
     var tempDir = await getApplicationDocumentsDirectory();
-    final filePath = tempDir.path + '/emb.json';
+    final filePath = '${tempDir.path}/emb.json';
     final file = File(filePath);
 
     //jsonFile = new File(_embPath);
@@ -97,9 +96,9 @@ class DataBaseService {
       //   });
       // }
       //ConvertBack to string in the directory path
-      String _embPath = tempDir.path + '/emb.json';
+      String embPath = '${tempDir.path}/emb.json';
 
-      jsonFile = new File(_embPath);
+      jsonFile = File(embPath);
 
       if (jsonFile.existsSync()) {
         _db = json.decode(jsonFile.readAsStringSync());
@@ -109,13 +108,13 @@ class DataBaseService {
     // [Name]: name of the new user
     // [Data]: Face representation for Machine Learning model
     Future saveData(String user, String password, List modelData) async {
-      String userAndPass = user + ':' + password;
+      String userAndPass = '$user:$password';
       _db[userAndPass] = modelData;
       jsonFile.writeAsStringSync(json.encode(_db));
 
       var tempDir = await getApplicationDocumentsDirectory();
-      String _embPath = tempDir.path + '/emb.json';
-      File file = File(_embPath);
+      String embPath = '${tempDir.path}/emb.json';
+      File file = File(embPath);
 
       try {
         // await mountainsRef.putFile(file);
@@ -175,7 +174,7 @@ class DataBaseService {
 
     // deletes the created users
     cleanDB() {
-      this._db = Map<String, dynamic>();
+      _db = <String, dynamic>{};
       jsonFile.writeAsStringSync(json.encode({}));
     }
   }

@@ -41,7 +41,7 @@ class NotifyHelper {
     }
 
     // Android-specific initialization settings.
-    final AndroidInitializationSettings initializationSettingsAndroid =
+    const AndroidInitializationSettings initializationSettingsAndroid =
     AndroidInitializationSettings('notification_icon'); // Replace 'notification_icon' with your app's notification icon name from the 'android' folder in your project.
 
     // iOS-specific initialization settings.
@@ -53,7 +53,7 @@ class NotifyHelper {
     );
 
     // Combine platform-specific settings.
-    final InitializationSettings initializationSettings =
+    const InitializationSettings initializationSettings =
     InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsDarwin, // Use Darwin for both iOS and macOS
@@ -108,7 +108,7 @@ class NotifyHelper {
           android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
 
 
-      tz.TZDateTime scheduledDate = _calculateScheduledTime(hour, minute, task.repeat!);
+      tz.TZDateTime scheduledDate = _calculateScheduledTime(hour, minute, task.repeat);
 
       await flutterLocalNotificationsPlugin.zonedSchedule(
         task.id!.toInt(),
@@ -247,7 +247,7 @@ class NotifyHelper {
     print("tz.initializeTimeZonesBeforeChange()======${tz.Location}");
     tz.Location nigeriaTimeZone = tz.getLocation('Africa/Lagos');
 
-    print("tz.initializeTimeZonesAfterChange()======${nigeriaTimeZone}");
+    print("tz.initializeTimeZonesAfterChange()======$nigeriaTimeZone");
   }
 
   // Displays a notification immediately.

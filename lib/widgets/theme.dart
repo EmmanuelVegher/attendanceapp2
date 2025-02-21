@@ -98,7 +98,7 @@ class Themes{
   static final dark = ThemeData(
     fontFamily: "customFont",
     primaryColor: darkGreyClr,
-    brightness: Brightness.dark, colorScheme: ColorScheme.fromSwatch(primarySwatch: PrimaryMaterialColor).copyWith(background: darkGreyClr),
+    brightness: Brightness.dark, colorScheme: ColorScheme.fromSwatch(primarySwatch: PrimaryMaterialColor).copyWith(surface: darkGreyClr),
   );
 }
 

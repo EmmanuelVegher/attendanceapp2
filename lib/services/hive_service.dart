@@ -70,6 +70,7 @@ class HiveService extends DatabaseAdapter {
     await box.delete('imagesSignature');
   }
 
+  @override
   Future<void> clearSignatureImages1() async {
     var box = await Hive.openBox('imageSignatureBox');
     await box.clear();

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TimesheetTable extends StatefulWidget {
+  const TimesheetTable({super.key});
+
   @override
   _TimesheetTableState createState() => _TimesheetTableState();
 }
@@ -31,7 +33,7 @@ class _TimesheetTableState extends State<TimesheetTable> {
   Widget build(BuildContext context) {
     return Table(
       border: TableBorder.all(),
-      columnWidths: {0: const FixedColumnWidth(120)}, // Fix width for the Project column
+      columnWidths: const {0: FixedColumnWidth(120)}, // Fix width for the Project column
       children: [
         _buildHeaderRow(),
         _buildDateRow(),

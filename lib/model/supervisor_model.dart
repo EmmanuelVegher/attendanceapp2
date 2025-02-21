@@ -1,4 +1,3 @@
-import 'package:attendanceapp/model/statemodel.dart';
 import 'package:isar/isar.dart';
 part 'supervisor_model.g.dart';
 

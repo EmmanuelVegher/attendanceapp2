@@ -1,4 +1,3 @@
-import 'package:attendanceapp/model/departmentmodel.dart';
 import 'package:isar/isar.dart';
 part 'marital_status_model.g.dart';
 

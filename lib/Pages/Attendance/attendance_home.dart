@@ -91,20 +91,20 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
   late SharedPreferences sharedPreferences;
   late StreamSubscription subscription;
   bool _isBusy = false;
-  OpenFileDialogType _dialogType = OpenFileDialogType.document;
-  SourceType _sourceType = SourceType.photoLibrary;
-  bool _allowEditing = false;
+  final OpenFileDialogType _dialogType = OpenFileDialogType.document;
+  final SourceType _sourceType = SourceType.photoLibrary;
+  final bool _allowEditing = false;
   File? _currentFile;
 
-  bool _localOnly = false;
-  bool _copyFileToCacheDir = true;
+  final bool _localOnly = false;
+  final bool _copyFileToCacheDir = true;
   bool isAppCheckShown = false;
   String? _pickedFilePath;
   var notifyHelper;
   var _timer;
 
   DirectoryLocation? _pickedDirecotry;
-  Future<bool> _isPickDirectorySupported =
+  final Future<bool> _isPickDirectorySupported =
       FlutterFileDialog.isPickDirectorySupported();
   //AESEncryption encryption = new AESEncryption();
   List localFileSave = [];
@@ -208,7 +208,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
 
   void _checkTimeAndTriggerNotification() {
     final now = DateTime.now();
-    print("Current Time === ${now}");
+    print("Current Time === $now");
 
   }
 
@@ -267,8 +267,8 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('Kindly choose your restore preference'),
-            content: Text(
+            title: const Text('Kindly choose your restore preference'),
+            content: const Text(
                 '''Kindly Note that this overides all data stored locally and restores all data from the chosen restore preference.
                 
  Warning!!!
@@ -293,11 +293,11 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                     //getConnectivity();
 
                     if (isDeviceConnected) {
-                      CircularProgressIndicator();
+                      const CircularProgressIndicator();
                       log("isDeviceConnectedIf===$isDeviceConnected");
                       await IsarService()
                           .removeAllAttendance(AttendanceModel());
-                      final CollectionReference snap3 = await FirebaseFirestore
+                      final CollectionReference snap3 = FirebaseFirestore
                           .instance
                           .collection('Staff')
                           .doc(firebaseAuthId)
@@ -347,7 +347,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                         widget.service.saveAttendance(attendnce);
                       }
                       print("FirebaseID ====$firebaseAuthId");
-                      CircularProgressIndicator(value: 0.0);
+                      const CircularProgressIndicator(value: 0.0);
                       Fluttertoast.showToast(
                           msg: "Sychning from server",
                           toastLength: Toast.LENGTH_LONG,
@@ -382,8 +382,8 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('Sync Attendance/ Local Backup'),
-            content: Text(
+            title: const Text('Sync Attendance/ Local Backup'),
+            content: const Text(
                 "Kindly Note that only attendance with Clock-out gets synced.So kindly clock-in and Clock-out before synchning "
                 //controller: _textFieldController,
                 //decoration: InputDecoration(hintText: "TextField in Dialog"),
@@ -396,7 +396,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                     try{
                       await _uploadImageToFirebaseServer();
                     }catch(e){
-                      log("_uploadImageToFirebaseServer Error: ${e}");
+                      log("_uploadImageToFirebaseServer Error: $e");
                     }
 
 
@@ -437,7 +437,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "My Attendance",
           style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
         ),
@@ -455,24 +455,24 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 20.0),
+            padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
                 _displayDialog2(context);
               },
-              child: Icon(
+              child: const Icon(
                 Icons.upload,
                 size: 26.0,
               ),
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(right: 20.0),
+            padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
                 _displayDialog(context);
               },
-              child: Icon(
+              child: const Icon(
                 Icons.download,
                 size: 26.0,
               ),
@@ -486,16 +486,16 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
       body: IndexedStack(
         index: currentIndex,
         children: [
-          new CalendarScreen(
+          CalendarScreen(
 
             service: IsarService(),
           ),
-          new ClockAttendance(
+          ClockAttendance(
             IsarService(), service: IsarService(), controller: null,
           ),
-         new AttendanceReportPage(),
+         const AttendanceReportPage(),
 
-          new ProfilePage(
+          const ProfilePage(
 
           ),
         ],
@@ -1133,7 +1133,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     try {
       // prefer using rename as it is probably faster
       return await sourceFile.rename(newPath);
-    } on FileSystemException catch (e) {
+    } on FileSystemException {
       // if rename fails, copy the source file and then delete it
       final newFile = await sourceFile.copy(newPath);
       await sourceFile.delete();
@@ -1190,7 +1190,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence = false;
         for (GeofenceModel office in offices) {
@@ -1212,7 +1212,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           location1 =
           "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-          print("Location from map === ${location1}");
+          print("Location from map === $location1");
         }
 
 
@@ -1254,7 +1254,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence = false;
         for (GeofenceModel office in offices) {
@@ -1276,7 +1276,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           location2 =
           "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-          print("Location from map === ${location2}");
+          print("Location from map === $location2");
         }
 
         //Update all missing Clock In location
@@ -1324,7 +1324,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence = false;
         for (GeofenceModel office in offices) {
@@ -1346,7 +1346,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           location2 =
           "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-          print("Location from map === ${location2}");
+          print("Location from map === $location2");
         }
 
         //Input the queried latitude and Lngitude, but also assign 0.0 to any null Latitude and Longitude
@@ -1395,7 +1395,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     String noOfHours1,
     String comments1,
   ) async {
-    final user = await User(
+    final user = User(
         state: state1,
         project: project1,
         firstName: firstName1,
@@ -1480,10 +1480,10 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
               final timestamp = data['appVersionDate'] as Timestamp;
               final appVersionDate = timestamp.toDate();
               final versionNumber = data['appVersion'];
-              DateTime newappVersionDate = appVersionDate.add(Duration(days: 16));
+              DateTime newappVersionDate = appVersionDate.add(const Duration(days: 16));
 
-              print("appVersionDate ====${appVersionDate}");
-              print("versionNumber ====${versionNumber}");
+              print("appVersionDate ====$appVersionDate");
+              print("versionNumber ====$versionNumber");
 
               if (getAppVersion[0].appVersion != versionNumber
                   // &&
@@ -1495,10 +1495,10 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                   // Prevent dismissing by tapping outside
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text('Update Available'),
+                      title: const Text('Update Available'),
                       content: Text(
                           'You are using an older version of the app (${getAppVersion[0]
-                              .appVersion}). Please update to the latest version (${versionNumber}), updated on ${DateFormat('MMMM dd, yyyy').format(appVersionDate)}. Kindly Note that you would be logged out on ${DateFormat('MMMM dd, yyyy').format(newappVersionDate)} if you do not upgrade to the latest version (${versionNumber})'),
+                              .appVersion}). Please update to the latest version ($versionNumber), updated on ${DateFormat('MMMM dd, yyyy').format(appVersionDate)}. Kindly Note that you would be logged out on ${DateFormat('MMMM dd, yyyy').format(newappVersionDate)} if you do not upgrade to the latest version ($versionNumber)'),
                       actions: <Widget>[
                         TextButton(
                           onPressed: () async {
@@ -1507,7 +1507,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                                 1, AppVersionModel(), DateTime.now(),false);
                             Navigator.of(context).pop(); // Close the dialog
                           },
-                          child: Text('Close'),
+                          child: const Text('Close'),
                         ),
                       ],
                     );
@@ -1536,7 +1536,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
               final timestamp = data['LastUpdateDate'] as Timestamp;
               final LastUpdateDate = timestamp.toDate();
 
-              print("appVersionDate ====${LastUpdateDate}");
+              print("appVersionDate ====$LastUpdateDate");
 
               if (LastUpdateDate.isAfter(
                   getlastUpdateDate[0].lastUpdateDate!) || DateFormat('dd/MM/yyyy').format(LastUpdateDate) == DateFormat('dd/MM/yyyy').format(DateTime.now())) {
@@ -1756,7 +1756,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
 
           final versionNumber = data['appVersion'];
 
-          print("versionNumber ====${versionNumber}");
+          print("versionNumber ====$versionNumber");
 
           if (getAppVersion[0].appVersion != versionNumber) {
             showDialog(
@@ -1765,10 +1765,10 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
               // Prevent dismissing by tapping outside
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text('Update Available'),
+                  title: const Text('Update Available'),
                   content: Text(
                       'You are using an older version of the app (${getAppVersion[0]
-                          .appVersion}). Please update to the latest version (${versionNumber}). Kindly Note that you would be logged out after 15 days if you do not upgrade to the latest version (${versionNumber})'),
+                          .appVersion}). Please update to the latest version ($versionNumber). Kindly Note that you would be logged out after 15 days if you do not upgrade to the latest version ($versionNumber)'),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () async {
@@ -1777,7 +1777,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                             1, AppVersionModel(), DateTime.now(),false);
                         Navigator.of(context).pop(); // Close the dialog
                       },
-                      child: Text('Close'),
+                      child: const Text('Close'),
                     ),
                   ],
                 );
@@ -1831,7 +1831,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
       for (final lgaDoc in lgaCollectionRef.docs) {
         final lga = lgaDoc.id;
         // print("lgaSnap====${lga}");
-        final data = lgaDoc.data() as Map<String, dynamic>;
+        final data = lgaDoc.data();
         //print("data====${data}");
 
         final locationSave = LocationModel()
@@ -1955,7 +1955,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
       for (final designationDoc in designationCollectionRef.docs) {
         final designation = designationDoc.id;
         // print("lgaSnap====${lga}");
-        final data = designationDoc.data() as Map<String, dynamic>;
+        final data = designationDoc.data();
         //print("data====${data}");
 
         final designationSave = DesignationModel()
@@ -2003,7 +2003,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           final timestamp = data['LastUpdateDate'] as Timestamp;
           final lastUpdate = timestamp.toDate();
 
-          print("LastUpdateDate ====${lastUpdate}");
+          print("LastUpdateDate ====$lastUpdate");
 
           final lastUpdateSave = LastUpdateDateModel()
             ..lastUpdateDate = lastUpdate;
@@ -2025,7 +2025,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
   Future<void> _insertVersion() async {
     final getAppVersion = await IsarService().getAppVersionInfo();
 
-    if (getAppVersion.length == 0) {
+    if (getAppVersion.isEmpty) {
       final appVersion = AppVersionModel()
         ..appVersion = appVersionConstant;
 
@@ -2048,7 +2048,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
 
       for (final supervisorDoc in supervisorCollectionRef.docs) {
         final supervisor = supervisorDoc.id;
-        final data = supervisorDoc.data() as Map<String, dynamic>;
+        final data = supervisorDoc.data();
 
         final supervisorSave = SupervisorModel()
           ..department = data['department']
@@ -2085,8 +2085,8 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
           final appVersionDate = timestamp.toDate();
           final versionNumber = data['appVersion'];
 
-          print("appVersionDate ====${appVersionDate}");
-          print("versionNumber ====${versionNumber}");
+          print("appVersionDate ====$appVersionDate");
+          print("versionNumber ====$versionNumber");
 
           if(getAppVersion[0].appVersion == versionNumber){
             await service.updateAppVersion1(1,AppVersionModel(),appVersionDate,DateTime.now(),true);

@@ -5,16 +5,16 @@ import 'package:get/get.dart';
 
 class AttendanceTile extends StatelessWidget {
   final Attendance? attendance;
-  AttendanceTile(this.attendance);
+  const AttendanceTile(this.attendance, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       width: MediaQuery.of(context).size.width,
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         //  width: SizeConfig.screenWidth * 0.78,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -40,7 +40,7 @@ class AttendanceTile extends StatelessWidget {
                         color: Colors.white),
                   ),*/
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 12,
                 ),
                 Row(
@@ -51,14 +51,14 @@ class AttendanceTile extends StatelessWidget {
                       color: Colors.grey[200],
                       size: 18,
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
                       "${attendance!.clockIn} - ${attendance!.clockOut}",
                       style: TextStyle(fontSize: 13, color: Colors.grey[100]),
                     ),
                   ],
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Text(
                   attendance?.date ?? "",
                   style: TextStyle(fontSize: 15, color: Colors.grey[100]),
@@ -67,7 +67,7 @@ class AttendanceTile extends StatelessWidget {
             ),
           ),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 10),
+            margin: const EdgeInsets.symmetric(horizontal: 10),
             height: 60,
             width: 0.5,
             color: Colors.grey[200]!.withOpacity(0.7),
@@ -76,7 +76,7 @@ class AttendanceTile extends StatelessWidget {
             quarterTurns: 3,
             child: Text(
               attendance!.isSynced == 1 ? "SYNCED" : "NOT SYNCED",
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   color: Colors.white),

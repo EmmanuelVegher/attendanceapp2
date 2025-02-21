@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:geolocator/geolocator.dart';
-import 'package:gps_connectivity/gps_connectivity.dart';
+//import 'package:gps_connectivity/gps_connectivity.dart';
 import 'package:location/location.dart' as locationPkg;
 import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
@@ -51,7 +51,7 @@ class ClockAttendance extends StatelessWidget {
   final IsarService service;
 
 
-  ClockAttendance(IsarService isarService, {Key? key, required this.service, required controller})
+  const ClockAttendance(IsarService isarService, {Key? key, required this.service, required controller})
       : super(key: key);
 
   @override
@@ -158,7 +158,7 @@ class ClockAttendance extends StatelessWidget {
                         fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.030),
                       ),
                     ),),
-                    SizedBox(height: 10), // Spacing between status and coordinates
+                    const SizedBox(height: 10), // Spacing between status and coordinates
                     Obx(() =>
                         Card(
 
@@ -191,7 +191,7 @@ class ClockAttendance extends StatelessWidget {
                                     color: Colors.blueGrey, // Change color to blueGrey
                                   ),
                                 ),),
-                                SizedBox(height: 10),
+                                const SizedBox(height: 10),
                                 // ... Add other location-related Obx Text widgets here ...
 
                             IntrinsicWidth(child:Text(
@@ -201,7 +201,7 @@ class ClockAttendance extends StatelessWidget {
                                     fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.023),
                                   ),
                                 ),),
-                                SizedBox(height: 10), // Spacing between status and coordinates
+                                const SizedBox(height: 10), // Spacing between status and coordinates
 
                             IntrinsicWidth(child: Text(
                                   "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
@@ -210,7 +210,7 @@ class ClockAttendance extends StatelessWidget {
                                     fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.023),
                                   ),
                                 ),),
-                                SizedBox(height: 10), // Spacing between status and coordinates
+                                const SizedBox(height: 10), // Spacing between status and coordinates
 
                             IntrinsicWidth(child: Text(
                                   "Coordinates Accuracy: ${controller.accuracy.value}, Altitude: ${controller.altitude.value} , Speed: ${controller.speed.value}, Speed Accuracy: ${controller.speedAccuracy.value}, Location Data Timestamp: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(controller.time.value.toInt()))} , Is Location Mocked?: ${controller.isMock.value}",
@@ -219,7 +219,7 @@ class ClockAttendance extends StatelessWidget {
                                     fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.045 : 0.023),
                                   ),
                                 ),),
-                                SizedBox(height: 10),
+                                const SizedBox(height: 10),
 
                             IntrinsicWidth(child:Text(
                                   "Current State: ${controller.administrativeArea.value}",
@@ -229,7 +229,7 @@ class ClockAttendance extends StatelessWidget {
                                   ),
                                 ),),
 
-                                SizedBox(height: 10),
+                                const SizedBox(height: 10),
 
                             IntrinsicWidth(child: Obx(() => Text(
                                   "Current Location: ${controller.location.value}",
@@ -461,7 +461,7 @@ class ClockAttendance extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(height: 10.0),
-                                    Container(
+                                    SizedBox(
                                       width:
                                       MediaQuery.of(context).size.width * 0.7,
                                       height:
@@ -711,7 +711,7 @@ class ClockAttendance extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(height: 10.0),
-                                    Container(
+                                    SizedBox(
                                       width:
                                       MediaQuery.of(context).size.width * 0.7,
                                       height:
@@ -831,7 +831,7 @@ class ClockAttendance extends StatelessWidget {
                       );
                     }
                     else{
-                        return CircularProgressIndicator();
+                        return const CircularProgressIndicator();
                     }
 
 
@@ -869,7 +869,7 @@ class ClockAttendance extends StatelessWidget {
                                         color: Colors.black54,
                                       ),
                                     ),
-                                    Text("--/--"),
+                                    const Text("--/--"),
                                   ],
                                 ),
                               ),
@@ -886,7 +886,7 @@ class ClockAttendance extends StatelessWidget {
                                         color: Colors.black54,
                                       ),
                                     ),
-                                    Text("--/--"),
+                                    const Text("--/--"),
 
                                   ],
                                 ),
@@ -990,7 +990,7 @@ class ClockAttendance extends StatelessWidget {
                           stream: controller.clockInStream,
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
-                              return SizedBox.shrink();
+                              return const SizedBox.shrink();
                             } else {
                               return Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -1001,7 +1001,7 @@ class ClockAttendance extends StatelessWidget {
                                     child: Container(
                                       width: MediaQuery.of(context).size.width * 0.70,
                                       height: MediaQuery.of(context).size.height * 0.05,
-                                      padding: EdgeInsets.only(left: 20.0, bottom: 0.0),
+                                      padding: const EdgeInsets.only(left: 20.0, bottom: 0.0),
                                       decoration: const BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
@@ -1079,7 +1079,7 @@ class ClockAttendance extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 10.0),
-                                Container(
+                                SizedBox(
                                   width:
                                   MediaQuery.of(context).size.width * 0.7,
                                   height:
@@ -1184,7 +1184,7 @@ class ClockAttendance extends StatelessWidget {
                         hintText: "Comments (If Any)",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15.0), // More pronounced curve
-                          borderSide: BorderSide(color: Colors.grey), // Customize border color
+                          borderSide: const BorderSide(color: Colors.grey), // Customize border color
                         ), // Add a border
                       ),),
                         //: SizedBox.shrink(),
@@ -1210,7 +1210,7 @@ class ClockAttendance extends StatelessWidget {
                           ),
                         ),
                         child:
-                        Center(
+                        const Center(
                           child: Text(
                             "Add Comment",
                             style: TextStyle(
@@ -1225,7 +1225,7 @@ class ClockAttendance extends StatelessWidget {
                        // :const SizedBox(height:0),
                   ],
                 ),
-              ):SizedBox.shrink(),
+              ):const SizedBox.shrink(),
 
             ],
           ),
@@ -1268,38 +1268,25 @@ class ClockAttendance extends StatelessWidget {
 
 
 
-    if(commentsForAttendance != null) {
-
-      await service.updateAttendanceWithComment(
-          attendanceId,
-          AttendanceModel(),
-          commentsForAttendance
-      );
-      Fluttertoast.showToast(
-        msg: "Adding Comments..",
-        toastLength: Toast.LENGTH_LONG,
-        backgroundColor: Colors.black54,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      Get.off(() =>
-      bioInfoForUser!.role == "User"
-          ? UserDashBoard(service: service)
-          : AdminDashBoard(service: service));
-    } else{
-      Fluttertoast.showToast(
-        msg: "Comments Box Cannot be empty..",
-        toastLength: Toast.LENGTH_LONG,
-        backgroundColor: Colors.black54,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+    await service.updateAttendanceWithComment(
+        attendanceId,
+        AttendanceModel(),
+        commentsForAttendance
+    );
+    Fluttertoast.showToast(
+      msg: "Adding Comments..",
+      toastLength: Toast.LENGTH_LONG,
+      backgroundColor: Colors.black54,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+    Get.off(() =>
+    bioInfoForUser!.role == "User"
+        ? UserDashBoard(service: service)
+        : AdminDashBoard(service: service));
     }
-  }
 
 
 }
@@ -1326,20 +1313,20 @@ class ClockAttendanceController extends GetxController {
 
   var isCircularProgressBarOn = true.obs; // Observable boolean
 
-  var _clockInStreamController = StreamController<String>.broadcast();
+  final _clockInStreamController = StreamController<String>.broadcast();
   Stream<String> get clockInStream => _clockInStreamController.stream;
 
-  var _clockOutStreamController = StreamController<String>.broadcast();
+  final _clockOutStreamController = StreamController<String>.broadcast();
   Stream<String> get clockOutStream => _clockOutStreamController.stream;
 
-  var _clockInLocationStreamController = StreamController<String>.broadcast();
+  final _clockInLocationStreamController = StreamController<String>.broadcast();
   Stream<String> get clockInLocationStream => _clockInLocationStreamController.stream;
 
-  var _clockOutLocationStreamController = StreamController<String>.broadcast();
+  final _clockOutLocationStreamController = StreamController<String>.broadcast();
   Stream<String> get clockOutLocationStream => _clockOutLocationStreamController.stream;
 
   // Create a stream for full name
-  var _fullNameStreamController = StreamController<String>.broadcast();
+  final _fullNameStreamController = StreamController<String>.broadcast();
   Stream<String> get fullNameStream => _fullNameStreamController.stream;
 
   RxString clockIn = "--/--".obs;
@@ -1452,20 +1439,20 @@ class ClockAttendanceController extends GetxController {
     //   }
     // });
 
-    subscription =
-        GpsConnectivity().onGpsConnectivityChanged.listen((bool isGpsEnabled) {
-
-            this.isGpsEnabled.value = isGpsEnabled;
-
-        });
-
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      GpsConnectivity().checkGpsConnectivity().then((bool isGpsEnabled) {
-
-          this.isGpsEnabled.value = isGpsEnabled;
-
-      });
-    });
+    // subscription =
+    //     GpsConnectivity().onGpsConnectivityChanged.listen((bool isGpsEnabled) {
+    //
+    //         this.isGpsEnabled.value = isGpsEnabled;
+    //
+    //     });
+    //
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   GpsConnectivity().checkGpsConnectivity().then((bool isGpsEnabled) {
+    //
+    //       this.isGpsEnabled.value = isGpsEnabled;
+    //
+    //   });
+    // });
 
     // // Start the periodic location updates
     // _locationTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
@@ -1826,7 +1813,7 @@ class ClockAttendanceController extends GetxController {
         }
 
         // Geofencing logic
-        if (administrativeArea.value != '' && administrativeArea.value != null) {
+        if (administrativeArea.value != '') {
           // Query Isar database for locations with the same administrative area
           List<LocationModel> isarLocations =
           await service.getLocationsByState(administrativeArea.value);
@@ -1840,7 +1827,7 @@ class ClockAttendanceController extends GetxController {
             radius: location.radius?.toDouble() ?? 0.0,
           )).toList();
 
-          print("Officessss == ${offices}");
+          print("Officessss == $offices");
 
           isInsideAnyGeofence.value = false;
           for (GeofenceModel office in offices) {
@@ -1955,24 +1942,11 @@ class ClockAttendanceController extends GetxController {
 
       Position? position1 = await Geolocator.getLastKnownPosition();
 
-      if (position != null) {
-
-        lati.value = position.latitude;
-        longi.value = position.longitude;
-        print("locationData.latitude == ${position.latitude}");
-        _updateLocation();
-      } else if (position1 != null){
-        // Store the latitude and longitude (e.g., in shared preferences, database, etc.)
-        print('Cached Latitude: ${position.latitude}');
-        print('Cached Longitude: ${position.longitude}');
-        lati.value = position1.latitude;
-        longi.value = position1.longitude;
-        _updateLocation();
-      }
-      else {
-        print('No last known location available.');
-      }
-
+      lati.value = position.latitude;
+      longi.value = position.longitude;
+      print("locationData.latitude == ${position.latitude}");
+      _updateLocation();
+    
 
 
     }
@@ -2006,7 +1980,7 @@ class ClockAttendanceController extends GetxController {
       }
 
       // Geofencing logic
-      if (administrativeArea.value != '' && administrativeArea.value != null) {
+      if (administrativeArea.value != '') {
         // Query Isar database for locations with the same administrative area
         List<LocationModel> isarLocations =
         await service.getLocationsByState(administrativeArea.value);
@@ -2020,7 +1994,7 @@ class ClockAttendanceController extends GetxController {
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence.value = false;
         for (GeofenceModel office in offices) {
@@ -2827,7 +2801,7 @@ class ClockAttendanceController extends GetxController {
                   //     ),
                   //   ),
                   // ),
-                  SizedBox(height: 10), // Spacing between status and coordinates
+                  const SizedBox(height: 10), // Spacing between status and coordinates
                   Obx(() => Text(
                     "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
                     style: TextStyle(
@@ -2835,7 +2809,7 @@ class ClockAttendanceController extends GetxController {
                       fontSize: screenWidth / 23,
                     ),
                   )),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Obx(() => Text(
                     "Current State: ${controller.administrativeArea.value}",
                     style: TextStyle(
@@ -2843,7 +2817,7 @@ class ClockAttendanceController extends GetxController {
                       fontSize: screenWidth / 23,
                     ),
                   )),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Obx(() => Text(
                     "Current Location: ${controller.location.value}",
                     style: TextStyle(
@@ -2851,7 +2825,7 @@ class ClockAttendanceController extends GetxController {
                       fontSize: screenWidth / 23,
                     ),
                   )),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   MyInputField(
                     title: "Date",
                     hint: DateFormat("dd/MM/yyyy").format(_selectedDate),
@@ -3059,7 +3033,7 @@ class ClockAttendanceController extends GetxController {
           timeInSecForIosWeb: 1,
           textColor: Colors.white,
           fontSize: 16.0);
-    } else if (attendanceLast.length == 0) {
+    } else if (attendanceLast.isEmpty) {
       final attendnce = AttendanceModel()
         ..clockIn = _startTime
         ..date = DateFormat('dd-MMMM-yyyy').format(_selectedDate)
@@ -3092,15 +3066,15 @@ class ClockAttendanceController extends GetxController {
   }
 
   void _getDateFromUser(StateSetter setState) async {
-    DateTime? _pickerDate = await showDatePicker(
+    DateTime? pickerDate = await showDatePicker(
       context: Get.context!,
       initialDate: DateTime.now(),
       firstDate: DateTime(2015),
       lastDate: DateTime(2090),
     );
-    if (_pickerDate != null) {
+    if (pickerDate != null) {
       setState(() {
-        _selectedDate = _pickerDate;
+        _selectedDate = pickerDate;
       });
     } else {
       print("It's null or something is wrong");
@@ -3110,19 +3084,17 @@ class ClockAttendanceController extends GetxController {
   void _getTimeFromUser(
       {required bool isStartTime, required StateSetter setState}) async {
     var pickedTime = await _showTimePicker();
-    String _formattedTime = pickedTime.format(Get.context!);
+    String formattedTime = pickedTime.format(Get.context!);
     print(pickedTime);
-    if (pickedTime == null) {
-      print("Time Canceled");
-    } else if (isStartTime) {
-      setState(() {
-        _startTime = _formattedTime;
-      });
-    } else {
-      setState(() {
-        _endTime = _formattedTime;
-      });
-    }
+    if (isStartTime) {
+    setState(() {
+      _startTime = formattedTime;
+    });
+  } else {
+    setState(() {
+      _endTime = formattedTime;
+    });
+  }
   }
 
   Future<TimeOfDay> _showTimePicker() async {

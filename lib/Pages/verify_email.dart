@@ -19,26 +19,26 @@ class _VerifyEmailState extends State<VerifyEmail> {
 
   @override
   Widget build(BuildContext context) {
-    double _headerHeight = 300;
+    double headerHeight = 300;
     return Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                height: _headerHeight,
-                child: HeaderWidget(_headerHeight, true, Icons.verified_user),
+              SizedBox(
+                height: headerHeight,
+                child: HeaderWidget(headerHeight, true, Icons.verified_user),
               ),
               SafeArea(
                 child: Container(
-                  margin: EdgeInsets.fromLTRB(25, 10, 25, 10),
-                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  margin: const EdgeInsets.fromLTRB(25, 10, 25, 10),
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: Column(
                     children: [
                       Container(
                         alignment: Alignment.topLeft,
-                        margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                        child: Column(
+                        margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                        child: const Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -64,7 +64,7 @@ class _VerifyEmailState extends State<VerifyEmail> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 10.0),
+                      const SizedBox(height: 10.0),
                       Form(
                         key: _formKey,
                         child: Column(
@@ -87,15 +87,15 @@ class _VerifyEmailState extends State<VerifyEmail> {
                             ),
                             */
 
-                            SizedBox(height: 10.0),
+                            const SizedBox(height: 10.0),
                             Container(
                               decoration:
                                   ThemeHelper().buttonBoxDecoration(context),
                               child: ElevatedButton(
                                 style: ThemeHelper().buttonStyle(),
-                                child: Padding(
+                                child: const Padding(
                                   padding:
-                                      const EdgeInsets.fromLTRB(40, 10, 40, 10),
+                                      EdgeInsets.fromLTRB(40, 10, 40, 10),
                                   child: Text(
                                     "Send Verification Email",
                                     style: TextStyle(
@@ -125,11 +125,11 @@ class _VerifyEmailState extends State<VerifyEmail> {
                                 },
                               ),
                             ),
-                            SizedBox(height: 30.0),
+                            const SizedBox(height: 30.0),
                             Text.rich(
                               TextSpan(
                                 children: [
-                                  TextSpan(text: "Verified your Email? "),
+                                  const TextSpan(text: "Verified your Email? "),
                                   TextSpan(
                                     text: 'Login',
                                     recognizer: TapGestureRecognizer()

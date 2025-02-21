@@ -20,7 +20,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   bool visible = false;
   final _auth = FirebaseAuth.instance;
-  final TextEditingController emailController = new TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   var role;
 
   @override
@@ -37,10 +37,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    double _headerHeight = 300;
+    double headerHeight = 300;
     return Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             "Forgot Password",
             style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
           ),
@@ -74,21 +74,21 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                height: _headerHeight,
+              SizedBox(
+                height: headerHeight,
                 child:
-                    HeaderWidget(_headerHeight, true, Icons.password_rounded),
+                    HeaderWidget(headerHeight, true, Icons.password_rounded),
               ),
               SafeArea(
                 child: Container(
-                  margin: EdgeInsets.fromLTRB(25, 10, 25, 10),
-                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  margin: const EdgeInsets.fromLTRB(25, 10, 25, 10),
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: Column(
                     children: [
                       Container(
                         alignment: Alignment.topLeft,
-                        margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                        child: Column(
+                        margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                        child: const Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -125,7 +125,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 40.0),
+                      const SizedBox(height: 40.0),
                       Form(
                         key: _formKey,
                         child: Column(
@@ -133,14 +133,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   "Email Address",
                                   style: TextStyle(
                                     color: Colors.black87,
                                     fontSize: 14,
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 10,
                                 ),
                                 Container(
@@ -154,7 +154,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       "Enter your email",
                                       IconButton(
                                         onPressed: () {},
-                                        icon: Icon(
+                                        icon: const Icon(
                                           Icons.email,
                                           color: Colors.black54,
                                         ),
@@ -165,7 +165,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       if ((!(val!.isEmpty) &&
                                               !RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
                                                   .hasMatch(val)) ||
-                                          (val != null && val.isEmpty)) {
+                                          (val.isEmpty)) {
                                         return "Enter a valid email address";
                                       }
                                       return null;
@@ -174,7 +174,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 25.0),
+                            const SizedBox(height: 25.0),
                             Container(
                               decoration:
                                   ThemeHelper().buttonBoxDecoration(context),
@@ -185,7 +185,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       const EdgeInsets.fromLTRB(40, 10, 40, 10),
                                   child: Text(
                                     "Send".toUpperCase(),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
@@ -212,11 +212,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 },
                               ),
                             ),
-                            SizedBox(height: 20.0),
+                            const SizedBox(height: 20.0),
                             Text.rich(
                               TextSpan(
                                 children: [
-                                  TextSpan(text: "Remember your password? "),
+                                  const TextSpan(text: "Remember your password? "),
                                   TextSpan(
                                     text: 'Login',
                                     recognizer: TapGestureRecognizer()
@@ -228,7 +228,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                                   service: IsarService())),
                                         );
                                       },
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.red,
                                         fontSize: 20),

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class EditTasks extends StatefulWidget {
   DocumentSnapshot docid;
-  EditTasks({required this.docid});
+  EditTasks({super.key, required this.docid});
 
   @override
   State<EditTasks> createState() => _EditTasksState();
@@ -30,19 +30,19 @@ class _EditTasksState extends State<EditTasks> {
                 'title': title.text,
               }).whenComplete(() {
                 Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (_) => TaskManagerHomePage()));
+                    MaterialPageRoute(builder: (_) => const TaskManagerHomePage()));
               });
             },
-            child: Text("save"),
+            child: const Text("save"),
           ),
           MaterialButton(
             onPressed: () {
               widget.docid.reference.delete().whenComplete(() {
                 Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (_) => TaskManagerHomePage()));
+                    MaterialPageRoute(builder: (_) => const TaskManagerHomePage()));
               });
             },
-            child: Text("delete"),
+            child: const Text("delete"),
           ),
         ],
       ),
@@ -56,13 +56,13 @@ class _EditTasksState extends State<EditTasks> {
                   controller: title,
                   expands: true,
                   maxLines: null,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'title',
                   ),
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
           ],

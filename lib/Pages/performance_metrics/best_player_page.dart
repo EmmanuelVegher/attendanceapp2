@@ -8,6 +8,8 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../model/facility_staff_model.dart';
 
 class BestPlayerChartPage extends StatefulWidget {
+  const BestPlayerChartPage({super.key});
+
   @override
   _BestPlayerChartPageState createState() => _BestPlayerChartPageState();
 }
@@ -153,7 +155,7 @@ class _BestPlayerChartPageState extends State<BestPlayerChartPage> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         SfCartesianChart(
-          primaryXAxis: CategoryAxis(),
+          primaryXAxis: const CategoryAxis(),
           series: <CartesianSeries>[
             BarSeries<FacilityStaffModel, String>(
               dataSource: _isarBestPlayers,
@@ -176,7 +178,7 @@ class _BestPlayerChartPageState extends State<BestPlayerChartPage> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         SfCartesianChart(
-          primaryXAxis: CategoryAxis(),
+          primaryXAxis: const CategoryAxis(),
           series: <CartesianSeries>[
             BarSeries<MapEntry<String, int>, String>(
               dataSource: _firestoreBestPlayerCounts.entries.toList(),
@@ -200,7 +202,7 @@ class _BestPlayerChartPageState extends State<BestPlayerChartPage> {
       child: Column(
         children: [
           const Icon(Icons.star, color: Colors.orange, size: 50),
-          Text(
+          const Text(
             "Best Team Player of the Week",
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),

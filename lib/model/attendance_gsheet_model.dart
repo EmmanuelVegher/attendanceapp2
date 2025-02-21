@@ -1,29 +1,29 @@
 import 'dart:convert';
 
 class UserFields {
-  static final String id = 'Id';
-  static final String state = 'State';
-  static final String project = 'Project';
-  static final String firstName = 'First Name';
-  static final String lastName = 'Last Name';
-  static final String designation = 'Designation';
-  static final String department = 'Department';
-  static final String location = 'location';
-  static final String staffCategory = 'Staff Category';
-  static final String mobile = 'Mobile Number';
-  static final String date = 'Date';
-  static final String emailAddress = 'Email Address';
-  static final String clockIn = 'Clock In Time';
-  static final String clockInLatitude = 'Clock In Latitude';
-  static final String clockInLongitude = 'Clock In Longitude';
-  static final String clockInLocation = 'Clock In Location';
-  static final String clockOut = 'Clock Out Time';
-  static final String clockOutLatitude = 'Clock Out Latitude';
-  static final String clockOutLongitude = 'Clock Out Longitude';
-  static final String clockOutLocation = 'Clock Out Location';
-  static final String durationWorked = 'Duration Worked';
-  static final String noOfHours = 'Number Of Hours';
-  static final String comments = 'Comments';
+  static const String id = 'Id';
+  static const String state = 'State';
+  static const String project = 'Project';
+  static const String firstName = 'First Name';
+  static const String lastName = 'Last Name';
+  static const String designation = 'Designation';
+  static const String department = 'Department';
+  static const String location = 'location';
+  static const String staffCategory = 'Staff Category';
+  static const String mobile = 'Mobile Number';
+  static const String date = 'Date';
+  static const String emailAddress = 'Email Address';
+  static const String clockIn = 'Clock In Time';
+  static const String clockInLatitude = 'Clock In Latitude';
+  static const String clockInLongitude = 'Clock In Longitude';
+  static const String clockInLocation = 'Clock In Location';
+  static const String clockOut = 'Clock Out Time';
+  static const String clockOutLatitude = 'Clock Out Latitude';
+  static const String clockOutLongitude = 'Clock Out Longitude';
+  static const String clockOutLocation = 'Clock Out Location';
+  static const String durationWorked = 'Duration Worked';
+  static const String noOfHours = 'Number Of Hours';
+  static const String comments = 'Comments';
 
   static List<String> getFields() => [
         id,

@@ -30,7 +30,7 @@ class _UserQueryScreenState extends State<UserQueryScreen> {
 
   _getAllRecordsFirebase() async {
     List data = [];
-    var seen = Set();
+    var seen = <dynamic>{};
     List data2 = [];
     List<AttendanceModel> allAttendance = [];
     var collection = FirebaseFirestore.instance.collection('Staff');
@@ -43,7 +43,7 @@ class _UserQueryScreenState extends State<UserQueryScreen> {
         //print("element2=====${element2.data()["id"]}");
         for (var element3 in seen) {
           //print("element3=====${element3["id"]}");
-          final CollectionReference snap3 = await FirebaseFirestore.instance
+          final CollectionReference snap3 = FirebaseFirestore.instance
               .collection('Staff')
               .doc(element3["id"])
               .collection("Record");
@@ -125,7 +125,7 @@ class _UserQueryScreenState extends State<UserQueryScreen> {
           Container(
             alignment: Alignment.centerLeft,
             //padding: const EdgeInsets.only(top: 0),
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [

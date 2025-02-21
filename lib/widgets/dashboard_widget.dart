@@ -1,10 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:month_year_picker/month_year_picker.dart';
 
 Widget dashBoardWidget(BuildContext context, Function setState) {
-  String _month = DateFormat("MMMM yyyy").format(DateTime.now());
+  String month = DateFormat("MMMM yyyy").format(DateTime.now());
   List<FlSpot> dataSet = [];
   return ListView(
     children: [
@@ -17,7 +16,7 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 20),
             child: Text(
-              _month,
+              month,
               style: TextStyle(
                   color: Colors.brown,
                   fontFamily: "NexaBold",
@@ -96,9 +95,9 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
       // Next Create card
       Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        margin: EdgeInsets.all(12.0),
+        margin: const EdgeInsets.all(12.0),
         child: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
                 Colors.red,
@@ -109,10 +108,10 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
               Radius.circular(24),
             ),
           ),
-          padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
           child: Column(
             children: [
-              Text(
+              const Text(
                 "Attendance Summary",
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -121,10 +120,10 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
                   color: Colors.white,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 12.0,
               ),
-              Text(
+              const Text(
                 "Total Hours Worked = ${"0 Hour(s) 0 minute(s)"}",
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -133,11 +132,11 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
                   color: Colors.white,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 12.0,
               ),
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -180,8 +179,8 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
       //     :
       Container(
         height: MediaQuery.of(context).size.width * 0.95,
-        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 20.0),
-        margin: EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 20.0),
+        margin: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
           boxShadow: [
@@ -189,7 +188,7 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
               color: Colors.grey.withOpacity(0.4),
               spreadRadius: 5,
               blurRadius: 6,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
           color: Colors.white,
@@ -202,7 +201,7 @@ Widget dashBoardWidget(BuildContext context, Function setState) {
               // },
               isCurved: false,
               barWidth: 2.5,
-              color: Color.fromARGB(255, 63, 7, 3),
+              color: const Color.fromARGB(255, 63, 7, 3),
             )
           ]),
         ),
@@ -444,24 +443,24 @@ Widget cardClockIn(String value) {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20.0),
         ),
-        padding: EdgeInsets.all(6.0),
+        padding: const EdgeInsets.all(6.0),
+        margin: const EdgeInsets.only(right: 8.0),
         child: Icon(
           Icons.arrow_downward,
           size: 28.0,
           color: Colors.green[700],
         ),
-        margin: EdgeInsets.only(right: 8.0),
       ),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             "Clock-In Total",
             style: TextStyle(fontSize: 14.0, color: Colors.white),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 20.0,
                 fontWeight: FontWeight.w700,
                 color: Colors.white),
@@ -480,24 +479,24 @@ Widget cardClockOut(String value) {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20.0),
         ),
-        padding: EdgeInsets.all(6.0),
+        padding: const EdgeInsets.all(6.0),
+        margin: const EdgeInsets.only(right: 8.0),
         child: Icon(
           Icons.arrow_upward,
           size: 28.0,
           color: Colors.red[700],
         ),
-        margin: EdgeInsets.only(right: 8.0),
       ),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             "Clock-Out Total",
             style: TextStyle(fontSize: 14.0, color: Colors.white),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 20.0,
                 fontWeight: FontWeight.w700,
                 color: Colors.white),

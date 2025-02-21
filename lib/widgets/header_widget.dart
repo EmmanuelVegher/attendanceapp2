@@ -16,7 +16,7 @@ class HeaderWidget extends StatefulWidget {
 
 class _HeaderWidgetState extends State<HeaderWidget> {
   final double _height;
-  bool _showIcon;
+  final bool _showIcon;
   final IconData _icon;
 
   _HeaderWidgetState(this._height, this._showIcon, this._icon);
@@ -93,7 +93,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     ],
                     begin: const FractionalOffset(0.0, 0.0),
                     end: const FractionalOffset(1.0, 0.0),
-                    stops: [0.0, 1.0],
+                    stops: const [0.0, 1.0],
                     tileMode: TileMode.clamp),
               ),
             ),
@@ -104,7 +104,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               height: _height - 40,
               child: Center(
                 child: Container(
-                  margin: EdgeInsets.all(20),
+                  margin: const EdgeInsets.all(20),
                   padding: const EdgeInsets.only(
                     left: 5.0,
                     top: 20.0,
@@ -137,11 +137,11 @@ class _HeaderWidgetState extends State<HeaderWidget> {
 }
 
 class ShapeClipper extends CustomClipper<Path> {
-  List<Offset> _offsets = [];
-  ShapeClipper(this._offsets);
+  final List<Offset> _offsets; // Declare as final, but don't initialize here
+  ShapeClipper(this._offsets); // Initialize in the constructor
   @override
   Path getClip(Size size) {
-    var path = new Path();
+    var path = Path();
 
     path.lineTo(0.0, size.height - 20);
 

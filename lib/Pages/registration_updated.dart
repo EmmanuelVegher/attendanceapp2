@@ -9,7 +9,6 @@ import 'package:attendanceapp/widgets/drawer.dart';
 import 'package:attendanceapp/widgets/drawer2.dart';
 import 'package:attendanceapp/widgets/header_widget.dart';
 import 'package:attendanceapp/widgets/input_field.dart';
-import 'package:attendanceapp/widgets/locations.dart';
 import 'package:attendanceapp/widgets/progress_dialog.dart';
 import 'package:attendanceapp/widgets/show_error_dialog.dart';
 import 'package:attendanceapp/widgets/theme_helper.dart';
@@ -25,9 +24,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 import '../widgets/constants.dart';
-import '../widgets/facility_dropdown.dart';
 
 class RegistrationPageUpdated extends StatefulWidget {
+  const RegistrationPageUpdated({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _RegistrationPageUpdatedState();
@@ -333,7 +333,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
     value: item,
     child: Text(
       item,
-      style: TextStyle(fontSize: 13, fontFamily: "NexaLight"),
+      style: const TextStyle(fontSize: 13, fontFamily: "NexaLight"),
     ),
   );
 
@@ -488,7 +488,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Registration Page",
           style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
         ),
@@ -522,13 +522,13 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            Container(
+            const SizedBox(
               height: 150,
               child: HeaderWidget(150, false, Icons.person_add_alt_1_rounded),
             ),
             Container(
-              margin: EdgeInsets.fromLTRB(25, 50, 25, 10),
-              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+              margin: const EdgeInsets.fromLTRB(25, 50, 25, 10),
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
               alignment: Alignment.center,
               child: Column(
                 children: [
@@ -590,14 +590,14 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "First Name",
                               style: TextStyle(
                                 color: Colors.black87,
                                 fontSize: 15,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                             Container(
@@ -610,7 +610,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   "Enter your First Name",
                                   IconButton(
                                     onPressed: () {},
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.person,
                                       color: Colors.black54,
                                     ),
@@ -631,14 +631,14 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "Last Name",
                               style: TextStyle(
                                 color: Colors.black87,
                                 fontSize: 15,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                             Container(
@@ -651,7 +651,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   "Enter your Last Name",
                                   IconButton(
                                     onPressed: () {},
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.person,
                                       color: Colors.black54,
                                     ),
@@ -670,14 +670,14 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "Email Address",
                               style: TextStyle(
                                 color: Colors.black87,
                                 fontSize: 14,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                             Container(
@@ -690,7 +690,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   "Enter your email",
                                   IconButton(
                                     onPressed: () {},
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.email,
                                       color: Colors.black54,
                                     ),
@@ -701,7 +701,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   if ((!(val!.isEmpty) &&
                                       !RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
                                           .hasMatch(val)) ||
-                                      (val != null && val.isEmpty)) {
+                                      (val.isEmpty)) {
                                     return "Enter a valid email address";
                                   }
                                   return null;
@@ -715,14 +715,14 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "Mobile Number",
                               style: TextStyle(
                                 color: Colors.black87,
                                 fontSize: 15,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                             Container(
@@ -735,7 +735,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   "Enter your Mobile Number",
                                   IconButton(
                                     onPressed: () {},
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.phone_android,
                                       color: Colors.black54,
                                     ),
@@ -745,7 +745,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 validator: (val) {
                                   if ((!(val!.isEmpty) &&
                                       !RegExp(r"^(\d+)*$").hasMatch(val)) ||
-                                      (val != null && val.isEmpty)) {
+                                      (val.isEmpty)) {
                                     return "Enter a valid phone number";
                                   }
                                   return null;
@@ -763,26 +763,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                               return Text('Error: ${snapshot.error}');
                             } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                               // Check if facilityStateName is in the list of dropdown values
-                              String? selectedGender =
-                              // snapshot.data!.any((item) => item.value == value5)
-                              //     ? value5
-                              //     :
-                              null;
+                              String? selectedGender;
 
                               // If there's no valid state selected, set the first item as the default
-                              if (selectedGender == null) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  setState(() {
-                                    //facilityStateName = snapshot.data!.first.value!;
-                                    // facilityStateName = "Select your state";
-                                  });
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                setState(() {
+                                  //facilityStateName = snapshot.data!.first.value!;
+                                  // facilityStateName = "Select your state";
                                 });
-                              }
-
+                              });
+                            
                               return MyInputField(
                                 title: "Gender",
                                 hint: "",
-                                widget: Container(
+                                widget: SizedBox(
                                   width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                   child: DropdownButtonFormField<String>(
                                     decoration: InputDecoration(
@@ -790,17 +784,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       labelText: "",
                                       filled: true,
                                       fillColor: Colors.white,
-                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8),
                                         borderSide: BorderSide.none,
                                       ),
                                     ),
 
-                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                    icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                     dropdownColor: Colors.white,
                                     elevation: 4,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 16,
                                       fontFamily: "NexaBold",
@@ -845,26 +839,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                               return Text('Error: ${snapshot.error}');
                             } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                               // Check if facilityStateName is in the list of dropdown values
-                              String? selectedMaritalStatus =
-                              // snapshot.data!.any((item) => item.value == value5)
-                              //     ? value5
-                              //     :
-                              null;
+                              String? selectedMaritalStatus;
 
                               // If there's no valid state selected, set the first item as the default
-                              if (selectedMaritalStatus == null) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  setState(() {
-                                    //facilityStateName = snapshot.data!.first.value!;
-                                    // facilityStateName = "Select your state";
-                                  });
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                setState(() {
+                                  //facilityStateName = snapshot.data!.first.value!;
+                                  // facilityStateName = "Select your state";
                                 });
-                              }
-
+                              });
+                            
                               return MyInputField(
                                 title: "Marital Status",
                                 hint: "",
-                                widget: Container(
+                                widget: SizedBox(
                                   width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                   child: DropdownButtonFormField<String>(
                                     decoration: InputDecoration(
@@ -872,17 +860,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       labelText: "",
                                       filled: true,
                                       fillColor: Colors.white,
-                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8),
                                         borderSide: BorderSide.none,
                                       ),
                                     ),
 
-                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                    icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                     dropdownColor: Colors.white,
                                     elevation: 4,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 16,
                                       fontFamily: "NexaBold",
@@ -926,26 +914,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                               return Text('Error: ${snapshot.error}');
                             } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                               // Check if facilityStateName is in the list of dropdown values
-                              String? selectedStaffCategory =
-                              // snapshot.data!.any((item) => item.value == value5)
-                              //     ? value5
-                              //     :
-                              null;
+                              String? selectedStaffCategory;
 
                               // If there's no valid state selected, set the first item as the default
-                              if (selectedStaffCategory == null) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  setState(() {
-                                    //facilityStateName = snapshot.data!.first.value!;
-                                    // facilityStateName = "Select your state";
-                                  });
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                setState(() {
+                                  //facilityStateName = snapshot.data!.first.value!;
+                                  // facilityStateName = "Select your state";
                                 });
-                              }
-
+                              });
+                            
                               return MyInputField(
                                 title: "Staff Category",
                                 hint: "",
-                                widget: Container(
+                                widget: SizedBox(
                                   width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                   child: DropdownButtonFormField<String>(
                                     decoration: InputDecoration(
@@ -953,17 +935,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       labelText: "",
                                       filled: true,
                                       fillColor: Colors.white,
-                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8),
                                         borderSide: BorderSide.none,
                                       ),
                                     ),
 
-                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                    icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                     dropdownColor: Colors.white,
                                     elevation: 4,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 16,
                                       fontFamily: "NexaBold",
@@ -1020,26 +1002,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedState =
-                                      // snapshot.data!.any((item) => item.value == facilityStateName)
-                                      //     ? facilityStateName
-                                      //     :
-                                      null;
+                                      String? selectedState;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedState == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                             // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                           // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return  MyInputField(
                                         title: "State Of Implementations",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1047,17 +1023,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1092,7 +1068,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   },
                                 ),
                                 // Facility List
-                                stateName != null && stateName.isNotEmpty
+                                stateName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchLocationsFromIsar(stateName,"Facility"),
                                   builder: (context, snapshot) {
@@ -1100,26 +1076,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedLocation =
-                                      // snapshot.data!.any((item) => item.value == facilityLocationName)
-                                      //     ? facilityLocationName
-                                      //     :
-                                      null;
+                                      String? selectedLocation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedLocation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Location",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1127,17 +1097,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1175,7 +1145,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Location",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your state",
                                       style: TextStyle(
@@ -1193,26 +1163,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDepartment =
-                                      // snapshot.data!.any((item) => item.value == facilitydepartmentName)
-                                      //     ? facilitydepartmentName
-                                      //     :
-                                      null;
+                                      String? selectedDepartment;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDepartment == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Department",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1220,17 +1184,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1250,7 +1214,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                             onChanged: (value) {
                                               setState(() {
                                                 departmentName = value!;
-                                                facilitydepartmentName = value!;
+                                                facilitydepartmentName = value;
                                                 disableddropdown = false;
                                               });
                                             },
@@ -1266,7 +1230,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   },
                                 ),
                                 // Designations
-                                facilitydepartmentName != null && facilitydepartmentName.isNotEmpty
+                                facilitydepartmentName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchDesignationsFromIsar(departmentName,"Facility Staff"),
                                   builder: (context, snapshot) {
@@ -1274,26 +1238,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == facilitydesignationName)
-                                      //     ? facilitydesignationName
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Designation",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1301,17 +1259,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1350,7 +1308,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Designation",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your department",
                                       style: TextStyle(
@@ -1364,7 +1322,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 //_fetchProjectFromIsar
 
                                 // Supervisor
-                                facilitydepartmentName != null && facilitydepartmentName.isNotEmpty
+                                facilitydepartmentName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchSupervisorsFromIsar(departmentName,stateName),
                                   builder: (context, snapshot) {
@@ -1372,26 +1330,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == supervisorName)
-                                      //     ? supervisorName
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Name of Supervisor",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1399,17 +1351,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1448,7 +1400,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Name of Supervisor",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your department",
                                       style: TextStyle(
@@ -1460,7 +1412,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 ),
 
                                 // Supervisor Email
-                                supervisorName != null && supervisorName.isNotEmpty
+                                supervisorName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchSupervisorEmailFromIsar(departmentName,supervisorName),
                                   builder: (context, snapshot) {
@@ -1468,26 +1420,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == supervisorEmail)
-                                      //     ? supervisorEmail
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return  MyInputField(
                                         title: "Email of Supervisor",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1495,17 +1441,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1543,7 +1489,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "  Email of Supervisor",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your Supervisor",
                                       style: TextStyle(
@@ -1573,26 +1519,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedState =
-                                      // snapshot.data!.any((item) => item.value == facilityStateName)
-                                      //     ? facilityStateName
-                                      //     :
-                                      null;
+                                      String? selectedState;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedState == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return  MyInputField(
                                         title: "State Of Implementations",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1600,17 +1540,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1645,7 +1585,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   },
                                 ),
                                 // Facility List
-                                stateName != null && stateName.isNotEmpty
+                                stateName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchLocationsFromIsar(stateName,"Facility"),
                                   builder: (context, snapshot) {
@@ -1653,26 +1593,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedLocation =
-                                      // snapshot.data!.any((item) => item.value == facilityLocationName)
-                                      //     ? facilityLocationName
-                                      //     :
-                                      null;
+                                      String? selectedLocation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedLocation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Location",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1680,17 +1614,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1728,7 +1662,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Location",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your state",
                                       style: TextStyle(
@@ -1746,26 +1680,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDepartment =
-                                      // snapshot.data!.any((item) => item.value == facilitydepartmentName)
-                                      //     ? facilitydepartmentName
-                                      //     :
-                                      null;
+                                      String? selectedDepartment;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDepartment == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Department",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1773,17 +1701,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1803,7 +1731,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                             onChanged: (value) {
                                               setState(() {
                                                 departmentName = value!;
-                                                facilitydepartmentName = value!;
+                                                facilitydepartmentName = value;
                                                 disableddropdown = false;
                                               });
                                             },
@@ -1819,7 +1747,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   },
                                 ),
                                 // Designations
-                                facilitydepartmentName != null && facilitydepartmentName.isNotEmpty
+                                facilitydepartmentName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchDesignationsFromIsar(departmentName,"Facility Supervisor"),
                                   builder: (context, snapshot) {
@@ -1827,26 +1755,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == facilitydesignationName)
-                                      //     ? facilitydesignationName
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Designation",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -1854,17 +1776,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -1903,7 +1825,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Designation",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your department",
                                       style: TextStyle(
@@ -2019,14 +1941,14 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    const Text(
                                       "Name of Supervisor",
                                       style: TextStyle(
                                         color: Colors.black87,
                                         fontSize: 15,
                                       ),
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       height: 10,
                                     ),
                                     Container(
@@ -2039,7 +1961,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                           "Enter your Supervisor's Name",
                                           IconButton(
                                             onPressed: () {},
-                                            icon: Icon(
+                                            icon: const Icon(
                                               Icons.person,
                                               color: Colors.black54,
                                             ),
@@ -2060,14 +1982,14 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    const Text(
                                       "Email of Supervisor",
                                       style: TextStyle(
                                         color: Colors.black87,
                                         fontSize: 15,
                                       ),
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       height: 10,
                                     ),
                                     Container(
@@ -2080,7 +2002,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                           "Enter your Supervisor's Email",
                                           IconButton(
                                             onPressed: () {},
-                                            icon: Icon(
+                                            icon: const Icon(
                                               Icons.person,
                                               color: Colors.black54,
                                             ),
@@ -2211,26 +2133,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedState =
-                                      // snapshot.data!.any((item) => item.value == facilityStateName)
-                                      //     ? facilityStateName
-                                      //     :
-                                      null;
+                                      String? selectedState;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedState == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return  MyInputField(
                                         title: "State",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -2238,17 +2154,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -2283,7 +2199,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   },
                                 ),
                                 // Facility List
-                                stateName != null && stateName.isNotEmpty
+                                stateName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchLocationsFromIsar(stateName,"State Office"),
                                   builder: (context, snapshot) {
@@ -2291,26 +2207,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedLocation =
-                                      // snapshot.data!.any((item) => item.value == locationName)
-                                      //     ? locationName
-                                      //     :
-                                      null;
+                                      String? selectedLocation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedLocation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Office",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -2318,17 +2228,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -2365,7 +2275,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "State",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your state",
                                       style: TextStyle(
@@ -2383,26 +2293,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDepartment =
-                                      // snapshot.data!.any((item) => item.value == facilitydepartmentName)
-                                      //     ? facilitydepartmentName
-                                      //     :
-                                      null;
+                                      String? selectedDepartment;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDepartment == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Department",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -2410,17 +2314,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -2456,7 +2360,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   },
                                 ),
                                 // Designations
-                                departmentName != null && departmentName.isNotEmpty
+                                departmentName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchDesignationsFromIsar(departmentName,"Office Staff"),
                                   builder: (context, snapshot) {
@@ -2464,26 +2368,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == facilitydesignationName)
-                                      //     ? facilitydesignationName
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Designation",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -2491,17 +2389,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -2540,7 +2438,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Designation",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your department",
                                       style: TextStyle(
@@ -2553,7 +2451,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
 
                                 //_fetchProjectFromIsar
                                 // Supervisor
-                                departmentName != null && departmentName.isNotEmpty
+                                departmentName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchSupervisorsFromIsar(departmentName,stateName),
                                   builder: (context, snapshot) {
@@ -2561,26 +2459,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == supervisorName)
-                                      //     ? supervisorName
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Name of Supervisor",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -2588,17 +2480,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -2637,7 +2529,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Name of Supervisor",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your department",
                                       style: TextStyle(
@@ -2649,7 +2541,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 ),
 
                                 // Supervisor Email
-                                supervisorName != null && supervisorName.isNotEmpty
+                                supervisorName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchSupervisorEmailFromIsar(departmentName,supervisorName),
                                   builder: (context, snapshot) {
@@ -2657,26 +2549,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == supervisorEmail)
-                                      //     ? supervisorEmail
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return  MyInputField(
                                         title: "Email of Supervisor",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -2684,17 +2570,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -2733,7 +2619,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "  Email of Supervisor",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your Supervisor",
                                       style: TextStyle(
@@ -2762,26 +2648,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedState =
-                                      // snapshot.data!.any((item) => item.value == locationName)
-                                      //     ? locationName
-                                      //     :
-                                      null;
+                                      String? selectedState;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedState == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return  MyInputField(
                                         title: "HQ State",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -2789,17 +2669,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -2834,7 +2714,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   },
                                 ),
                                 // Facility List
-                                stateName != null && stateName.isNotEmpty
+                                stateName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchLocationsFromIsar(stateName,"HQ"),
                                   builder: (context, snapshot) {
@@ -2842,26 +2722,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedLocation =
-                                      // snapshot.data!.any((item) => item.value == facilityLocationName)
-                                      //     ? facilityLocationName
-                                      //     :
-                                      null;
+                                      String? selectedLocation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedLocation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Office",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -2869,17 +2743,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -2916,7 +2790,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Office",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your state",
                                       style: TextStyle(
@@ -2934,26 +2808,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDepartment =
-                                      // snapshot.data!.any((item) => item.value == facilitydepartmentName)
-                                      //     ? facilitydepartmentName
-                                      //     :
-                                      null;
+                                      String? selectedDepartment;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDepartment == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Department",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -2961,17 +2829,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -3007,7 +2875,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   },
                                 ),
                                 // Designations
-                                departmentName != null && departmentName.isNotEmpty
+                                departmentName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchDesignationsFromIsar(departmentName,"Office Staff"),
                                   builder: (context, snapshot) {
@@ -3015,26 +2883,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == facilitydesignationName)
-                                      //     ? facilitydesignationName
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Designation",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -3042,17 +2904,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -3090,7 +2952,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Designation",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your department",
                                       style: TextStyle(
@@ -3104,7 +2966,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 //_fetchProjectFromIsar
 
                                 // Supervisor
-                                departmentName != null && departmentName.isNotEmpty
+                                departmentName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchSupervisorsFromIsar(departmentName,stateName),
                                   builder: (context, snapshot) {
@@ -3112,26 +2974,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == supervisorName)
-                                      //     ? supervisorName
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Name of Supervisor",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -3139,17 +2995,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -3188,7 +3044,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Name of Supervisor",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your department",
                                       style: TextStyle(
@@ -3200,7 +3056,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 ),
 
                                 // Supervisor Email
-                                supervisorName != null && supervisorName.isNotEmpty
+                                supervisorName.isNotEmpty
                                     ?FutureBuilder<List<DropdownMenuItem<String>>>(
                                   future: _fetchSupervisorEmailFromIsar(departmentName,supervisorName),
                                   builder: (context, snapshot) {
@@ -3208,26 +3064,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                       // Check if facilityStateName is in the list of dropdown values
-                                      String? selectedDesignation =
-                                      // snapshot.data!.any((item) => item.value == supervisorEmail)
-                                      //     ? supervisorEmail
-                                      //     :
-                                      null;
+                                      String? selectedDesignation;
 
                                       // If there's no valid state selected, set the first item as the default
-                                      if (selectedDesignation == null) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          setState(() {
-                                            //facilityStateName = snapshot.data!.first.value!;
-                                            // facilityStateName = "Select your state";
-                                          });
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        setState(() {
+                                          //facilityStateName = snapshot.data!.first.value!;
+                                          // facilityStateName = "Select your state";
                                         });
-                                      }
-
+                                      });
+                                    
                                       return MyInputField(
                                         title: "Email of Supervisor",
                                         hint: "",
-                                        widget: Container(
+                                        widget: SizedBox(
                                           width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                           child: DropdownButtonFormField<String>(
                                             decoration: InputDecoration(
@@ -3235,17 +3085,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                               labelText: "",
                                               filled: true,
                                               fillColor: Colors.white,
-                                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
 
-                                            icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                             dropdownColor: Colors.white,
                                             elevation: 4,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 16,
                                               fontFamily: "NexaBold",
@@ -3284,7 +3134,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   title: "Email of Supervisor",
                                   hint: "",
                                   widget: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),// Adjust padding as needed
                                     child: Text(
                                       "First Select your Supervisor",
                                       style: TextStyle(
@@ -3311,26 +3161,20 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                               return Text('Error: ${snapshot.error}');
                             } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                               // Check if facilityStateName is in the list of dropdown values
-                              String? selectedProject =
-                              // snapshot.data!.any((item) => item.value == project)
-                              //     ? project
-                              //     :
-                              null;
+                              String? selectedProject;
 
                               // If there's no valid state selected, set the first item as the default
-                              if (selectedProject == null) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  setState(() {
-                                    //facilityStateName = snapshot.data!.first.value!;
-                                    // facilityStateName = "Select your state";
-                                  });
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                setState(() {
+                                  //facilityStateName = snapshot.data!.first.value!;
+                                  // facilityStateName = "Select your state";
                                 });
-                              }
-
+                              });
+                            
                               return MyInputField(
                                 title: "Project",
                                 hint: "",
-                                widget: Container(
+                                widget: SizedBox(
                                   width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                                   child: DropdownButtonFormField<String>(
                                     decoration: InputDecoration(
@@ -3338,17 +3182,17 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                       labelText: "",
                                       filled: true,
                                       fillColor: Colors.white,
-                                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8),
                                         borderSide: BorderSide.none,
                                       ),
                                     ),
 
-                                    icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                    icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                     dropdownColor: Colors.white,
                                     elevation: 4,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 16,
                                       fontFamily: "NexaBold",
@@ -3388,7 +3232,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                         MyInputField(
                           title: "Role",
                           hint: "",
-                          widget: Container(
+                          widget: SizedBox(
                             width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.8 : 0.9), // Make container occupy 90% of screen width
                             child: DropdownButtonFormField<String>(
                               decoration: InputDecoration(
@@ -3396,16 +3240,16 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 labelText: "",
                                 filled: true,
                                 fillColor: Colors.white,
-                                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                   borderSide: BorderSide.none,
                                 ),
                               ),
-                              icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                              icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                               dropdownColor: Colors.white,
                               elevation: 4,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
                                 fontFamily: "NexaBold",
@@ -3465,14 +3309,14 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "Password**",
                               style: TextStyle(
                                 color: Colors.black87,
                                 fontSize: 15,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                             Container(
@@ -3536,7 +3380,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                   child: Text(
                                     state.errorText ?? '',
                                     textAlign: TextAlign.left,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       //color: Color.red,
                                       fontSize: 12,
                                     ),
@@ -3553,7 +3397,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                             }
                           },
                         ),
-                        SizedBox(height: 20.0),
+                        const SizedBox(height: 20.0),
 
                         Container(
                           decoration:
@@ -3565,7 +3409,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                               const EdgeInsets.fromLTRB(40, 10, 40, 10),
                               child: Text(
                                 "Register".toUpperCase(),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -3780,7 +3624,7 @@ class _RegistrationPageUpdatedState extends State<RegistrationPageUpdated> {
                                 } catch (e) {
                                   await showErrorDialog(context, e.toString());
                                   Fluttertoast.showToast(
-                                    msg: "${e.toString()}",
+                                    msg: e.toString(),
                                     toastLength: Toast.LENGTH_LONG,
                                     backgroundColor: Colors.black54,
                                     gravity: ToastGravity.BOTTOM,

@@ -184,7 +184,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             Container(
               alignment: Alignment.centerLeft,
               //padding: const EdgeInsets.only(top: 0),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -212,7 +212,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 5,
             ),
             Stack(
@@ -242,7 +242,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           builder: (context, child) {
                             return Theme(
                               data: Theme.of(context).copyWith(
-                                colorScheme: ColorScheme.light(
+                                colorScheme: const ColorScheme.light(
                                   primary: Colors.red,
                                   secondary: Colors.red,
                                   onSecondary: Colors.white,
@@ -286,7 +286,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             //const SizedBox(height: 10.0),
@@ -344,7 +344,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           margin: const EdgeInsets.only(),
                                           padding: const EdgeInsets.all(5),
                                           width: screenWidth * 0.30,
-                                          decoration: BoxDecoration(
+                                          decoration: const BoxDecoration(
                                             gradient: LinearGradient(
                                               colors: [
                                                 //Colors.redAccent,
@@ -366,7 +366,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                               crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                               children: [
-                                                SizedBox(
+                                                const SizedBox(
                                                   height: 10,
                                                 ),
                                                 Text(
@@ -378,7 +378,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                       fontWeight:FontWeight.bold
                                                   ),
                                                 ),
-                                                SizedBox(
+                                                const SizedBox(
                                                   height: 10,
                                                 ),
                                                 Text(
@@ -392,7 +392,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                       fontWeight:FontWeight.bold
                                                   ),
                                                 ),
-                                                SizedBox(
+                                                const SizedBox(
                                                   height: 10,
                                                 ),
                                                 Text(
@@ -409,13 +409,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                         .isSynced
                                                         .toString() ==
                                                         "true"
-                                                        ? Color.fromARGB(
+                                                        ? const Color.fromARGB(
                                                         255, 6, 202, 12)
-                                                        : Color.fromARGB(
+                                                        : const Color.fromARGB(
                                                         255, 252, 252, 252),
                                                   ),
                                                 ),
-                                                SizedBox(height: 10),
+                                                const SizedBox(height: 10),
                                                 IconButton(
                                                   icon: Icon(Icons.refresh, color: Colors.white, size: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.040),),
                                                   onPressed: () {
@@ -463,7 +463,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                         ? Colors.red
                                                         : Colors.black),
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
                                               Text(
@@ -535,7 +535,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                         ? Colors.red
                                                         : Colors.black),
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
                                               Text(
@@ -569,7 +569,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     ),
                                     Container(
                                      width: screenWidth * 1,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
                                             Colors.deepOrange,
@@ -601,7 +601,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                               fontWeight:FontWeight.bold
                                             ),
                                           ),
-                                          SizedBox(height:5),
+                                          const SizedBox(height:5),
                                           Text(
                                             "Clock-Out Location: ${attendance[index].clockOutLocation.toString()}",
                                             style: TextStyle(
@@ -611,7 +611,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 fontWeight:FontWeight.bold
                                             ),
                                           ),
-                                          SizedBox(height:5),
+                                          const SizedBox(height:5),
                                           Text(
                                             "Comments: ${attendance[index].comments.toString()}",
                                             style: TextStyle(
@@ -636,7 +636,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                        // )
 
                         )
-                            : SizedBox();
+                            : const SizedBox();
                       },
                     );
                   } else {
@@ -656,8 +656,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Delete Attendance"),
-          content: Text("Do you want to delete this attendance?"),
+          title: const Text("Delete Attendance"),
+          content: const Text("Do you want to delete this attendance?"),
           actions: [
             TextButton(
               onPressed: () {
@@ -666,13 +666,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 // Show the confirmation dialog
                 _showDeleteConfirmationDialog(context, id);
               },
-              child: Text("Delete"),
+              child: const Text("Delete"),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
             ),
           ],
         );
@@ -707,7 +707,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence = false;
         for (GeofenceModel office in offices) {
@@ -729,7 +729,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           location1 =
           "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-          print("Location from map === ${location1}");
+          print("Location from map === $location1");
         }
 
 
@@ -771,7 +771,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence = false;
         for (GeofenceModel office in offices) {
@@ -793,7 +793,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           location2 =
           "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-          print("Location from map === ${location2}");
+          print("Location from map === $location2");
         }
 
         //Update all missing Clock In location
@@ -839,7 +839,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
           final versionNumber = data['appVersion'];
 
-          print("versionNumber ====${versionNumber}");
+          print("versionNumber ====$versionNumber");
 
           if (getAppVersion[0].appVersion != versionNumber) {
             showDialog(
@@ -848,10 +848,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
               // Prevent dismissing by tapping outside
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text('Update Available'),
+                  title: const Text('Update Available'),
                   content: Text(
                       'You are using an older version of the app (${getAppVersion[0]
-                          .appVersion}). Please update to the latest version (${versionNumber}). Kindly Note that you would be logged out after 15 days if you do not upgrade to the latest version (${versionNumber})'),
+                          .appVersion}). Please update to the latest version ($versionNumber). Kindly Note that you would be logged out after 15 days if you do not upgrade to the latest version ($versionNumber)'),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () async {
@@ -860,7 +860,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             1, AppVersionModel(), DateTime.now(),false);
                         Navigator.of(context).pop(); // Close the dialog
                       },
-                      child: Text('Close'),
+                      child: const Text('Close'),
                     ),
                   ],
                 );
@@ -1164,8 +1164,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Confirm Delete"),
-          content: Text("Are you sure you want to delete this attendance? This action cannot be undone."),
+          title: const Text("Confirm Delete"),
+          content: const Text("Are you sure you want to delete this attendance? This action cannot be undone."),
           actions: [
             TextButton(
               onPressed: () async {
@@ -1187,13 +1187,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   fontSize: 16.0,
                 );
               },
-              child: Text("Yes"),
+              child: const Text("Yes"),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("No"),
+              child: const Text("No"),
             ),
           ],
         );
@@ -1224,7 +1224,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     color: Colors.deepOrange,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
 
                 _bottomSheetButton(
                   label: "Delete Attendance",
@@ -1251,7 +1251,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   clr: Colors.orange,
                   context: context,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 _bottomSheetButton(
@@ -1263,7 +1263,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   isClose: true,
                   context: context,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
               ],
@@ -1295,7 +1295,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
         child: Center(
           child: Text(label,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 16, color: Colors.white, fontFamily: "NexaBold")),
         ),
       ),

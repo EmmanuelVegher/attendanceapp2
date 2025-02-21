@@ -1,7 +1,6 @@
 import 'package:attendanceapp/services/isar_service.dart';
 import 'package:attendanceapp/widgets/drawer3.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
 
 class SuperAdminUserDashBoard extends StatefulWidget {
@@ -38,7 +37,7 @@ class _SuperAdminUserDashBoardState extends State<SuperAdminUserDashBoard> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             "Super Admin Interface",
             style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
           ),
@@ -62,7 +61,7 @@ class _SuperAdminUserDashBoardState extends State<SuperAdminUserDashBoard> {
             //         ? drawer2(this.context, IsarService())
             //         :
             drawer3(this.context, IsarService()),
-        body: Center(
+        body: const Center(
           child: Text("This is the Super-Admin Page"),
         ));
   }

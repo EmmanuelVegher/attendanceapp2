@@ -118,7 +118,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
         clockInSet.add(clockLength.clockIn);
       }
     }
-    return clockInSet.length == 0 ? 0 : clockInSet.length;
+    return clockInSet.isEmpty ? 0 : clockInSet.length;
   }
 
   // Future<int> getCurrentDateRecordCount() async {
@@ -137,7 +137,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
         clockOutSet.add(clockLength.clockOut);
       }
     }
-    return clockOutSet.length == 0 ? 0 : clockOutSet.length;
+    return clockOutSet.isEmpty ? 0 : clockOutSet.length;
   }
 
   getTotalHoursWorked(List entireData) {
@@ -192,7 +192,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             "User DashBoard",
             style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
           ),
@@ -218,7 +218,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MyFlutterApp()),
+                        builder: (context) => const MyFlutterApp()),
                   );
                 } else if (value == 'option2') {
                   _checkForUpdates();
@@ -227,27 +227,27 @@ class _UserDashBoardState extends State<UserDashBoard> {
               },
               itemBuilder: (BuildContext context) {
                 return [
-                  PopupMenuItem<String>(
+                  const PopupMenuItem<String>(
                     value: 'option1',
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(Icons.access_alarm, color: Colors.red,),
                         SizedBox(width: 8),
                         Text('Background Service'),
                       ],
                     ),
                   ),
-                  PopupMenuItem<String>(
+                  const PopupMenuItem<String>(
                     value: 'option2',
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(Icons.update, color: Colors.red,),
                         SizedBox(width: 8),
                         Text('Check For Updates'),
                       ],
                     ),
                   ),
-                  PopupMenuItem<String>(
+                  const PopupMenuItem<String>(
                     value: 'option3',
                     child: Row(
                       children: [
@@ -276,14 +276,14 @@ class _UserDashBoardState extends State<UserDashBoard> {
                 stream: widget.service.getHourWorkedForMonth(_month),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return Center(
+                    return const Center(
                       child: Text("Unexpected Error!"),
                     );
                   }
 
                   if (snapshot.hasData) {
                     if (snapshot.data!.isEmpty) {
-                      return Center(
+                      return const Center(
                         child: Text("No Attendance Yet for the Month"),
                       );
                     }
@@ -324,7 +324,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                       builder: (context, child) {
                                         return Theme(
                                           data: Theme.of(context).copyWith(
-                                            colorScheme: ColorScheme.light(
+                                            colorScheme: const ColorScheme.light(
                                               primary: Colors.red,
                                               secondary: Colors.red,
                                               onSecondary: Colors.white,
@@ -374,9 +374,9 @@ class _UserDashBoardState extends State<UserDashBoard> {
                         // Next Create card
                         Container(
                           width: MediaQuery.of(context).size.width * 0.9,
-                          margin: EdgeInsets.all(12.0),
+                          margin: const EdgeInsets.all(12.0),
                           child: Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
                                   Colors.red,
@@ -387,11 +387,11 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                 Radius.circular(24),
                               ),
                             ),
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 vertical: 12.0, horizontal: 8.0),
                             child: Column(
                               children: [
-                                Text(
+                                const Text(
                                   "Attendance Summary",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
@@ -400,23 +400,23 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                     color: Colors.white,
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 12.0,
                                 ),
                                 Text(
                                   "Total Hours Worked = ${getTotalHoursandMins(getTotalHoursWorked(snapshot.data!))}",
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 16.0,
                                     fontWeight: FontWeight.w700,
                                     color: Colors.white,
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 12.0,
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Row(
                                     mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -436,9 +436,9 @@ class _UserDashBoardState extends State<UserDashBoard> {
                         dataSet.isEmpty
                             ? Container(
                           //height: MediaQuery.of(context).size.width*0.95,//300
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 8.0, vertical: 20.0),
-                          margin: EdgeInsets.all(12),
+                          margin: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8.0),
                             boxShadow: [
@@ -446,7 +446,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                 color: Colors.grey.withOpacity(0.4),
                                 spreadRadius: 5,
                                 blurRadius: 6,
-                                offset: Offset(0, 4),
+                                offset: const Offset(0, 4),
                               )
                             ],
                             color: Colors.white,
@@ -463,9 +463,9 @@ class _UserDashBoardState extends State<UserDashBoard> {
                         )
                             : Container(
                           height: MediaQuery.of(context).size.width * 0.95,
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 8.0, vertical: 20.0),
-                          margin: EdgeInsets.all(12),
+                          margin: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8.0),
                             boxShadow: [
@@ -473,7 +473,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                 color: Colors.grey.withOpacity(0.4),
                                 spreadRadius: 5,
                                 blurRadius: 6,
-                                offset: Offset(0, 4),
+                                offset: const Offset(0, 4),
                               ),
                             ],
                             color: Colors.white,
@@ -486,7 +486,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                     spots: getPlotPoints(snapshot.data!),
                                     isCurved: false,
                                     barWidth: 2.5,
-                                    color: Color.fromARGB(255, 63, 7, 3),
+                                    color: const Color.fromARGB(255, 63, 7, 3),
                                   )
                                 ]),
                           ),
@@ -508,13 +508,13 @@ class _UserDashBoardState extends State<UserDashBoard> {
                             stream: widget.service.getDaysOffForMonth(_month),
                             builder: (context, snapshot) {
                               if (snapshot.hasError) {
-                                return Center(
+                                return const Center(
                                   child: Text("UnExpected Error!"),
                                 );
                               }
                               if (snapshot.hasData) {
                                 if (snapshot.data!.isEmpty) {
-                                  return Center(
+                                  return const Center(
                                     child: Text("No Day Off for the Month"),
                                   );
                                 }
@@ -550,7 +550,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                           Expanded(
                                             child: Container(
                                               margin: const EdgeInsets.only(),
-                                              decoration: BoxDecoration(
+                                              decoration: const BoxDecoration(
                                                 gradient: LinearGradient(
                                                   colors: [
                                                     Colors.red,
@@ -582,7 +582,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                                       ),
                                                     ),
                                                   ),
-                                                  SizedBox(height: 2),
+                                                  const SizedBox(height: 2),
                                                   Center(
                                                     // Reasons For Day Off
 
@@ -696,7 +696,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                                   },
                                 );
                               } else {
-                                return Center(
+                                return const Center(
                                     child: Text("No Day Off Recorded !!"));
                               }
                             },
@@ -724,24 +724,24 @@ class _UserDashBoardState extends State<UserDashBoard> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20.0),
           ),
-          padding: EdgeInsets.all(6.0),
+          padding: const EdgeInsets.all(6.0),
+          margin: const EdgeInsets.only(right: 8.0),
           child: Icon(
             Icons.arrow_downward,
             size: 28.0,
             color: Colors.green[700],
           ),
-          margin: EdgeInsets.only(right: 8.0),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Clock-In Total",
               style: TextStyle(fontSize: 14.0, color: Colors.white),
             ),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w700,
                   color: Colors.white),
@@ -760,24 +760,24 @@ class _UserDashBoardState extends State<UserDashBoard> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20.0),
           ),
-          padding: EdgeInsets.all(6.0),
+          padding: const EdgeInsets.all(6.0),
+          margin: const EdgeInsets.only(right: 8.0),
           child: Icon(
             Icons.arrow_upward,
             size: 28.0,
             color: Colors.red[700],
           ),
-          margin: EdgeInsets.only(right: 8.0),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Clock-Out Total",
               style: TextStyle(fontSize: 14.0, color: Colors.white),
             ),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w700,
                   color: Colors.white),
@@ -937,7 +937,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
         if (data != null && data.containsKey('LastUpdateDate')) {
           final timestamp = data['LastUpdateDate'] as Timestamp;
           final LastUpdateDate = timestamp.toDate();
-          print("appVersionDate ====${LastUpdateDate}");
+          print("appVersionDate ====$LastUpdateDate");
 
           if (LastUpdateDate.isAfter(getlastUpdateDate[0].lastUpdateDate!) ||
               DateFormat('dd/MM/yyyy').format(LastUpdateDate) ==
@@ -1149,7 +1149,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
           // Prevent dismissing by tapping outside
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Update Available'),
+              title: const Text('Update Available'),
               content: Text(
                   "The upgrade to version ${getAppVersion[0].appVersion} has been successfully completed. Please click the 'Complete Upgrade' button to finalize all pending updates. Ensure a stable internet connection during this process. After the upgrade is complete, kindly navigate to your Profile page to update your Bio Information, including Staff Category, State, Facility, Department, Designation, Supervisor, and Supervisor's Email."),
               actions: <Widget>[
@@ -1164,7 +1164,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
 
                     Navigator.of(context).pop(); // Close the dialog
                   },
-                  child: Text('Complete Upgrade'),
+                  child: const Text('Complete Upgrade'),
                 ),
 
                 // TextButton(
@@ -1268,7 +1268,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
           final timestamp = data['LastUpdateDate'] as Timestamp;
           final lastUpdate = timestamp.toDate();
 
-          print("LastUpdateDate ====${lastUpdate}");
+          print("LastUpdateDate ====$lastUpdate");
 
           final lastUpdateSave = LastUpdateDateModel()
             ..lastUpdateDate = lastUpdate;
@@ -1291,7 +1291,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
   Future<void> _insertSuperUser() async {
     final bioInfoForSuperUser = await widget.service.getBioInfoForSuperUser();
 
-    if (bioInfoForSuperUser.length == 0) {
+    if (bioInfoForSuperUser.isEmpty) {
       final bioData = BioModel()
         ..emailAddress = emailAddressConstant
         ..password = passwordConstant
@@ -1315,7 +1315,6 @@ class _UserDashBoardState extends State<UserDashBoard> {
 
 
 
-      ;
 
 
       await widget.service.saveBioData(bioData);
@@ -1419,7 +1418,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
       for (final designationDoc in designationCollectionRef.docs) {
         final designation = designationDoc.id;
         // print("lgaSnap====${lga}");
-        final data = designationDoc.data() as Map<String, dynamic>;
+        final data = designationDoc.data();
         //print("data====${data}");
 
         final designationSave = DesignationModel()
@@ -1463,7 +1462,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
       for (final lgaDoc in lgaCollectionRef.docs) {
         final lga = lgaDoc.id;
         // print("lgaSnap====${lga}");
-        final data = lgaDoc.data() as Map<String, dynamic>;
+        final data = lgaDoc.data();
         //print("data====${data}");
 
         final locationSave = LocationModel()
@@ -1494,7 +1493,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
 
       for (final supervisorDoc in supervisorCollectionRef.docs) {
         final supervisor = supervisorDoc.id;
-        final data = supervisorDoc.data() as Map<String, dynamic>;
+        final data = supervisorDoc.data();
 
         final supervisorSave = SupervisorModel()
           ..department = data['department']
@@ -1546,8 +1545,8 @@ class _UserDashBoardState extends State<UserDashBoard> {
           final appVersionDate = timestamp.toDate();
           final versionNumber = data['appVersion'];
 
-          print("appVersionDate ====${appVersionDate}");
-          print("versionNumber ====${versionNumber}");
+          print("appVersionDate ====$appVersionDate");
+          print("versionNumber ====$versionNumber");
 
           if(getAppVersion[0].appVersion == versionNumber){
             await service.updateAppVersion1(1,AppVersionModel(),appVersionDate,DateTime.now(),true);
@@ -1618,7 +1617,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
         ),
         child: Center(
           child: Text(label,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 16, color: Colors.white, fontFamily: "NexaBold")),
         ),
       ),
@@ -1647,7 +1646,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                     color: Colors.deepOrange,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 _bottomSheetButton(
                   label: "Local Backup",
                   onTap: () async {
@@ -1673,7 +1672,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                   clr: Colors.orange,
                   context: context,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 _bottomSheetButton(
@@ -1685,7 +1684,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
                   isClose: true,
                   context: context,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
               ],
