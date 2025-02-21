@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:attendanceapp/Pages/Attendance/attendance_home.dart';
 import 'package:attendanceapp/Pages/auth_exceptions.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
 import 'package:attendanceapp/model/bio_model.dart';
@@ -42,12 +40,6 @@ class LoginController extends GetxController {
   DatabaseAdapter adapter = HiveService();
   var getAppVersion1;
 
-  @override
-  void onInit() {
-    super.onInit();
-    // service is now available here
-   // fetchLastUpdateDateAndInsertIntoIsar(IsarService());
-  }
 
   void togglePasswordVisibility() {
     isObscure.value = !isObscure.value;
@@ -155,7 +147,7 @@ class LoginController extends GetxController {
           if (context.mounted) {
           // Get.off(() => HomePage());
             Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) => const HomePage()),
                   (Route<dynamic> route) => false,
             );
           Fluttertoast.showToast(
@@ -230,7 +222,7 @@ class LoginController extends GetxController {
   Future<void> _insertVersion() async {
     final getAppVersion = await service.getAppVersionInfo();
 
-    if (getAppVersion.length == 0) {
+    if (getAppVersion.isEmpty) {
       final appVersion = AppVersionModel()
         ..appVersion = appVersionConstant;
 
@@ -240,32 +232,27 @@ class LoginController extends GetxController {
 
   Future<void> _pickImageFromFirebase(String profilePicLink) async {
     var profilePic = profilePicLink;
-    if (profilePic != null) {
-      try {
-        final image = FirebaseStorage.instance.refFromURL(profilePic);
-        if (image == null) return;
+    try {
+      final image = FirebaseStorage.instance.refFromURL(profilePic);
 
-        try {
-          const oneMegabyte = 1024 * 1024;
-          final Uint8List? data = await image.getData(oneMegabyte);
-          adapter.storeImage(data!);
-        } on FirebaseException catch (e) {
-          // Handle any errors.
-        }
-      } catch (e) {
-        Fluttertoast.showToast(
-            msg: "Error:${e.toString()}",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0);
+      try {
+        const oneMegabyte = 1024 * 1024;
+        final Uint8List? data = await image.getData(oneMegabyte);
+        adapter.storeImage(data!);
+      } on FirebaseException {
+        // Handle any errors.
       }
-    } else {
-      return;
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "Error:${e.toString()}",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
-  }
+    }
 
   Future<void> _autoFirebaseDBUpdate(IsarService service, String fireBaseIdNew) async {
     final allAttendance = await service.getAllAttendance();
@@ -349,7 +336,7 @@ class LoginController extends GetxController {
       for (final lgaDoc in lgaCollectionRef.docs) {
         final lga = lgaDoc.id;
         // print("lgaSnap====${lga}");
-        final data = lgaDoc.data() as Map<String, dynamic>;
+        final data = lgaDoc.data();
         //print("data====${data}");
 
         final locationSave = LocationModel()
@@ -385,7 +372,7 @@ class LoginController extends GetxController {
       for (final supervisorDoc in supervisorCollectionRef.docs) {
         final supervisor = supervisorDoc.id;
         print("supervisorCollectionstatesupervisor == $supervisor");
-        final data = supervisorDoc.data() as Map<String, dynamic>;
+        final data = supervisorDoc.data();
 
         print("supervisorCollectionstatesupervisorData == $data");
 
@@ -422,7 +409,7 @@ class LoginController extends GetxController {
       for (final designationDoc in designationCollectionRef.docs) {
         final designation = designationDoc.id;
         // print("lgaSnap====${lga}");
-        final data = designationDoc.data() as Map<String, dynamic>;
+        final data = designationDoc.data();
         //print("data====${data}");
 
         final designationSave = DesignationModel()
@@ -470,7 +457,7 @@ class LoginController extends GetxController {
           final timestamp = data['LastUpdateDate'] as Timestamp;
           final lastUpdate = timestamp.toDate();
 
-          print("LastUpdateDate ====${lastUpdate}");
+          print("LastUpdateDate ====$lastUpdate");
 
           final lastUpdateSave = LastUpdateDateModel()
             ..lastUpdateDate = lastUpdate;
@@ -512,8 +499,8 @@ class LoginController extends GetxController {
           final appVersionDate = timestamp.toDate();
           final versionNumber = data['appVersion'];
 
-          print("appVersionDate ====${appVersionDate}");
-          print("versionNumber ====${versionNumber}");
+          print("appVersionDate ====$appVersionDate");
+          print("versionNumber ====$versionNumber");
 
 
           if(getAppVersion[0].appVersion == versionNumber){

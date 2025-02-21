@@ -9,6 +9,8 @@ import '../services/isar_service.dart';
 import '../widgets/drawer.dart';
 
 class UploadSignaturePage extends StatefulWidget {
+  const UploadSignaturePage({super.key});
+
   @override
   _UploadSignaturePageState createState() => _UploadSignaturePageState();
 }
@@ -66,7 +68,7 @@ class _UploadSignaturePageState extends State<UploadSignaturePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          content: Container(
+          content: SizedBox(
             height: 300,
             width: double.infinity,
             child: Column(
@@ -82,7 +84,7 @@ class _UploadSignaturePageState extends State<UploadSignaturePage> {
                   children: [
                     TextButton(
                       onPressed: () => _signatureController.clear(),
-                      child: Text("Clear"),
+                      child: const Text("Clear"),
                     ),
                     ElevatedButton(
                       onPressed: () async {
@@ -92,7 +94,7 @@ class _UploadSignaturePageState extends State<UploadSignaturePage> {
                           Navigator.pop(context);
                         }
                       },
-                      child: Text("Save"),
+                      child: const Text("Save"),
                     ),
                   ],
                 ),
@@ -109,9 +111,9 @@ class _UploadSignaturePageState extends State<UploadSignaturePage> {
     return Scaffold(
       drawer: drawer(context, IsarService()),
       appBar: AppBar(
-        title: Text("Upload Signature"),
+        title: const Text("Upload Signature"),
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Colors.white, Colors.white],
               begin: Alignment.topLeft,
@@ -173,16 +175,16 @@ class _UploadSignaturePageState extends State<UploadSignaturePage> {
               children: [
                 ElevatedButton.icon(
                   onPressed: () => _showSignaturePad(),
-                  icon: Icon(Icons.create),
-                  label: Text("Draw Signature"),
+                  icon: const Icon(Icons.create),
+                  label: const Text("Draw Signature"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                   ),
                 ),
                 ElevatedButton.icon(
                   onPressed: () => _pickAndUploadSignature(),
-                  icon: Icon(Icons.upload_file, color: Colors.white), // Set icon color to white
-                  label: Text(
+                  icon: const Icon(Icons.upload_file, color: Colors.white), // Set icon color to white
+                  label: const Text(
                     "Upload Signature",
                     style: TextStyle(color: Colors.white), // Set text color to white
                   ),
@@ -199,16 +201,16 @@ class _UploadSignaturePageState extends State<UploadSignaturePage> {
                 if (_currentSignature != null) {
                   await _saveSignatureToDatabase(_currentSignature!);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Signature saved successfully!")),
+                    const SnackBar(content: Text("Signature saved successfully!")),
                   );
                 }
               },
-              child: Text("Save Signature",style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[800],
                 foregroundColor: Colors.white,
 
               ),
+              child: const Text("Save Signature",style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

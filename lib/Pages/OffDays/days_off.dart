@@ -6,7 +6,6 @@ import 'package:attendanceapp/services/isar_service.dart';
 import 'package:attendanceapp/widgets/drawer.dart';
 import 'package:attendanceapp/widgets/input_field.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -104,7 +103,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Out-Of-Office",
           style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
         ),
@@ -152,7 +151,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                     fontWeight: FontWeight.bold),
               ),
 
-              SizedBox(height: 10), // Spacing between status and coordinates
+              const SizedBox(height: 10), // Spacing between status and coordinates
               Obx(() => Text(
                 "Current Latitude: ${controller.lati.value.toStringAsFixed(6)}, Current Longitude: ${controller.longi.value.toStringAsFixed(6)}",
                 style: TextStyle(
@@ -160,7 +159,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                   fontSize: screenWidth / 23,
                 ),
               )),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Obx(() => Text(
                 "Current State: ${controller.administrativeArea.value}",
                 style: TextStyle(
@@ -168,7 +167,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                   fontSize: screenWidth / 23,
                 ),
               )),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Obx(() => Text(
                 "Current Location: ${controller.location.value}",
                 style: TextStyle(
@@ -252,7 +251,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                     return MyInputField(
                       title: "Reasons For Been out of office",
                       hint: "",
-                      widget: Container(
+                      widget: SizedBox(
                         width: MediaQuery.of(context).size.width*0.89,
                         // height: MediaQuery.of(context).size.height * 1,// Set your desired width
                         // color:Colors.red,
@@ -266,17 +265,17 @@ class _DaysOffPageState extends State<DaysOffPage> {
                                     labelText: "",
                                     filled: true,
                                     fillColor: Colors.white,
-                                    contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide.none,
                                     ),
                                   ),
                                   value: selectedReasons,
-                                  icon: Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
+                                  icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
                                  dropdownColor: Colors.white,
                                   elevation: 4,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 16,
                                     fontFamily: "NexaBold",
@@ -320,13 +319,13 @@ class _DaysOffPageState extends State<DaysOffPage> {
                       onPressed: () {
                         _getTimeFromUser(isStartTime: true, setState: setState);
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.access_time_rounded,
                         color: Colors.grey,
                       ),
                     ),
                   )),
-                  SizedBox(
+                  const SizedBox(
                     width: 12,
                   ),
                   Expanded(
@@ -337,7 +336,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                       onPressed: () {
                         _getTimeFromUser(isStartTime: false, setState: setState);
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.access_time_rounded,
                         color: Colors.grey,
                       ),
@@ -345,7 +344,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                   ))
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
 
@@ -356,12 +355,12 @@ class _DaysOffPageState extends State<DaysOffPage> {
               hintText: "Comments (If Any)",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15.0), // More pronounced curve
-                borderSide: BorderSide(color: Colors.grey), // Customize border color
+                borderSide: const BorderSide(color: Colors.grey), // Customize border color
               ), // Add a border
             ),),
 
 
-              SizedBox(height: 18),
+              const SizedBox(height: 18),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -376,7 +375,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                             fontSize: screenWidth / 21,
                             fontFamily: "NexaBold"),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 8.0,
                       ),
                       Wrap(
@@ -427,7 +426,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                           Radius.circular(20),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           "Submit",
                           style: TextStyle(
@@ -440,7 +439,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
                   )
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 40,
               )
             ],
@@ -488,7 +487,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
           timeInSecForIosWeb: 1,
           textColor: Colors.white,
           fontSize: 16.0);
-    } else if (attendanceLast.length == 0) {
+    } else if (attendanceLast.isEmpty) {
       final attendnce = AttendanceModel()
         ..clockIn = _startTime
         ..date = DateFormat('dd-MMMM-yyyy').format(_selectedDate)
@@ -509,7 +508,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
         ..month = DateFormat('MMMM yyyy').format(_selectedDate);
 
       await widget.service.saveAttendance(attendnce);
-    } else  if (attendanceLast.length > 0) {
+    } else  if (attendanceLast.isNotEmpty) {
       Fluttertoast.showToast(
           msg: "Error: Attendance with same date already exist",
           toastLength: Toast.LENGTH_LONG,
@@ -522,16 +521,16 @@ class _DaysOffPageState extends State<DaysOffPage> {
   }
 
   _getDateFromUser() async {
-    DateTime? _pickerDate = await showDatePicker(
+    DateTime? pickerDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2015),
       lastDate: DateTime(2090),
     );
 
-    if (_pickerDate != null) {
+    if (pickerDate != null) {
       setState(() {
-        _selectedDate = _pickerDate;
+        _selectedDate = pickerDate;
       });
     } else {
       print("It's null or something is wrong");
@@ -566,7 +565,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
       print("Time Canceled");
     } else {
       // Format the time in 12-hour AM/PM format
-      String _formattedTime = DateFormat('hh:mm a').format(
+      String formattedTime = DateFormat('hh:mm a').format(
         DateTime(
           DateTime.now().year,
           DateTime.now().month,
@@ -578,11 +577,11 @@ class _DaysOffPageState extends State<DaysOffPage> {
 
       if (isStartTime) {
         setState(() {
-          _startTime = _formattedTime;
+          _startTime = formattedTime;
         });
       } else {
         setState(() {
-          _endTime = _formattedTime;
+          _endTime = formattedTime;
         });
       }
     }
@@ -620,7 +619,7 @@ class _DaysOffPageState extends State<DaysOffPage> {
       var clockTimeIn = format.parse(clockInTime);
       var clockTimeOut = format.parse(clockOutTime);
       if (clockTimeIn.isAfter(clockTimeOut)) {
-        clockTimeOut = clockTimeOut.add(Duration(days: 1));
+        clockTimeOut = clockTimeOut.add(const Duration(days: 1));
         Duration diff = clockTimeOut.difference(clockTimeIn);
         final hours = diff.inHours;
         final minutes = diff.inMinutes % 60;

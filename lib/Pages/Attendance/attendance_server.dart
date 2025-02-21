@@ -121,7 +121,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Attendance(Server)",
           style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
         ),
@@ -159,7 +159,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
             Container(
               alignment: Alignment.centerLeft,
               //padding: const EdgeInsets.only(top: 0),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -187,7 +187,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 5,
             ),
             Stack(
@@ -217,7 +217,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                           builder: (context, child) {
                             return Theme(
                               data: Theme.of(context).copyWith(
-                                colorScheme: ColorScheme.light(
+                                colorScheme: const ColorScheme.light(
                                   primary: Colors.red,
                                   secondary: Colors.red,
                                   onSecondary: Colors.white,
@@ -261,7 +261,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             const SizedBox(height: 10.0),
@@ -317,7 +317,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                                   margin: const EdgeInsets.only(),
                                   padding: const EdgeInsets.all(5),
                                   width: screenWidth * 0.30,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
                                         Colors.redAccent,
@@ -343,7 +343,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                                             color: Colors.white,
                                           ),
                                         ),
-                                        SizedBox(
+                                        const SizedBox(
                                           height: 10,
                                         ),
                                         Text(
@@ -356,7 +356,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                                             color: Colors.white,
                                           ),
                                         ),
-                                        SizedBox(
+                                        const SizedBox(
                                           height: 10,
                                         ),
                                         Text(
@@ -370,9 +370,9 @@ class _AttendanceServerState extends State<AttendanceServer> {
                                             color: snap[index]["isSynced"]
                                                         .toString() ==
                                                     "true"
-                                                ? Color.fromARGB(
+                                                ? const Color.fromARGB(
                                                     255, 6, 202, 12)
-                                                : Color.fromARGB(
+                                                : const Color.fromARGB(
                                                     255, 252, 252, 252),
                                           ),
                                         ),
@@ -409,7 +409,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                                                 ? Colors.red
                                                 : Colors.black),
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 10,
                                       ),
                                       Text(
@@ -476,7 +476,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                                                 ? Colors.red
                                                 : Colors.black),
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 10,
                                       ),
                                       Text(
@@ -547,7 +547,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                     color: Colors.deepOrange,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 _bottomSheetButton(
                   label: "Update Attendance",
                   onTap: () async {
@@ -588,7 +588,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                   clr: Colors.orange,
                   context: context,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 _bottomSheetButton(
@@ -600,7 +600,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
                   isClose: true,
                   context: context,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
               ],
@@ -632,7 +632,7 @@ class _AttendanceServerState extends State<AttendanceServer> {
         ),
         child: Center(
           child: Text(label,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 16, color: Colors.white, fontFamily: "NexaBold")),
         ),
       ),

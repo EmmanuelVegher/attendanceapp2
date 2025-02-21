@@ -178,7 +178,7 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Update Attendance",
           style: TextStyle(color: Colors.red, fontFamily: "NexaBold"),
         ),
@@ -288,13 +288,13 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
                       onPressed: () {
                         _getTimeFromUser(isStartTime: true);
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.access_time_rounded,
                         color: Colors.grey,
                       ),
                     ),
                   )),
-                  SizedBox(
+                  const SizedBox(
                     width: 12,
                   ),
                   Expanded(
@@ -305,7 +305,7 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
                       onPressed: () {
                         _getTimeFromUser(isStartTime: false);
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.access_time_rounded,
                         color: Colors.grey,
                       ),
@@ -313,7 +313,7 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
                   ))
                 ],
               ),
-              SizedBox(height: 18),
+              const SizedBox(height: 18),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -328,7 +328,7 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
                             fontSize: screenWidth / 21,
                             fontFamily: "NexaBold"),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 8.0,
                       ),
                       Wrap(
@@ -379,7 +379,7 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
                           Radius.circular(20),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           "Update",
                           style: TextStyle(
@@ -392,7 +392,7 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
                   )
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 40,
               )
             ],
@@ -444,7 +444,7 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
     var clockTimeIn = format.parse(clockInTime);
     var clockTimeOut = format.parse(clockOutTime);
     if (clockTimeIn.isAfter(clockTimeOut)) {
-      clockTimeOut = clockTimeOut.add(Duration(days: 1));
+      clockTimeOut = clockTimeOut.add(const Duration(days: 1));
       Duration diff = clockTimeOut.difference(clockTimeIn);
       final hours = diff.inHours;
       final minutes = diff.inMinutes % 60;
@@ -462,16 +462,16 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
   }
 
   _getDateFromUser() async {
-    DateTime? _pickerDate = await showDatePicker(
+    DateTime? pickerDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2015),
       lastDate: DateTime(2090),
     );
 
-    if (_pickerDate != null) {
+    if (pickerDate != null) {
       setState(() {
-        selectedDate = _pickerDate;
+        selectedDate = pickerDate;
       });
     } else {
       print("It's null or something is wrong");
@@ -480,16 +480,16 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
 
   _getTimeFromUser({required bool isStartTime}) async {
     var pickedTime = await _showTimePicker();
-    String _formatedTime = pickedTime.format(context);
+    String formatedTime = pickedTime.format(context);
     if (pickedTime == null) {
       print("Time Canceled");
     } else if (isStartTime == true) {
       setState(() {
-        startTime = _formatedTime;
+        startTime = formatedTime;
       });
     } else if (isStartTime == false) {
       setState(() {
-        endTime = _formatedTime;
+        endTime = formatedTime;
       });
     }
   }
@@ -522,7 +522,7 @@ class _UpdateAttendanceState extends State<UpdateAttendance> {
     var clockTimeIn = format.parse(clockInTime);
     var clockTimeOut = format.parse(clockOutTime);
     if (clockTimeIn.isAfter(clockTimeOut)) {
-      clockTimeOut = clockTimeOut.add(Duration(days: 1));
+      clockTimeOut = clockTimeOut.add(const Duration(days: 1));
       Duration diff = clockTimeOut.difference(clockTimeIn);
       final hours = diff.inHours;
       final minutes = diff.inMinutes % 60;

@@ -1,4 +1,3 @@
-import 'package:attendanceapp/model/departmentmodel.dart';
 import 'package:isar/isar.dart';
 part 'gendercategory.g.dart';
 

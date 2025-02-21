@@ -1,19 +1,14 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter/widgets.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:attendanceapp/services/database_adapter.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,6 +27,8 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 
 
 class TimesheetScreen extends StatefulWidget {
+  const TimesheetScreen({super.key});
+
   @override
   _TimesheetScreenState createState() => _TimesheetScreenState();
 }
@@ -108,10 +105,10 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
     _loadProjectNames();
     _loadAttendanceData();
     _scrollController = ScrollController();
-    bool _isLoading = true; // Add a loading flag
+    bool isLoading = true; // Add a loading flag
 
     // Start the 5-second timer
-    Timer(Duration(seconds: 5), () async {
+    Timer(const Duration(seconds: 5), () async {
       await _loadBioData().then((_) async {
         if (bioData != null &&
             bioData!.department != null &&
@@ -126,7 +123,7 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
 
       // Stop loading state
       setState(() {
-        _isLoading = false;
+        isLoading = false;
       });
     });
   }
@@ -315,7 +312,7 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
     // 2. Save the PDF to a temporary file
     final tempDir = await getTemporaryDirectory();
     final pdfFile = File('${tempDir
-        .path}/Timesheet_${monthYear1}_${selectedBioFirstName}_${selectedBioLastName}.pdf');
+        .path}/Timesheet_${monthYear1}_${selectedBioFirstName}_$selectedBioLastName.pdf');
     await pdfFile.writeAsBytes(await pdf.save());
 
     // 3. Add the PDF file path to attachments
@@ -324,15 +321,15 @@ class _TimesheetScreenState extends State<TimesheetScreen> {
 
     final Email email = Email(
       body: '''
-Greetings ${selectedBioFirstName},
+Greetings $selectedBioFirstName,
 
-Please find attached your timesheet for ${monthYear}.
+Please find attached your timesheet for $monthYear.
 
 Best regards,
-${selectedBioFirstName} ${selectedBioLastName}
+$selectedBioFirstName $selectedBioLastName
 
 ''',
-      subject: 'Timesheet for ${selectedBioFirstName} ${selectedBioLastName} ,${monthYear}',
+      subject: 'Timesheet for $selectedBioFirstName $selectedBioLastName ,$monthYear',
       recipients: [selectedBioEmail!],
       attachmentPaths: attachments,
       isHTML: isHTML,
@@ -421,11 +418,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text('Name: ${selectedBioFirstName} ${selectedBioLastName}'),
-        pw.Text('Department: ${selectedBioDepartment}'),
-        pw.Text('Designation: ${selectedBioDesignation}'),
-        pw.Text('Location: ${selectedBioLocation}'),
-        pw.Text('State: ${selectedBioState}'),
+        pw.Text('Name: $selectedBioFirstName $selectedBioLastName'),
+        pw.Text('Department: $selectedBioDepartment'),
+        pw.Text('Designation: $selectedBioDesignation'),
+        pw.Text('Location: $selectedBioLocation'),
+        pw.Text('State: $selectedBioState'),
         pw.SizedBox(height: 20), // Add some spacing
 
       ],
@@ -513,7 +510,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
       double percentage = (workingDays * 8) != 0 ? (rowTotal /
           (workingDays * 8)) * 100 : 0;
       row[daysInRange.length + 2] =
-          percentage.round().toString() + '%'; // Rounded percentage
+          '${percentage.round()}%'; // Rounded percentage
     }
 
 
@@ -547,7 +544,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
     double grandPercentage = (workingDays * 8) > 0 ? (grandTotalHours /
         (workingDays * 8)) * 100 : 0;
     totalRow[daysInRange.length + 2] =
-        grandPercentage.round().toString() + '%'; // Round percentage
+        '${grandPercentage.round()}%'; // Round percentage
 
 
     // Build the table
@@ -566,7 +563,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
       children: [
         // Header row
         pw.TableRow(
-          decoration: pw.BoxDecoration(color: PdfColors.grey300),
+          decoration: const pw.BoxDecoration(color: PdfColors.grey300),
           children: tableHeaders
               .map((header) =>
               pw.Center(
@@ -1291,16 +1288,16 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
 
   getDateFromUser() async {
-    DateTime? _pickerDate = await showDatePicker(
+    DateTime? pickerDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2015),
       lastDate: DateTime(2090),
     );
 
-    if (_pickerDate != null) {
+    if (pickerDate != null) {
       setState(() {
-        selectedDate = _pickerDate;
+        selectedDate = pickerDate;
       });
     } else {
       print("It's null or something is wrong");
@@ -1635,7 +1632,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Timesheet'),
+        title: const Text('Timesheet'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.save_alt),
@@ -1680,7 +1677,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                           .shortestSide < 600 ? 0.15 : 0.10),
                       //height: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.050 : 0.30),
                     ),
-                    Text('Name: ${selectedBioFirstName} ${selectedBioLastName}',
+                    Text('Name: $selectedBioFirstName $selectedBioLastName',
                       style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: MediaQuery
                           .of(context)
@@ -1689,8 +1686,8 @@ ${selectedBioFirstName} ${selectedBioLastName}
                           .of(context)
                           .size
                           .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 5),
-                    Text('Department: ${selectedBioDepartment}',
+                    const SizedBox(height: 5),
+                    Text('Department: $selectedBioDepartment',
                       style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: MediaQuery
                           .of(context)
@@ -1699,8 +1696,8 @@ ${selectedBioFirstName} ${selectedBioLastName}
                           .of(context)
                           .size
                           .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 5),
-                    Text('Designation: ${selectedBioDesignation}',
+                    const SizedBox(height: 5),
+                    Text('Designation: $selectedBioDesignation',
                       style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: MediaQuery
                           .of(context)
@@ -1709,8 +1706,8 @@ ${selectedBioFirstName} ${selectedBioLastName}
                           .of(context)
                           .size
                           .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 5),
-                    Text('Location: ${selectedBioLocation}', style: TextStyle(
+                    const SizedBox(height: 5),
+                    Text('Location: $selectedBioLocation', style: TextStyle(
                       fontWeight: FontWeight.bold, fontSize: MediaQuery
                         .of(context)
                         .size
@@ -1718,8 +1715,8 @@ ${selectedBioFirstName} ${selectedBioLastName}
                         .of(context)
                         .size
                         .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 5),
-                    Text('State: ${selectedBioState}', style: TextStyle(
+                    const SizedBox(height: 5),
+                    Text('State: $selectedBioState', style: TextStyle(
                       fontWeight: FontWeight.bold, fontSize: MediaQuery
                         .of(context)
                         .size
@@ -1727,7 +1724,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                         .of(context)
                         .size
                         .shortestSide < 600 ? 0.035 : 0.020),),),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     // Add some spacing
                   ]
               ),),
@@ -1794,7 +1791,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                 ],
               ),
             ),
-            Divider(),
+            const Divider(),
             // Attendance Sheet in a Container with 50% screen height
             Container(
               //height: MediaQuery.of(context).size.height * 0.5, // Adjusted height for better visibility
@@ -1820,9 +1817,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           width: 150,
                                           // Set a width for the "Project Name" header
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.blue.shade100,
-                                          child: Text(
+                                          child: const Text(
                                             'Project Name',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
@@ -1832,13 +1829,13 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           return Container(
                                             width: 50,
                                             alignment: Alignment.center,
-                                            padding: EdgeInsets.all(8.0),
+                                            padding: const EdgeInsets.all(8.0),
                                             color: isWeekend(date) ? Colors.grey
                                                 .shade300 : Colors.blue
                                                 .shade100,
                                             child: Text(
                                               DateFormat('dd MMM').format(date),
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   fontWeight: FontWeight.bold),
                                             ),
                                           );
@@ -1846,9 +1843,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         Container(
                                           width: 100,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.blue.shade100,
-                                          child: Text(
+                                          child: const Text(
                                             'Total Hours',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
@@ -1857,9 +1854,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         Container(
                                           width: 100,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.blue.shade100,
-                                          child: Text(
+                                          child: const Text(
                                             'Percentage',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
@@ -1867,17 +1864,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         ),
                                       ],
                                     ),
-                                    Divider(),
+                                    const Divider(),
                                     Row(
                                       children: [
                                         Container(
                                           width: 150,
                                           // Keep the fixed width if you need it
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.white,
                                           child: projectNames.isEmpty
-                                              ? Text('No projects found')
+                                              ? const Text('No projects found')
                                               : DropdownButton<String>(
                                             value: selectedProjectName,
                                             isExpanded: true,
@@ -1902,12 +1899,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                 selectedProjectName = newValue;
                                               });
                                             },
-                                            hint: Text('Select Project'),
+                                            hint: const Text('Select Project'),
                                           ),
                                         ),
                                         ...daysInRange.map((date) {
-                                          bool weekend = date != null &&
-                                              isWeekend(date);
+                                          bool weekend = isWeekend(date);
                                           String hours = _getDurationForDate2(
                                               date, selectedProjectName,
                                               selectedProjectName!);
@@ -1925,12 +1921,12 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                   .center,
                                               children: [
                                                 weekend
-                                                    ? SizedBox
+                                                    ? const SizedBox
                                                     .shrink() // No hours on weekends
                                                     : Text(
-                                                  '${hours}',
+                                                  hours,
                                                   // Placeholder, replace with Isar data
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                       color: Colors.blueAccent),
                                                 ),
                                               ],
@@ -1940,16 +1936,15 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         Container(
                                           width: 100,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.white,
                                           child: Text(
                                             //'$totalHours hrs',
-                                            calculateTotalHours1(
+                                            "${calculateTotalHours1(
                                                 selectedProjectName)
-                                                .round()
-                                                .toString() + " hrs",
+                                                .round()} hrs",
 
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.green,
                                                 fontWeight: FontWeight.bold),
                                           ),
@@ -1957,29 +1952,29 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         Container(
                                           width: 100,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.white,
                                           child: Text(
                                             // '${percentageWorked.toStringAsFixed(2)}%',
                                             '${calculatePercentageWorked1(
                                                 selectedProjectName).round()}%',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.green,
                                                 fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    Divider(),
+                                    const Divider(),
                                     // "Out-of-office" Header Row
                                     Row(
                                       children: [
                                         Container(
                                           width: 150,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.white,
-                                          child: Text(
+                                          child: const Text(
                                             'Out-of-office',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold,
@@ -1991,9 +1986,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           return Container(
                                             width: 50,
                                             alignment: Alignment.center,
-                                            padding: EdgeInsets.all(8.0),
+                                            padding: const EdgeInsets.all(8.0),
                                             color: Colors.white,
-                                            child: Text(
+                                            child: const Text(
                                               '', // Placeholder for out-of-office data, can be replaced later
                                             ),
                                           );
@@ -2001,18 +1996,18 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         Container(
                                           width: 100,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.white,
-                                          child: Text(
+                                          child: const Text(
                                             '', // Placeholder for total hours
                                           ),
                                         ),
                                         Container(
                                           width: 100,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.white,
-                                          child: Text(
+                                          child: const Text(
                                             '', // Placeholder for percentage
                                           ),
                                         ),
@@ -2034,11 +2029,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           Container(
                                             width: 150,
                                             alignment: Alignment.center,
-                                            padding: EdgeInsets.all(8.0),
+                                            padding: const EdgeInsets.all(8.0),
                                             color: Colors.white,
                                             child: Text(
                                               category,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   fontWeight: FontWeight.bold),
                                             ),
                                           ),
@@ -2063,12 +2058,12 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                     .center,
                                                 children: [
                                                   weekend
-                                                      ? SizedBox
+                                                      ? const SizedBox
                                                       .shrink() // No hours on weekends
                                                       : Text(
                                                     offDayHours,
                                                     // Placeholder, replace with Isar data
-                                                    style: TextStyle(
+                                                    style: const TextStyle(
                                                         color: Colors
                                                             .blueAccent),
                                                   ),
@@ -2079,13 +2074,12 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           Container(
                                             width: 100,
                                             alignment: Alignment.center,
-                                            padding: EdgeInsets.all(8.0),
+                                            padding: const EdgeInsets.all(8.0),
                                             color: Colors.white,
                                             child: Text(
                                               //'${outOfOfficeHours.toStringAsFixed(1)} hrs',
-                                              calculateCategoryHours1(category)
-                                                  .round()
-                                                  .toString() + " hrs",
+                                              "${calculateCategoryHours1(category)
+                                                  .round()} hrs",
                                               style: const TextStyle(
                                                   color: Colors.green,
                                                   fontWeight: FontWeight.bold),
@@ -2100,7 +2094,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                               //'${outOfOfficePercentage.toStringAsFixed(1)}%',
                                               '${calculateCategoryPercentage(
                                                   category).round()}%',
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   color: Colors.green,
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -2114,9 +2108,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         Container(
                                           width: 150,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.white,
-                                          child: Text(
+                                          child: const Text(
                                             'Total',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold,
@@ -2128,9 +2122,9 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           return Container(
                                             width: 50,
                                             alignment: Alignment.center,
-                                            padding: EdgeInsets.all(8.0),
+                                            padding: const EdgeInsets.all(8.0),
                                             color: Colors.white,
-                                            child: Text(
+                                            child: const Text(
                                               '', // Placeholder for out-of-office data, can be replaced later
                                             ),
                                           );
@@ -2138,14 +2132,14 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         Container(
                                           width: 100,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.white,
                                           child: Text(
                                             // '$totalGrandHours hrs',
-                                            calculateGrandTotalHours1()
-                                                .toStringAsFixed(0) + " hrs",
+                                            "${calculateGrandTotalHours1()
+                                                .toStringAsFixed(0)} hrs",
                                             // Or .round().toString() if grand total should also be rounded.
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.green,
                                                 fontWeight: FontWeight.bold),
                                           ),
@@ -2153,13 +2147,13 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                         Container(
                                           width: 100,
                                           alignment: Alignment.center,
-                                          padding: EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           color: Colors.white,
                                           child: Text(
                                             //'${grandPercentageWorked.toStringAsFixed(2)}%',
                                             '${calculateGrandPercentageWorked()
                                                 .round()}%',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.green,
                                                 fontWeight: FontWeight.bold),
                                           ),
@@ -2185,7 +2179,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               .shortestSide < 600 ? 0.07 : 0.05)),
                           //Signature and Detials
 
-                          Divider(),
+                          const Divider(),
                           Text('Signature & Date', style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: MediaQuery
                               .of(context)
@@ -2194,7 +2188,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                               .of(context)
                               .size
                               .shortestSide < 600 ? 0.050 : 0.030),)),
-                          Divider(),
+                          const Divider(),
                           Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
@@ -2217,7 +2211,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           .size
                                           .shortestSide < 600 ? 0.25 : 0.25),
                                       alignment: Alignment.center,
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       //color: Colors.white,
                                       child: Column(
                                         mainAxisAlignment: MainAxisAlignment
@@ -2295,7 +2289,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           .size
                                           .shortestSide < 600 ? 0.35 : 0.35),
                                       alignment: Alignment.center,
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       //  color: Colors.grey.shade200,
                                       child: Column(
                                         children: [
@@ -2956,7 +2950,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                   );
                                                 }
                                               }
-                                              return Text(
+                                              return const Text(
                                                   "Loading Signature...");
                                             },
                                           ),
@@ -2982,10 +2976,10 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           .of(context)
                                           .size
                                           .shortestSide < 600 ? 0.30 : 0.30),
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: Column(
                                         children: [
-                                          Text('Date', style: TextStyle(
+                                          const Text('Date', style: TextStyle(
                                               fontWeight: FontWeight.bold)),
                                           SizedBox(height: MediaQuery
                                               .of(context)
@@ -3033,14 +3027,14 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                   );
                                                 } else {
                                                   return Text(
-                                                      "${formattedDate}",
-                                                      style: TextStyle(
+                                                      formattedDate,
+                                                      style: const TextStyle(
                                                           fontWeight: FontWeight
                                                               .bold));
                                                 }
                                               } else {
-                                                return Text("${formattedDate}",
-                                                    style: TextStyle(
+                                                return Text(formattedDate,
+                                                    style: const TextStyle(
                                                         fontWeight: FontWeight
                                                             .bold));
                                               }
@@ -3076,7 +3070,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                     .of(context)
                                     .size
                                     .shortestSide < 600 ? 0.005 : 0.005)),
-                                Divider(),
+                                const Divider(),
                                 //Second - Project Coordinator Section
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -3396,7 +3390,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           .size
                                           .shortestSide < 600 ? 0.35 : 0.35),
                                       alignment: Alignment.center,
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       //color: Colors.grey.shade200,
                                       child: Column(
                                         children: [
@@ -3471,15 +3465,15 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                             fit: BoxFit.contain,
                                                           ),
                                                         ),
-                                                        SizedBox(height: 8),
+                                                        const SizedBox(height: 8),
                                                         Row(
                                                           mainAxisAlignment: MainAxisAlignment.center,
                                                           children: [
-                                                            Icon(Icons.check_circle, color: Colors.green),
-                                                            SizedBox(width: 8),
+                                                            const Icon(Icons.check_circle, color: Colors.green),
+                                                            const SizedBox(width: 8),
                                                             Text(
                                                               "$facilitySupervisorSignatureStatus",
-                                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                                              style: const TextStyle(fontWeight: FontWeight.bold),
                                                             ),
                                                           ],
                                                         ),
@@ -3492,39 +3486,39 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                     null && facilitySupervisorSignatureStatus == "Rejected"){
                                                   return Column(
                                                     children: [
-                                                      Text("Awaiting Facility Supervisor Signature"),
-                                                      SizedBox(height: 8),
+                                                      const Text("Awaiting Facility Supervisor Signature"),
+                                                      const SizedBox(height: 8),
                                                       if (facilitySupervisorSignatureStatus == "Rejected")
                                                         Row(
                                                           children: [
-                                                            Icon(Icons.cancel, color: Colors.red),
-                                                            SizedBox(width: 8),
+                                                            const Icon(Icons.cancel, color: Colors.red),
+                                                            const SizedBox(width: 8),
                                                             Text(
                                                               "$facilitySupervisorSignatureStatus",
-                                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                                              style: const TextStyle(fontWeight: FontWeight.bold),
                                                             ),
-                                                            SizedBox(width: 15),
+                                                            const SizedBox(width: 15),
                                                             GestureDetector(
                                                               onTap: () {
                                                                 showDialog(
                                                                   context: context,
                                                                   builder: (context) {
                                                                     return AlertDialog(
-                                                                      title: Text("Reason for Rejection"),
+                                                                      title: const Text("Reason for Rejection"),
                                                                       content: Text(facilitySupervisorRejectionReason ?? "No reason provided."),
                                                                       actions: [
                                                                         TextButton(
                                                                           onPressed: () {
                                                                             Navigator.of(context).pop();
                                                                           },
-                                                                          child: Text("Close"),
+                                                                          child: const Text("Close"),
                                                                         ),
                                                                       ],
                                                                     );
                                                                   },
                                                                 );
                                                               },
-                                                              child: Icon(
+                                                              child: const Icon(
                                                                 Icons.info_outline,
                                                                 color: Colors.blue,
                                                                 size: 20,
@@ -3535,11 +3529,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                       else
                                                         Row(
                                                           children: [
-                                                            Icon(Icons.check_circle, color: Colors.green),
-                                                            SizedBox(width: 8),
+                                                            const Icon(Icons.check_circle, color: Colors.green),
+                                                            const SizedBox(width: 8),
                                                             Text(
                                                               "$facilitySupervisorSignatureStatus",
-                                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                                              style: const TextStyle(fontWeight: FontWeight.bold),
                                                             ),
                                                           ],
                                                         ),
@@ -3549,50 +3543,50 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                 else {
                                                   return Column(
                                                     children: [
-                                                      Text("Awaiting Facility Supervisor Signature"),
-                                                      SizedBox(height: 8),
+                                                      const Text("Awaiting Facility Supervisor Signature"),
+                                                      const SizedBox(height: 8),
                                                       if (facilitySupervisorSignatureStatus == "Pending")
                                                         Row(
                                                           children: [
-                                                            Icon(Icons.access_time, color: Colors.orange),
-                                                            SizedBox(width: 8),
+                                                            const Icon(Icons.access_time, color: Colors.orange),
+                                                            const SizedBox(width: 8),
                                                             Text(
                                                               "$facilitySupervisorSignatureStatus",
-                                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                                              style: const TextStyle(fontWeight: FontWeight.bold),
                                                             ),
                                                           ],
                                                         )
                                                       else if (facilitySupervisorSignatureStatus == "Rejected")
                                                         Row(
                                                           children: [
-                                                            Icon(Icons.cancel, color: Colors.red),
-                                                            SizedBox(width: 8),
+                                                            const Icon(Icons.cancel, color: Colors.red),
+                                                            const SizedBox(width: 8),
                                                             Text(
                                                               "$facilitySupervisorSignatureStatus",
-                                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                                              style: const TextStyle(fontWeight: FontWeight.bold),
                                                             ),
-                                                            SizedBox(width: 15),
+                                                            const SizedBox(width: 15),
                                                             GestureDetector(
                                                               onTap: () {
                                                                 showDialog(
                                                                   context: context,
                                                                   builder: (context) {
                                                                     return AlertDialog(
-                                                                      title: Text("Reason for Rejection"),
+                                                                      title: const Text("Reason for Rejection"),
                                                                       content: Text(facilitySupervisorRejectionReason ?? "No reason provided."),
                                                                       actions: [
                                                                         TextButton(
                                                                           onPressed: () {
                                                                             Navigator.of(context).pop();
                                                                           },
-                                                                          child: Text("Close"),
+                                                                          child: const Text("Close"),
                                                                         ),
                                                                       ],
                                                                     );
                                                                   },
                                                                 );
                                                               },
-                                                              child: Icon(
+                                                              child: const Icon(
                                                                 Icons.info_outline,
                                                                 color: Colors.blue,
                                                                 size: 20,
@@ -3603,11 +3597,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                       else
                                                         Row(
                                                           children: [
-                                                            Icon(Icons.check_circle, color: Colors.green),
-                                                            SizedBox(width: 8),
+                                                            const Icon(Icons.check_circle, color: Colors.green),
+                                                            const SizedBox(width: 8),
                                                             Text(
                                                               "$facilitySupervisorSignatureStatus",
-                                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                                              style: const TextStyle(fontWeight: FontWeight.bold),
                                                             ),
                                                           ],
                                                         ),
@@ -3616,7 +3610,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
                                                 }
                                               } else {
-                                                return Text(
+                                                return const Text(
                                                     "Timesheet Yet to be submitted for Project Cordinator's Signature");
                                               }
                                             },
@@ -3641,10 +3635,10 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           .of(context)
                                           .size
                                           .shortestSide < 600 ? 0.30 : 0.30),
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: Column(
                                         children: [
-                                          Text('Date', style: TextStyle(
+                                          const Text('Date', style: TextStyle(
                                               fontWeight: FontWeight.bold)),
                                           SizedBox(height: MediaQuery
                                               .of(context)
@@ -3691,11 +3685,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                     ],
                                                   );
                                                 } else {
-                                                  return Text(
+                                                  return const Text(
                                                       "Awaiting Facility Supervisor Date");
                                                 }
                                               } else {
-                                                return Text(
+                                                return const Text(
                                                     "Timesheet Yet to be submitted for Project Cordinator's Signature Date");
                                               }
                                             },
@@ -3713,7 +3707,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                     .of(context)
                                     .size
                                     .shortestSide < 600 ? 0.005 : 0.005)),
-                                Divider(),
+                                const Divider(),
                                 // Third - CARITAS Supervisor Section
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -3844,7 +3838,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                                 child: Text(
                                                                     supervisorName ??
                                                                         'No Supervisor',
-                                                                    style: TextStyle(
+                                                                    style: const TextStyle(
                                                                         fontWeight: FontWeight
                                                                             .bold)),
                                                               );
@@ -4001,7 +3995,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           .size
                                           .shortestSide < 600 ? 0.35 : 0.35),
                                       alignment: Alignment.center,
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       //color: Colors.grey.shade200,
                                       child: Column(
                                         children: [
@@ -4116,15 +4110,15 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                             fit: BoxFit.contain,
                                                           ),
                                                         ),
-                                                        SizedBox(height: 8),
+                                                        const SizedBox(height: 8),
                                                         Row(
                                                           mainAxisAlignment: MainAxisAlignment.center,
                                                           children: [
-                                                            Icon(Icons.check_circle, color: Colors.green),
-                                                            SizedBox(width: 8),
+                                                            const Icon(Icons.check_circle, color: Colors.green),
+                                                            const SizedBox(width: 8),
                                                             Text(
                                                               "$caritasSupervisorSignatureStatus",
-                                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                                              style: const TextStyle(fontWeight: FontWeight.bold),
                                                             ),
                                                           ],
                                                         ),
@@ -4138,28 +4132,28 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                 else if (caritasSupervisorSignatureStatus == "Pending" && facilitySupervisorSignatureStatus == "Pending") {
                                                   return Column(
                                                     children: [
-                                                      Text(
+                                                      const Text(
                                                         "Awaiting Approved Signature from Facility Supervisor before signature from CARITAS Supervisor ",
                                                        // style: TextStyle(fontWeight: FontWeight.bold),
                                                         softWrap: true,
                                                         overflow: TextOverflow.visible,
                                                       ),
-                                                      SizedBox(height: 8),
+                                                      const SizedBox(height: 8),
                                                       facilitySupervisorSignatureStatus == "Pending"
                                                           ? Row(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
-                                                          Padding(
+                                                          const Padding(
                                                             padding: EdgeInsets.only(top: 0.0),
                                                             child: Icon(Icons.access_time, color: Colors.orange),
                                                           ),
-                                                          SizedBox(width: 8),
+                                                          const SizedBox(width: 8),
                                                           Expanded(
                                                             child: Padding(
-                                                              padding: EdgeInsets.only(top: 0.0),
+                                                              padding: const EdgeInsets.only(top: 0.0),
                                                               child: Text(
                                                                 "$facilitySupervisorSignatureStatus (Awaiting Approval from Facility Supervisor)",
-                                                                style: TextStyle(fontWeight: FontWeight.bold),
+                                                                style: const TextStyle(fontWeight: FontWeight.bold),
                                                                 softWrap: true,
                                                                 overflow: TextOverflow.visible,
                                                               ),
@@ -4171,30 +4165,30 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                           ? Row(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
-                                                          Padding(
+                                                          const Padding(
                                                             padding: EdgeInsets.only(top: 0.0),
                                                             child: Icon(Icons.cancel, color: Colors.red),
                                                           ),
-                                                          SizedBox(width: 8),
+                                                          const SizedBox(width: 8),
                                                           Expanded(
                                                             child: Padding(
-                                                              padding: EdgeInsets.only(bottom: 0.0),
+                                                              padding: const EdgeInsets.only(bottom: 0.0),
                                                               child: Text(
                                                                 "$facilitySupervisorSignatureStatus (Approval Rejected by Facility Supervisor)",
-                                                                style: TextStyle(fontWeight: FontWeight.bold),
+                                                                style: const TextStyle(fontWeight: FontWeight.bold),
                                                                 softWrap: true,
                                                                 overflow: TextOverflow.visible,
                                                               ),
                                                             ),
                                                           ),
-                                                          SizedBox(width: 8),
+                                                          const SizedBox(width: 8),
                                                           GestureDetector(
                                                             onTap: () {
                                                               showDialog(
                                                                 context: context,
                                                                 builder: (context) {
                                                                   return AlertDialog(
-                                                                    title: Text("Reason for Rejection"),
+                                                                    title: const Text("Reason for Rejection"),
                                                                     content: Text(
                                                                       facilitySupervisorSignatureStatus ?? "No reason provided.",
                                                                       softWrap: true,
@@ -4205,14 +4199,14 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                                         onPressed: () {
                                                                           Navigator.of(context).pop();
                                                                         },
-                                                                        child: Text("Close"),
+                                                                        child: const Text("Close"),
                                                                       ),
                                                                     ],
                                                                   );
                                                                 },
                                                               );
                                                             },
-                                                            child: Icon(
+                                                            child: const Icon(
                                                               Icons.info_outline,
                                                               color: Colors.blue,
                                                               size: 20,
@@ -4223,17 +4217,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                           : Row(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
-                                                          Padding(
+                                                          const Padding(
                                                             padding: EdgeInsets.only(top: 0.0),
                                                             child: Icon(Icons.check_circle, color: Colors.green),
                                                           ),
-                                                          SizedBox(width: 8),
+                                                          const SizedBox(width: 8),
                                                           Expanded(
                                                             child: Padding(
-                                                              padding: EdgeInsets.only(bottom: 0.0),
+                                                              padding: const EdgeInsets.only(bottom: 0.0),
                                                               child: Text(
                                                                 "$facilitySupervisorSignatureStatus",
-                                                                style: TextStyle(fontWeight: FontWeight.bold),
+                                                                style: const TextStyle(fontWeight: FontWeight.bold),
                                                                 softWrap: true,
                                                                 overflow: TextOverflow.visible,
                                                               ),
@@ -4247,15 +4241,15 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                 else if (caritasSupervisorSignatureStatus == "Pending" && facilitySupervisorSignatureStatus == "Rejected") {
                                                   return Column(
                                                     children: [
-                                                      Text(
+                                                      const Text(
                                                         "Awaiting Approved Signature from Facility Supervisor before signature from CARITAS Supervisor ",
                                                        // style: TextStyle(fontWeight: FontWeight.w100),
                                                         softWrap: true,
                                                         overflow: TextOverflow.visible,
                                                       ),
-                                                      SizedBox(height: 8),
+                                                      const SizedBox(height: 8),
                                                       facilitySupervisorSignatureStatus == "Rejected"
-                                                          ? Row(
+                                                          ? const Row(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
                                                           Padding(
@@ -4281,17 +4275,17 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                           : Row(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
-                                                          Padding(
+                                                          const Padding(
                                                             padding: EdgeInsets.only(top: 0.0),
                                                             child: Icon(Icons.check_circle, color: Colors.green),
                                                           ),
-                                                          SizedBox(width: 8),
+                                                          const SizedBox(width: 8),
                                                           Expanded(
                                                             child: Padding(
-                                                              padding: EdgeInsets.only(bottom: 0.0),
+                                                              padding: const EdgeInsets.only(bottom: 0.0),
                                                               child: Text(
                                                                 "$facilitySupervisorSignatureStatus",
-                                                                style: TextStyle(fontWeight: FontWeight.bold),
+                                                                style: const TextStyle(fontWeight: FontWeight.bold),
                                                                 softWrap: true,
                                                                 overflow: TextOverflow.visible,
                                                               ),
@@ -4307,16 +4301,16 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                 else {
                                                   return Column(
                                                     children: [
-                                                      Text(
+                                                      const Text(
                                                           "Awaiting Caritas Supervisor Signature"),
-                                                      SizedBox(height: 8),
+                                                      const SizedBox(height: 8),
                                                       caritasSupervisorSignatureStatus ==
                                                           "Pending"
                                                           ?
                                                       Row(
                                                         //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                           children: [
-                                                            Padding(
+                                                            const Padding(
                                                               padding: EdgeInsets
                                                                   .only(
                                                                   top: 0.0),
@@ -4326,14 +4320,14 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                                   color: Colors
                                                                       .orange),
                                                             ),
-                                                            SizedBox(width: 8),
+                                                            const SizedBox(width: 8),
                                                             Padding(
-                                                              padding: EdgeInsets
+                                                              padding: const EdgeInsets
                                                                   .only(
                                                                   top: 0.0),
                                                               child: Text(
                                                                 "$caritasSupervisorSignatureStatus",
-                                                                style: TextStyle(
+                                                                style: const TextStyle(
                                                                     fontWeight: FontWeight
                                                                         .bold),
                                                               ),
@@ -4344,7 +4338,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                           "Rejected" ?
                                                       Row(
                                                           children: [
-                                                            Padding(
+                                                            const Padding(
                                                               padding: EdgeInsets
                                                                   .only(
                                                                   top: 0.0),
@@ -4353,40 +4347,40 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                                   color: Colors
                                                                       .red),
                                                             ),
-                                                            SizedBox(width: 8),
+                                                            const SizedBox(width: 8),
                                                             Padding(
-                                                              padding: EdgeInsets
+                                                              padding: const EdgeInsets
                                                                   .only(
                                                                   bottom: 0.0),
                                                               child: Text(
                                                                 "$caritasSupervisorSignatureStatus",
-                                                                style: TextStyle(
+                                                                style: const TextStyle(
                                                                     fontWeight: FontWeight
                                                                         .bold),
                                                               ),
                                                             ),
-                                                            SizedBox(width:8),
+                                                            const SizedBox(width:8),
                                                             GestureDetector(
                                                               onTap: () {
                                                                 showDialog(
                                                                   context: context,
                                                                   builder: (context) {
                                                                     return AlertDialog(
-                                                                      title: Text("Reason for Rejection"),
+                                                                      title: const Text("Reason for Rejection"),
                                                                       content: Text(caritasSupervisorRejectionReason ?? "No reason provided."),
                                                                       actions: [
                                                                         TextButton(
                                                                           onPressed: () {
                                                                             Navigator.of(context).pop();
                                                                           },
-                                                                          child: Text("Close"),
+                                                                          child: const Text("Close"),
                                                                         ),
                                                                       ],
                                                                     );
                                                                   },
                                                                 );
                                                               },
-                                                              child: Icon(
+                                                              child: const Icon(
                                                                 Icons.info_outline,
                                                                 color: Colors.blue,
                                                                 size: 20,
@@ -4396,7 +4390,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                       )
                                                           : Row(
                                                           children: [
-                                                            Padding(
+                                                            const Padding(
                                                               padding: EdgeInsets
                                                                   .only(
                                                                   top: 0.0),
@@ -4406,14 +4400,14 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                                   color: Colors
                                                                       .green),
                                                             ),
-                                                            SizedBox(width: 8),
+                                                            const SizedBox(width: 8),
                                                             Padding(
-                                                              padding: EdgeInsets
+                                                              padding: const EdgeInsets
                                                                   .only(
                                                                   bottom: 0.0),
                                                               child: Text(
                                                                 "$caritasSupervisorSignatureStatus",
-                                                                style: TextStyle(
+                                                                style: const TextStyle(
                                                                     fontWeight: FontWeight
                                                                         .bold),
                                                               ),
@@ -4428,7 +4422,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
 
                                               } else {
-                                                return Text(
+                                                return const Text(
                                                     "Timesheet Yet to be submitted for Caritas Supervisor's Signature");
                                               }
                                             },
@@ -4453,10 +4447,10 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           .of(context)
                                           .size
                                           .shortestSide < 600 ? 0.30 : 0.30),
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: Column(
                                         children: [
-                                          Text('Date', style: TextStyle(
+                                          const Text('Date', style: TextStyle(
                                               fontWeight: FontWeight.bold)),
                                           SizedBox(height: MediaQuery
                                               .of(context)
@@ -4504,11 +4498,11 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                                     ],
                                                   );
                                                 } else {
-                                                  return Text(
+                                                  return const Text(
                                                       "Awaiting CARITAS Supervisor Date");
                                                 }
                                               } else {
-                                                return Text(
+                                                return const Text(
                                                     "Timesheet Yet to be submitted for CARITAS Supervisor's Signature Date");
                                               }
                                             },
@@ -4525,7 +4519,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                     .of(context)
                                     .size
                                     .shortestSide < 600 ? 0.005 : 0.005)),
-                                Divider(),
+                                const Divider(),
                                 StreamBuilder<DocumentSnapshot>(
                                   // Stream the supervisor signature
                                   stream: FirebaseFirestore.instance
@@ -4556,21 +4550,21 @@ ${selectedBioFirstName} ${selectedBioLastName}
                                           ElevatedButton(
                                             onPressed: sendEmailToSelf,
                                             // Call the save function
-                                            child: Text(
+                                            child: const Text(
                                                 'Email Signed Timesheet to Self'),
                                           );
                                       } else {
                                         return ElevatedButton(
                                           onPressed: _saveTimesheetToFirestore,
                                           // Call the save function
-                                          child: Text('Submit Timesheet'),
+                                          child: const Text('Submit Timesheet'),
                                         );
                                       }
                                     } else {
                                       return ElevatedButton(
                                         onPressed: _saveTimesheetToFirestore,
                                         // Call the save function
-                                        child: Text('Submit Timesheet'),
+                                        child: const Text('Submit Timesheet'),
                                       );
                                     }
                                   },
@@ -4798,7 +4792,7 @@ ${selectedBioFirstName} ${selectedBioLastName}
 
         Map<String, dynamic> timesheetData = {
           'projectName': selectedProjectName,
-          'staffName': '${selectedBioFirstName} ${selectedBioLastName}',
+          'staffName': '$selectedBioFirstName $selectedBioLastName',
           'staffSignature': staffSignatureLink,
           // 'staffSignatureDate': DateFormat('MMMM dd, yyyy').format(
           //     createCustomDate(selectedMonth + 1, selectedYear)),

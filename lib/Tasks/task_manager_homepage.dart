@@ -4,7 +4,6 @@ import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 
 import '../Pages/Attendance/button.dart';
@@ -164,7 +163,7 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
                   color: Get.isDarkMode?Colors.grey[600]:Colors.grey[300],
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               task.isCompleted==1
                   ?Container()
                   : _bottomSheetButton(
@@ -186,7 +185,7 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
                 clr: Colors.blue,
                 context:context,
               ),
-              SizedBox(height: 20,),
+              const SizedBox(height: 20,),
 
               _bottomSheetButton(
                 label: "Close",
@@ -197,7 +196,7 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
                 isClose:true,
                 context:context,
               ),
-              SizedBox(height: 10,),
+              const SizedBox(height: 10,),
             ],
           ),
         )
@@ -226,7 +225,7 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
           child: Text(
             label,
             style: isClose?TextStyle(fontSize: 16,color: Get.isDarkMode?Colors.white:Colors.black87, fontFamily: "NexaBold"):
-            TextStyle(fontSize: 16,color: Colors.white, fontFamily: "NexaBold"),
+            const TextStyle(fontSize: 16,color: Colors.white, fontFamily: "NexaBold"),
           ),
         ),
       ),
@@ -243,17 +242,17 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
         initialSelectedDate: DateTime.now(),
         selectionColor: Colors.red,
         selectedTextColor: Colors.white,
-        dateTextStyle: TextStyle(
+        dateTextStyle: const TextStyle(
             fontSize: 20,
             fontFamily: "NexaBold",
             color: Colors.grey
         ),
-        dayTextStyle: TextStyle(
+        dayTextStyle: const TextStyle(
             fontSize: 15,
             fontFamily: "NexaLight",
             color: Colors.grey
         ),
-        monthTextStyle: TextStyle(
+        monthTextStyle: const TextStyle(
             fontSize: 14,
             fontFamily: "NexaBold",
             color: Colors.grey
@@ -283,7 +282,7 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
                     alignment: Alignment.centerLeft,
                     child: RichText(
                       text: TextSpan(
-                          text:DateTime.now().day.toString()+",",
+                          text:"${DateTime.now().day},",
                           style: TextStyle(
                               color: Colors.red,
                               fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.080 : 0.060),
@@ -319,7 +318,7 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
             ),
           ),
           MyButton(label: "+ Add Task",onTap: ()async{
-            await Get.to(()=>AddTaskPage());
+            await Get.to(()=>const AddTaskPage());
             _taskController.getTasks();
           },
           )

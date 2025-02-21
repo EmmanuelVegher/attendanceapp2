@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 
 import '../Pages/Attendance/button.dart';
@@ -115,11 +114,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
                           onPressed: (){
                             _getTimeFromUser(isStartTime:true);
                           } ,
-                          icon: Icon(Icons.access_time_rounded,color: Colors.grey,),
+                          icon: const Icon(Icons.access_time_rounded,color: Colors.grey,),
                         ),
                       )
                   ),
-                  SizedBox(width: 12,),
+                  const SizedBox(width: 12,),
                   Expanded(
                       child: MyInputField(
                         title: "End Date",
@@ -128,7 +127,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                           onPressed: (){
                             _getTimeFromUser(isStartTime:false);
                           } ,
-                          icon: Icon(Icons.access_time_rounded,color: Colors.grey,),
+                          icon: const Icon(Icons.access_time_rounded,color: Colors.grey,),
                         ),
                       )
                   )
@@ -136,7 +135,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
               ),
               MyInputField(title: "Remind", hint: "$_selectedRemind minutes early",
                 widget: DropdownButton(
-                  icon: Icon(Icons.keyboard_arrow_down,color: Colors.grey,),
+                  icon: const Icon(Icons.keyboard_arrow_down,color: Colors.grey,),
                   iconSize: 32,
                   elevation: 4,
                   style: TextStyle(
@@ -160,7 +159,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 ),),
               MyInputField(title: "Repeat", hint: _selectedRepeat,
                 widget: DropdownButton(
-                  icon: Icon(Icons.keyboard_arrow_down,color: Colors.grey,),
+                  icon: const Icon(Icons.keyboard_arrow_down,color: Colors.grey,),
                   iconSize: 32,
                   elevation: 4,
                   style: TextStyle(
@@ -187,7 +186,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     });
                   },
                 ),),
-              SizedBox(height: 18),
+              const SizedBox(height: 18),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -200,7 +199,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                           fontSize: screenWidth / 21,
                           fontFamily: "NexaBold"
                       ),),
-                      SizedBox(height: 8.0,),
+                      const SizedBox(height: 8.0,),
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.start,
                         children: List<Widget>.generate(
@@ -231,7 +230,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   MyButton(label: "Create Task", onTap: ()=>_ValidateData()),
                 ],
               ),
-              SizedBox(height: 40,)
+              const SizedBox(height: 40,)
             ],
           ),
         ),
@@ -303,15 +302,15 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
 
   _getDateFromUser() async {
-    DateTime? _pickedDate = await showDatePicker(
+    DateTime? pickedDate = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
         firstDate: DateTime(2015),
         lastDate: DateTime(2100)); // Fix date range
 
-    if (_pickedDate != null) {
+    if (pickedDate != null) {
       setState(() {
-        _selectedDate = _pickedDate;
+        _selectedDate = pickedDate;
       });
     } else {
       print("It's null or something is wrong");
@@ -335,16 +334,16 @@ class _AddTaskPageState extends State<AddTaskPage> {
   // }
 
   _getTimeFromUser({required bool isStartTime}) async {
-    TimeOfDay? _pickedTime = await showTimePicker(
+    TimeOfDay? pickedTime = await showTimePicker(
       initialEntryMode: TimePickerEntryMode.input,
       context: context,
       initialTime: isStartTime
           ? TimeOfDay.now()
-          : TimeOfDay(hour: 12, minute: 0), // Default to 12:00 PM for end time
+          : const TimeOfDay(hour: 12, minute: 0), // Default to 12:00 PM for end time
     );
-    if (_pickedTime != null) {
+    if (pickedTime != null) {
       final now = DateTime.now();
-      final selectedTime = DateTime(now.year, now.month, now.day, _pickedTime.hour, _pickedTime.minute);
+      final selectedTime = DateTime(now.year, now.month, now.day, pickedTime.hour, pickedTime.minute);
       final formattedTime = DateFormat("hh:mm a").format(selectedTime);
 
       setState(() {

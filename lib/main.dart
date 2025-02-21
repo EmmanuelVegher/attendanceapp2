@@ -5,11 +5,9 @@ import 'dart:ui';
 import 'package:attendanceapp/Pages/splash_screen.dart';
 import 'package:attendanceapp/api/Attendance_gsheet_api.dart';
 import 'package:attendanceapp/model/attendancemodel.dart';
-import 'package:attendanceapp/services/attendance_service.dart';
 import 'package:attendanceapp/services/flutter_background_service.dart';
 import 'package:attendanceapp/services/isar_service.dart';
 import 'package:attendanceapp/services/notification_services.dart';
-import 'package:attendanceapp/widgets/constants.dart';
 import 'package:attendanceapp/widgets/geo_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -18,7 +16,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geocoding/geocoding.dart';
@@ -28,16 +25,12 @@ import 'package:get_storage/get_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:month_year_picker/month_year_picker.dart';
-import 'package:screen_loader/screen_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 import 'Pages/Attendance/clock_attendance.dart';
-import 'Pages/auth_check.dart';
 import 'model/bio_model.dart';
 import 'model/locationmodel.dart';
 import 'model/track_location_model.dart';
-import 'services/background_service.dart';
 
 
 // Global navigator key
@@ -61,7 +54,7 @@ Future<void> main() async {
     //checkEnvFile();
     debugEnvironment();
 
-    runApp(MyApp());
+    runApp(const MyApp());
     // Initialize and start the background service
     await initializeService();
   } catch (e) {
@@ -84,9 +77,9 @@ void debugEnvironment() {
   try {
     final files = Directory(currentDir).listSync();
     print("Files in current directory:");
-    files.forEach((file) {
+    for (var file in files) {
       print(file.path);
-    });
+    }
   } catch (e) {
     print("Error accessing directory: $e");
   }
@@ -433,6 +426,8 @@ Future<void> configLoading() async {
 
 // MyApp widget
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }

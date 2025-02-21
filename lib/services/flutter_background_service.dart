@@ -10,10 +10,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:isar/isar.dart';
 // Import a compatibility library for older devices if needed
-import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart'
-if (dart.library.html) 'package:flutter_local_notifications_web/flutter_local_notifications_web.dart' as impl;
 
 import '../model/attendancemodel.dart';
 import '../model/track_location_model.dart';
@@ -45,7 +42,7 @@ Future<void> trackLocation() async {
   Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high);
 
-  print("New Position LocationTrackingService ==== ${position}");
+  print("New Position LocationTrackingService ==== $position");
 
   try {
     final lastTimeStampBy12 = await IsarService().getLastLocationFor12();
@@ -164,7 +161,7 @@ void onStart(ServiceInstance service) async {
 
         List<AttendanceModel> clockInTime = await IsarService().getAttendanceForDate(
             DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
-        print("clockInTime[0].clockIn === ${clockInTime}");
+        print("clockInTime[0].clockIn === $clockInTime");
 
 
         if (now.hour ==8 && now.minute == 0) {

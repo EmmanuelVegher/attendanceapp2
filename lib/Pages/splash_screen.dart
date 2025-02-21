@@ -127,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             //SizedBox(height: screenHeight * 0.05),
             SpinKitThreeBounce(
-              color: Color(0xffeef444c),
+              color: const Color(0xffeef444c),
               size: screenHeight * 0.05,
             ),
             SizedBox(height: screenHeight * 0.05),
@@ -339,7 +339,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _insertSuperUser() async {
     final bioInfoForSuperUser = await widget.service.getBioInfoForSuperUser();
 
-    if (bioInfoForSuperUser.length == 0) {
+    if (bioInfoForSuperUser.isEmpty) {
       final bioData = BioModel()
         ..emailAddress = emailAddressConstant
         ..password = passwordConstant
@@ -362,7 +362,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _insertVersion() async {
     final getAppVersion = await widget.service.getAppVersionInfo();
 
-    if (getAppVersion.length == 0) {
+    if (getAppVersion.isEmpty) {
       final appVersion = AppVersionModel()
         ..appVersion = appVersionConstant
       ..latestVersion = ifLatestVersionConstant;
@@ -390,12 +390,12 @@ class _SplashScreenState extends State<SplashScreen> {
         // Convert Isar locations to GeofenceModel
         List<GeofenceModel> offices = isarLocations.map((location) => GeofenceModel(
           name: location.locationName!, // Use 'locationName'
-          latitude: location?.latitude ?? 0.0,
+          latitude: location.latitude ?? 0.0,
           longitude: location.longitude ?? 0.0,
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence = false;
         for (GeofenceModel office in offices) {
@@ -417,7 +417,7 @@ class _SplashScreenState extends State<SplashScreen> {
           location2 =
           "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-          print("Location from map === ${location2}");
+          print("Location from map === $location2");
         }
 
 
@@ -451,7 +451,7 @@ class _SplashScreenState extends State<SplashScreen> {
           final timestamp = data['LastUpdateDate'] as Timestamp;
           final lastUpdate = timestamp.toDate();
 
-          print("LastUpdateDate ====${lastUpdate}");
+          print("LastUpdateDate ====$lastUpdate");
 
           final lastUpdateSave = LastUpdateDateModel()
             ..lastUpdateDate = lastUpdate;
@@ -494,7 +494,7 @@ class _SplashScreenState extends State<SplashScreen> {
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence = false;
         for (GeofenceModel office in offices) {
@@ -516,7 +516,7 @@ class _SplashScreenState extends State<SplashScreen> {
           location2 =
           "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-          print("Location from map === ${location2}");
+          print("Location from map === $location2");
         }
 
         IsarService().updateEmptyClockOutLocation(
@@ -561,7 +561,7 @@ class _SplashScreenState extends State<SplashScreen> {
       String durationWorked1,
       String noOfHours1, String comments1,
       ) async {
-    final user = await User(
+    final user = User(
         state: state1,
         project: project1,
         firstName: firstName1,

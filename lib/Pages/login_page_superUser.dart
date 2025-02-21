@@ -10,7 +10,6 @@ import 'package:attendanceapp/services/isar_service.dart';
 import 'package:attendanceapp/widgets/header_widget.dart';
 import 'package:attendanceapp/widgets/theme_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -42,46 +41,40 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
 
   Future<void> _pickImageFromFirebase(String profilePicLink) async {
     var profilePic = profilePicLink;
-    if (profilePic != null) {
-      try {
-        // Create a reference from an HTTPS URL
+    try {
+      // Create a reference from an HTTPS URL
 // Note that in the URL, characters are URL escaped!
-        final image = FirebaseStorage.instance.refFromURL(profilePic);
-        //var image = await Image.network(UserModel.profilePicLink);
-        if (image == null) return;
-        //print("DownloadImage =====$image");
+      final image = FirebaseStorage.instance.refFromURL(profilePic);
+      //print("DownloadImage =====$image");
 
-        try {
-          const oneMegabyte = 1024 * 1024;
-          final Uint8List? data = await image.getData(oneMegabyte);
-          //print("DownloadImageUint8List =====$data");
-          adapter.storeImage(data!);
-        } on FirebaseException catch (e) {
-          // Handle any errors.
-        }
-      } catch (e) {
-        Fluttertoast.showToast(
-            msg: "Error:${e.toString()}",
-            toastLength: Toast.LENGTH_LONG,
-            backgroundColor: Colors.black54,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0);
+      try {
+        const oneMegabyte = 1024 * 1024;
+        final Uint8List? data = await image.getData(oneMegabyte);
+        //print("DownloadImageUint8List =====$data");
+        adapter.storeImage(data!);
+      } on FirebaseException {
+        // Handle any errors.
       }
-    } else {
-      return;
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "Error:${e.toString()}",
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.black54,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
-  }
+    }
 
   Future<void> _autoFirebaseDBUpdate(String fireBaseIdNew) async {
     final allAttendance = await widget.service.getAllAttendance();
-    if (allAttendance.length == 0) {
+    if (allAttendance.isEmpty) {
       // if (isDeviceConnected) {
-      CircularProgressIndicator();
+      const CircularProgressIndicator();
       log("isDeviceConnectedIf===$isDeviceConnected");
       await IsarService().removeAllAttendance(AttendanceModel());
-      final CollectionReference snap3 = await FirebaseFirestore.instance
+      final CollectionReference snap3 = FirebaseFirestore.instance
           .collection('Staff')
           .doc(fireBaseIdNew)
           .collection("Record");
@@ -125,7 +118,7 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
         widget.service.saveAttendance(attendnce);
       }
       //print("FirebaseID ====$firebaseAuthId");
-      CircularProgressIndicator(value: 0.0);
+      const CircularProgressIndicator(value: 0.0);
       Fluttertoast.showToast(
           msg: "Logging In..",
           toastLength: Toast.LENGTH_LONG,
@@ -198,7 +191,7 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
+            SizedBox(
               height: _headerHeight,
               child: HeaderWidget(_headerHeight, true,
                   Icons.login_rounded), //Here we create a common header widget
@@ -237,14 +230,14 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   "Email Address",
                                   style: TextStyle(
                                     color: Colors.black87,
                                     fontSize: 14,
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 10,
                                 ),
                                 Container(
@@ -258,7 +251,7 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
                                       "Enter your email",
                                       IconButton(
                                         onPressed: () {},
-                                        icon: Icon(
+                                        icon: const Icon(
                                           Icons.email,
                                           color: Colors.black54,
                                         ),
@@ -269,7 +262,7 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
                                       if ((!(val!.isEmpty) &&
                                               !RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
                                                   .hasMatch(val)) ||
-                                          (val != null && val.isEmpty)) {
+                                          (val.isEmpty)) {
                                         return "Enter a valid email address";
                                       }
                                       return null;
@@ -284,14 +277,14 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   "Password**",
                                   style: TextStyle(
                                     color: Colors.black87,
                                     fontSize: 15,
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 10,
                                 ),
                                 Container(
@@ -371,7 +364,7 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
                                       password == "Moderated@2023") {
                                     Navigator.of(context).pushReplacement(
                                       MaterialPageRoute(builder: (context) {
-                                        return SuperAdminUserDashBoard();
+                                        return const SuperAdminUserDashBoard();
                                       }),
                                     );
                                   }else{
@@ -599,7 +592,7 @@ class _LoginPageSuperUserState extends State<LoginPageSuperUser> {
                                     text: "Contact Admin",
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () {},
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontFamily: "NexaBold",
                                         color: Colors.red,
                                         fontSize: 15)),

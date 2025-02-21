@@ -1,13 +1,9 @@
-import 'package:attendanceapp/Pages/Attendance/attendance_clock.dart';
 import 'package:attendanceapp/Pages/Dashboard/admin_dashboard.dart';
-import 'package:attendanceapp/Pages/Dashboard/super_admin_dashboard.dart';
 import 'package:attendanceapp/Pages/Dashboard/user_dashboard.dart';
 import 'package:attendanceapp/Pages/login_page.dart';
-import 'package:attendanceapp/model/user_model.dart';
 import 'package:attendanceapp/services/isar_service.dart';
 import 'package:attendanceapp/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,12 +18,12 @@ class _HomePageState extends State<HomePage> {
   _HomePageState();
   @override
   Widget build(BuildContext context) {
-    return contro();
+    return const contro();
   }
 }
 
 class contro extends StatefulWidget {
-  contro();
+  const contro({super.key});
 
   @override
   _controState createState() => _controState();
@@ -103,7 +99,7 @@ class _controState extends State<contro> {
 
   @override
   Widget build(BuildContext context) {
-    CircularProgressIndicator();
+    const CircularProgressIndicator();
     return routing();
   }
 }

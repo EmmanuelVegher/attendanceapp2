@@ -27,7 +27,7 @@ import '../model/supervisor_model.dart';
 class LoginPage extends StatelessWidget {
   final IsarService service;
 
-  LoginPage({super.key, required this.service});
+  const LoginPage({super.key, required this.service});
 
   Future<void>_updateRegistrationPage() async {
     try{
@@ -100,7 +100,7 @@ class LoginPage extends StatelessWidget {
       for (final lgaDoc in lgaCollectionRef.docs) {
         final lga = lgaDoc.id;
         // print("lgaSnap====${lga}");
-        final data = lgaDoc.data() as Map<String, dynamic>;
+        final data = lgaDoc.data();
         //print("data====${data}");
 
         final locationSave = LocationModel()
@@ -132,7 +132,7 @@ class LoginPage extends StatelessWidget {
       for (final supervisorDoc in superviseCollectionRef.docs) {
         final lga = supervisorDoc.id;
         // print("lgaSnap====${lga}");
-        final data = supervisorDoc.data() as Map<String, dynamic>;
+        final data = supervisorDoc.data();
         //print("data====${data}");
 
         final supervisorSave = SupervisorModel()
@@ -166,7 +166,7 @@ class LoginPage extends StatelessWidget {
       for (final designationDoc in designationCollectionRef.docs) {
         final designation = designationDoc.id;
         // print("lgaSnap====${lga}");
-        final data = designationDoc.data() as Map<String, dynamic>;
+        final data = designationDoc.data();
         //print("data====${data}");
 
         final designationSave = DesignationModel()
@@ -362,6 +362,8 @@ class LoginPage extends StatelessWidget {
                                   ),
                                   keyboardType: TextInputType.emailAddress,
                                   validator: (val) {
+                                    return null;
+                                  
                                     // ... (Email validation logic remains the same)
                                   },
                                 ),
@@ -415,7 +417,7 @@ class LoginPage extends StatelessWidget {
                                     fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.040 : 0.025),
                                 ),
                               ),
-                              onPressed: () => Get.to(() => ForgotPasswordPage()),
+                              onPressed: () => Get.to(() => const ForgotPasswordPage()),
                             ),
                           ),
                           SizedBox(height: screenHeight * 0.02), // Responsive SizedBox height
@@ -452,23 +454,23 @@ class LoginPage extends StatelessWidget {
                                                   borderRadius: BorderRadius.circular(20.0),
                                                 ),
                                                 child: Container(
-                                                  padding: EdgeInsets.all(20),
+                                                  padding: const EdgeInsets.all(20),
                                                   child: Column(
                                                     mainAxisSize: MainAxisSize.min,
                                                     children: [
-                                                      Text(
+                                                      const Text(
                                                         "Registration",
                                                         style: TextStyle(
                                                           fontSize: 20,
                                                           fontWeight: FontWeight.bold,
                                                         ),
                                                       ),
-                                                      SizedBox(height: 20),
-                                                      Text(
+                                                      const SizedBox(height: 20),
+                                                      const Text(
                                                         "Don't have an account yet? Click on Register to create one.",
                                                         textAlign: TextAlign.center,
                                                       ),
-                                                      SizedBox(height: 30),
+                                                      const SizedBox(height: 30),
                                                       Row(
                                                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                                                         children: [
@@ -478,22 +480,22 @@ class LoginPage extends StatelessWidget {
                                                             },
                                                             style: ElevatedButton.styleFrom(
                                                               backgroundColor: Colors.grey, // Customize button color
-                                                              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                                                              textStyle: TextStyle(fontSize: 16),
+                                                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                                                              textStyle: const TextStyle(fontSize: 16),
                                                             ),
-                                                            child: Text("Cancel", style: TextStyle(color: Colors.white)),
+                                                            child: const Text("Cancel", style: TextStyle(color: Colors.white)),
                                                           ),
                                                           ElevatedButton(
                                                             onPressed: () {
                                                               Navigator.of(context).pop();
-                                                              Get.off(() => RegistrationPageUpdated());
+                                                              Get.off(() => const RegistrationPageUpdated());
                                                             },
                                                             style: ElevatedButton.styleFrom(
                                                               backgroundColor: Colors.red, // Customize button color
-                                                              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                                                              textStyle: TextStyle(fontSize: 16),
+                                                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                                                              textStyle: const TextStyle(fontSize: 16),
                                                             ),
-                                                            child: Text("Register", style: TextStyle(color: Colors.white)),
+                                                            child: const Text("Register", style: TextStyle(color: Colors.white)),
                                                           ),
                                                         ],
                                                       ),

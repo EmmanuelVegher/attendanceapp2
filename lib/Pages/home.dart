@@ -9,6 +9,8 @@ import 'package:attendanceapp/services/isar_service.dart';
 import 'login_page.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }

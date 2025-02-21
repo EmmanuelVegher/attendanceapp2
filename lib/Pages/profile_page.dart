@@ -27,6 +27,8 @@ import '../widgets/editable_supervisor.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _ProfilePageState();
@@ -35,8 +37,8 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   DatabaseAdapter adapter = HiveService();
-  double _drawerIconSize = 24;
-  double _drawerFontSize = 17;
+  final double _drawerIconSize = 24;
+  final double _drawerFontSize = 17;
   late SharedPreferences sharedPreferences;
   var firstName;
   var lastName;
@@ -300,7 +302,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SuperAdminUserDashBoard()));
+                    builder: (context) => const SuperAdminUserDashBoard()));
           }
         });
       }
@@ -313,7 +315,7 @@ class _ProfilePageState extends State<ProfilePage> {
       stream: IsarService().listenToBiometric1(), // Replace with your actual stream
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator()); // Show a loader while waiting for data
+          return const Center(child: CircularProgressIndicator()); // Show a loader while waiting for data
         }
 
         if (snapshot.hasError) {
@@ -321,7 +323,7 @@ class _ProfilePageState extends State<ProfilePage> {
         }
 
         if (!snapshot.hasData || snapshot.data == null) {
-          return Center(child: Text('No data available')); // Handle when there's no data
+          return const Center(child: Text('No data available')); // Handle when there's no data
         }
 
         // Assuming snapshot.data contains the BioModel
@@ -336,14 +338,14 @@ class _ProfilePageState extends State<ProfilePage> {
           body: SingleChildScrollView(
             child: Stack(
               children: [
-                Container(
+                const SizedBox(
                   height: 100,
                   child: HeaderWidget(100, false, Icons.house_rounded),
                 ),
                 Container(
                   alignment: Alignment.center,
-                  margin: EdgeInsets.fromLTRB(5, 10, 5, 10),
-                  padding: EdgeInsets.fromLTRB(7, 0, 7, 0),
+                  margin: const EdgeInsets.fromLTRB(5, 10, 5, 10),
+                  padding: const EdgeInsets.fromLTRB(7, 0, 7, 0),
                   child: Column(
                     children: [
                       GestureDetector(
@@ -387,10 +389,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Text(
                         '${bioModel.firstName.toString().toUpperCase()} ${bioModel.lastName.toString().toUpperCase()}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           fontFamily: "NexaLight",
@@ -398,18 +400,18 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
 
 
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Text(
-                        '${bioModel.designation.toString().toUpperCase()}',
-                        style: TextStyle(
+                        bioModel.designation.toString().toUpperCase(),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontFamily: "NexaLight",
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Container(
-                        padding: EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         child: Column(
                           children: <Widget>[
                             Container(
@@ -417,7 +419,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               alignment: Alignment.topLeft,
                               child: Text(
                                 "${bioModel.role}'s Information",
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.black87,
                                   fontWeight: FontWeight.w500,
                                   fontSize: 16,
@@ -430,7 +432,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: Card(
                                 child: Container(
                                   alignment: Alignment.topLeft,
-                                  padding: EdgeInsets.all(15),
+                                  padding: const EdgeInsets.all(15),
                                   child: Column(
                                     children: <Widget>[
                                       Column(
@@ -473,10 +475,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                             },
                                             fetchStates: () => _fetchStatesFromIsar(bioModel.staffCategory!),
                                           ):ListTile(
-                                            leading: Icon(Icons.place),
-                                            title: Text("State"),
+                                            leading: const Icon(Icons.place),
+                                            title: const Text("State"),
                                             subtitle: Text(
-                                                "${bioModel.state.toString()}"),
+                                                bioModel.state.toString()),
                                           ),
 
                                           bioModel.state!= null?
@@ -498,12 +500,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                             },
                                             fetchLocations: () => _fetchLocationsFromIsar(bioModel.state!,bioModel.staffCategory!),
                                           ):ListTile(
-                                            leading: Icon(Icons.my_location),
+                                            leading: const Icon(Icons.my_location),
                                             title:
                                             //staffCategory == "Facility Staff"?Text("State"):staffCategory == Text("State")?"State Office Location":Text("State"),
-                                            Text("Office Name"),
+                                            const Text("Office Name"),
                                             subtitle: Text(
-                                                "${bioModel.location.toString()}"),
+                                                bioModel.location.toString()),
                                           ),
                                           _buildEditableListTile1(
                                             icon: Icons.email,
@@ -564,10 +566,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                             },
                                             fetchDesignations: () => _fetchDesignationsFromIsar(bioModel.department!, bioModel.staffCategory!),
                                           ):ListTile(
-                                            leading: Icon(Icons.person),
-                                            title: Text("Designation"),
+                                            leading: const Icon(Icons.person),
+                                            title: const Text("Designation"),
                                             subtitle: Text(
-                                                "${bioModel.designation.toString()}"),
+                                                bioModel.designation.toString()),
                                           ),
                                           EditableProjectTile(
                                             icon: Icons.work,
@@ -624,17 +626,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                             fetchSupervisor: () => _fetchSupervisorsFromIsar(bioModel.department!,bioModel.state!),
                                           ):
                                           ListTile(
-                                            leading: Icon(Icons.person),
-                                            title: Text("Supervisor's Name"),
+                                            leading: const Icon(Icons.person),
+                                            title: const Text("Supervisor's Name"),
                                             subtitle: Text(
-                                                "${supervisor.toString()}"),
+                                                supervisor.toString()),
                                           ),
 
                                           ListTile(
-                                            leading: Icon(Icons.email),
-                                            title: Text("Supervisor's Email"),
+                                            leading: const Icon(Icons.email),
+                                            title: const Text("Supervisor's Email"),
                                             subtitle: Text(
-                                                "${supervisorEmail.toString()}"),
+                                                supervisorEmail.toString()),
                                           )
                                           ,
                                           // Signature section
@@ -651,8 +653,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                               children:[
                                                 Row(
                                                     children:[
-                                                      Icon(Icons.draw),
-                                                      Text("Is Signature saved?"),
+                                                      const Icon(Icons.draw),
+                                                      const Text("Is Signature saved?"),
                                                       Text(bioModel.signatureLink != null ? "Yes" : "No"),
                                                     ]
                                                 ),
@@ -666,10 +668,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                                             builder: (context) => Container(
                                                               height: MediaQuery.of(context).size.width *
                                                                   (MediaQuery.of(context).size.shortestSide < 600 ? 0.30 : 0.60), // Adjust height as needed
-                                                              padding: EdgeInsets.all(16),
+                                                              padding: const EdgeInsets.all(16),
                                                               child:Column(
                                                                   children:[
-                                                                    Container(
+                                                                    SizedBox(
                                                                       height: MediaQuery.of(context).size.width *
                                                                           (MediaQuery.of(context).size.shortestSide < 600 ? 0.30 : 0.50),
                                                                       child:GestureDetector(
@@ -743,7 +745,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                                                                     ElevatedButton(
                                                                         onPressed: () { Navigator.pop(context); },
-                                                                        child:Text("Save Signature")
+                                                                        child:const Text("Save Signature")
                                                                     ),
                                                                   ]
                                                               ),
@@ -751,14 +753,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                                             ),
                                                           );
                                                         },
-                                                        child: _signatureLink == null? Text("Add"):Text("Update"),
+                                                        child: _signatureLink == null? const Text("Add"):const Text("Update"),
                                                       ),
                                                     ]
                                                 ),
                                               ]
                                           );
                                         } else {
-                                          return Center(child: CircularProgressIndicator()); // Or other placeholder
+                                          return const Center(child: CircularProgressIndicator()); // Or other placeholder
                                         }
                                       },
                                     ),
@@ -792,7 +794,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Container(
                             width: MediaQuery.of(context).size.width * 0.60,
                             height: MediaQuery.of(context).size.height * 0.06,
-                            padding: EdgeInsets.only(left: 20.0, bottom: 0.0),
+                            padding: const EdgeInsets.only(left: 20.0, bottom: 0.0),
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -834,7 +836,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             // ),
                           ),
                         )
-                      ):SizedBox.shrink(),
+                      ):const SizedBox.shrink(),
                     ],
                   ),
                 ),
@@ -1151,7 +1153,7 @@ class _ProfilePageState extends State<ProfilePage> {
       )
           : null,// Or set to null if no initialValue
       trailing: IconButton(
-        icon: Icon(Icons.edit),
+        icon: const Icon(Icons.edit),
         onPressed: () {
           _showEditDialog1(
             context: context,
@@ -1192,14 +1194,14 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 onSave(newValue ?? "");
                 Navigator.of(context).pop();
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         );
@@ -1238,14 +1240,14 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 onSave(initialValue ?? "");
                 Navigator.of(context).pop();
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         );

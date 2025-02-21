@@ -194,10 +194,10 @@ class _AttendanceClockState extends State<AttendanceClock> {
   Future<void> _getLocation2() async {
     print("_getLocation2 hereeeee");
     // Check for internet connection
-    var isInternetConnected;
+    bool isInternetConnected;
     isInternetConnected = await InternetConnectionChecker().hasConnection;
 
-    if (!isInternetConnected.value) {
+    if (!isInternetConnected) {
       // Use Geolocator and request location updates using GPS
       try {
         print("There is nooooooo internet to get location data");
@@ -208,24 +208,11 @@ class _AttendanceClockState extends State<AttendanceClock> {
 
         Position? position1 = await Geolocator.getLastKnownPosition();
 
-        if (position != null) {
-
-          UserModel.lat = position.latitude;
-          UserModel.long = position.longitude;
-          print("locationData.latitude == ${position.latitude}");
-          _updateLocation();
-        } else if (position1 != null){
-          // Store the latitude and longitude (e.g., in shared preferences, database, etc.)
-          print('Cached Latitude: ${position.latitude}');
-          print('Cached Longitude: ${position.longitude}');
-          UserModel.lat = position1.latitude;
-          UserModel.long = position1.longitude;
-          _updateLocation();
-        }
-        else {
-          print('No last known location available.');
-        }
-      } catch (e) {
+        UserModel.lat = position.latitude;
+        UserModel.long = position.longitude;
+        print("locationData.latitude == ${position.latitude}");
+        _updateLocation();
+            } catch (e) {
         log("Error getting GPS location: ${e.toString()}");
         Fluttertoast.showToast(
           msg:
@@ -273,7 +260,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
         });
 
 
-        print("location.valuesssss==${location}");
+        print("location.valuesssss==$location");
         print("placemark.administrativeArea==${placemark.administrativeArea}");
         print("administrativeArea.value ==${administrativeArea.value}");
 
@@ -301,7 +288,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence = false;
         for (GeofenceModel office in offices) {
@@ -328,7 +315,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
             location =
             "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-            print("Location from map === ${location}");
+            print("Location from map === $location");
             //isCircularProgressBarOn.value = false; // Update observable value
           });
 
@@ -342,7 +329,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
           location =
           "${placemark[0].street},${placemark[0].subLocality},${placemark[0].subAdministrativeArea},${placemark[0].locality},${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
 
-          print("Location from map === ${location}");
+          print("Location from map === $location");
           //isCircularProgressBarOn.value = false; // Update observable value
         });
 
@@ -1189,7 +1176,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                     const SizedBox(
                                       height: 10.0,
                                     ),
-                                    Container(
+                                    SizedBox(
                                       width: MediaQuery.of(context).size.width *
                                           0.7,
                                       height:
@@ -1215,7 +1202,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                     fontSize: screenWidth / 25,
                                                     color: Colors.white),
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 5,
                                               ),
                                               Text(
@@ -1227,7 +1214,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                               ),
                                             ],
                                           )),
-                                          SizedBox(
+                                          const SizedBox(
                                             width: 5,
                                           ),
                                           //Clock Out
@@ -1517,7 +1504,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                             const SizedBox(
                                                               height: 10.0,
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: MediaQuery.of(
                                                                           context)
                                                                       .size
@@ -1556,7 +1543,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                                             color:
                                                                                 Colors.white),
                                                                       ),
-                                                                      SizedBox(
+                                                                      const SizedBox(
                                                                         height:
                                                                             5,
                                                                       ),
@@ -1574,7 +1561,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                                       ),
                                                                     ],
                                                                   )),
-                                                                  SizedBox(
+                                                                  const SizedBox(
                                                                     width: 5,
                                                                   ),
                                                                   //Clock Out
@@ -1639,7 +1626,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                             color:
                                                                 Colors.black54),
                                                       ),
-                                                      SizedBox(
+                                                      const SizedBox(
                                                         height: 10,
                                                       ),
                                                       Text(
@@ -1713,7 +1700,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                               const SizedBox(
                                                                 height: 10.0,
                                                               ),
-                                                              Container(
+                                                              SizedBox(
                                                                 width: MediaQuery.of(
                                                                             context)
                                                                         .size
@@ -1749,7 +1736,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                                               fontSize: screenWidth / 25,
                                                                               color: Colors.white),
                                                                         ),
-                                                                        SizedBox(
+                                                                        const SizedBox(
                                                                           height:
                                                                               5,
                                                                         ),
@@ -1764,7 +1751,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                                         ),
                                                                       ],
                                                                     )),
-                                                                    SizedBox(
+                                                                    const SizedBox(
                                                                       width: 5,
                                                                     ),
                                                                     //Clock Out
@@ -2111,7 +2098,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                         const SizedBox(
                                                           height: 10.0,
                                                         ),
-                                                        Container(
+                                                        SizedBox(
                                                           width: MediaQuery.of(
                                                                       context)
                                                                   .size
@@ -2150,7 +2137,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                                         color: Colors
                                                                             .white),
                                                                   ),
-                                                                  SizedBox(
+                                                                  const SizedBox(
                                                                     height: 5,
                                                                   ),
                                                                   Text(
@@ -2166,7 +2153,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                                   ),
                                                                 ],
                                                               )),
-                                                              SizedBox(
+                                                              const SizedBox(
                                                                 width: 5,
                                                               ),
                                                               //Clock Out
@@ -2503,7 +2490,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                               const SizedBox(
                                                 height: 10.0,
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width: MediaQuery.of(context)
                                                         .size
                                                         .width *
@@ -2538,7 +2525,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                               color:
                                                                   Colors.white),
                                                         ),
-                                                        SizedBox(
+                                                        const SizedBox(
                                                           height: 5,
                                                         ),
                                                         Text(
@@ -2554,7 +2541,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                                         ),
                                                       ],
                                                     )),
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 5,
                                                     ),
                                                     //Clock Out
@@ -2677,7 +2664,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
     var clockTimeIn = format.parse(clockInTime);
     var clockTimeOut = format.parse(clockOutTime);
     if (clockTimeIn.isAfter(clockTimeOut)) {
-      clockTimeOut = clockTimeOut.add(Duration(days: 1));
+      clockTimeOut = clockTimeOut.add(const Duration(days: 1));
       Duration diff = clockTimeOut.difference(clockTimeIn);
       final hours = diff.inHours;
       final minutes = diff.inMinutes % 60;
@@ -2699,7 +2686,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
     var clockTimeIn = format.parse(clockInTime);
     var clockTimeOut = format.parse(clockOutTime);
     if (clockTimeIn.isAfter(clockTimeOut)) {
-      clockTimeOut = clockTimeOut.add(Duration(days: 1));
+      clockTimeOut = clockTimeOut.add(const Duration(days: 1));
       Duration diff = clockTimeOut.difference(clockTimeIn);
       final hours = diff.inHours;
       final minutes = diff.inMinutes % 60;
@@ -2732,7 +2719,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: (context, setState) {
-            DateTime _seletDate = _selectedDate;
+            DateTime seletDate = _selectedDate;
             return Container(
               padding: const EdgeInsets.only(left: 20, right: 20),
               width: 300,
@@ -2754,7 +2741,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                     ),
                     MyInputField(
                       title: "Date",
-                      hint: DateFormat("dd/MM/yyyy").format(_seletDate),
+                      hint: DateFormat("dd/MM/yyyy").format(seletDate),
                       widget: IconButton(
                         onPressed: () {
                           _getDateFromUser();
@@ -2769,7 +2756,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                       title: "Reasons For Day off",
                       hint: _reasons,
                       widget: DropdownButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.keyboard_arrow_down,
                           color: Colors.grey,
                         ),
@@ -2815,13 +2802,13 @@ class _AttendanceClockState extends State<AttendanceClock> {
                             onPressed: () {
                               _getTimeFromUser(isStartTime: true);
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.access_time_rounded,
                               color: Colors.grey,
                             ),
                           ),
                         )),
-                        SizedBox(
+                        const SizedBox(
                           width: 12,
                         ),
                         Expanded(
@@ -2832,7 +2819,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                             onPressed: () {
                               _getTimeFromUser(isStartTime: false);
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.access_time_rounded,
                               color: Colors.grey,
                             ),
@@ -2840,7 +2827,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                         ))
                       ],
                     ),
-                    SizedBox(height: 18),
+                    const SizedBox(height: 18),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2857,7 +2844,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                   fontSize: screenWidth / 21,
                                   fontFamily: "NexaBold"),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 8.0,
                             ),
                             Wrap(
@@ -2908,7 +2895,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                                 Radius.circular(20),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 "Submit",
                                 style: TextStyle(color: Colors.white),
@@ -2918,7 +2905,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
                         )
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 40,
                     )
                   ],
@@ -2955,7 +2942,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
     final attendanceLast = await widget.service.getAttendanceForSpecificDate(
         DateFormat('dd-MMMM-yyyy').format(DateTime.now()));
 
-    if (attendanceLast.length == 0) {
+    if (attendanceLast.isEmpty) {
       final attendnce = AttendanceModel()
         ..clockIn = _startTime
         ..date = DateFormat('dd-MMMM-yyyy').format(_selectedDate)
@@ -2988,16 +2975,16 @@ class _AttendanceClockState extends State<AttendanceClock> {
   }
 
   _getDateFromUser() async {
-    DateTime? _pickerDate = await showDatePicker(
+    DateTime? pickerDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2015),
       lastDate: DateTime(2090),
     );
 
-    if (_pickerDate != null) {
+    if (pickerDate != null) {
       setState(() {
-        _selectedDate = _pickerDate;
+        _selectedDate = pickerDate;
       });
     } else {
       print("It's null or something is wrong");
@@ -3006,7 +2993,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
 
   _getTimeFromUser({required bool isStartTime}) async {
     var pickedTime = await _showTimePicker();
-    String _formatedTime =
+    String formatedTime =
         //DateFormat("hh:mm a").format(pickedTime).toString();
         pickedTime.format(context);
 
@@ -3015,11 +3002,11 @@ class _AttendanceClockState extends State<AttendanceClock> {
       print("Time Canceled");
     } else if (isStartTime == true) {
       setState(() {
-        _startTime = _formatedTime;
+        _startTime = formatedTime;
       });
     } else if (isStartTime == false) {
       setState(() {
-        _endTime = _formatedTime;
+        _endTime = formatedTime;
       });
     }
   }

@@ -40,18 +40,18 @@ class Attendance {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data["id"] = this.id;
-    data["clockIn"] = this.clockIn;
-    data["clockOut"] = this.clockOut;
-    data["clockInLocation"] = this.clockInLocation;
-    data["clockOutLocation"] = this.clockOutLocation;
-    data["date"] = this.date;
-    data["isSynced"] = this.isSynced;
-    data["clockInLatitude"] = this.clockInLatitude;
-    data["clockInLongitude"] = this.clockInLongitude;
-    data["clockOutLatitude"] = this.clockOutLatitude;
-    data["clockOutLongitude"] = this.clockOutLongitude;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data["id"] = id;
+    data["clockIn"] = clockIn;
+    data["clockOut"] = clockOut;
+    data["clockInLocation"] = clockInLocation;
+    data["clockOutLocation"] = clockOutLocation;
+    data["date"] = date;
+    data["isSynced"] = isSynced;
+    data["clockInLatitude"] = clockInLatitude;
+    data["clockInLongitude"] = clockInLongitude;
+    data["clockOutLatitude"] = clockOutLatitude;
+    data["clockOutLongitude"] = clockOutLongitude;
 
     return data;
   }

@@ -10,7 +10,7 @@ String mobileConstant = "";
 String projectConstant = "";
 String staffCategoryConstant = "";
 String stateConstant = "";
-var firebaseAuthIdConstant = null;
+var firebaseAuthIdConstant;
 String appVersionConstant = "Version 1.5";
 bool ifLatestVersionConstant = true;
 bool isSyncedConstant = true;

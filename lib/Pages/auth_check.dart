@@ -35,7 +35,7 @@ class AuthCheck extends StatelessWidget {
 
   Future<bool> _delayedAuthCheck() async {
     // Add a 5-second delay before checking authentication status
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 3));
     return _authCheckUser();
   }
 

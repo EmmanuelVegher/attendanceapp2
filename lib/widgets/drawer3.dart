@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:refreshable_widget/refreshable_widget.dart';
 
 import '../Pages/registration_updated.dart';
@@ -26,13 +25,13 @@ Widget drawer3(
   final IsarService service = IsarService();
 
   //final DataBaseService _dataBaseService = DataBaseService();
-  double _drawerIconSize = 24;
-  double _drawerFontSize = 17;
+  double drawerIconSize = 24;
+  double drawerFontSize = 17;
   //final _taskController = Get.put(TaskController());
 
   return Drawer(
     child: Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
           gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -50,7 +49,7 @@ Widget drawer3(
           DrawerHeader(
             decoration: BoxDecoration(
               color: Get.isDarkMode ? Colors.white : Colors.black,
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 stops: [0.0, 1.0],
@@ -61,14 +60,14 @@ Widget drawer3(
                 alignment: Alignment.bottomLeft,
                 child: Row(
                   children: [
-                    Text(
+                    const Text(
                       "Dashboard",
                       style: TextStyle(
                           fontSize: 25,
                           color: Colors.white,
                           fontFamily: "NexaBold"),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 30,
                     ),
                     Container(
@@ -116,13 +115,13 @@ Widget drawer3(
           ListTile(
               leading: Icon(
                 Icons.screen_lock_landscape_rounded,
-                size: _drawerIconSize,
+                size: drawerIconSize,
                 color: Colors.red,
               ),
               title: Text(
                 'DashBoard',
                 style: TextStyle(
-                    fontSize: _drawerFontSize,
+                    fontSize: drawerFontSize,
                     color: Get.isDarkMode ? Colors.white : Colors.brown),
               ),
               onTap: () async {
@@ -131,19 +130,19 @@ Widget drawer3(
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => SuperAdminUserDashBoard()),
+                      builder: (context) => const SuperAdminUserDashBoard()),
                 );
               }),
-          Divider(
+          const Divider(
             color: Colors.grey,
             height: 1,
           ),
           ListTile(
             leading:
-                Icon(Icons.work, size: _drawerIconSize, color: Colors.orange),
+                Icon(Icons.work, size: drawerIconSize, color: Colors.orange),
             title: Text(
               'Attendance(DB)',
-              style: TextStyle(fontSize: _drawerFontSize, color: Colors.brown),
+              style: TextStyle(fontSize: drawerFontSize, color: Colors.brown),
             ),
             onTap: () {
               // _taskController.getTasks();
@@ -156,38 +155,38 @@ Widget drawer3(
               );
             },
           ),
-          Divider(
+          const Divider(
             color: Colors.grey,
             height: 1,
           ),
           ListTile(
             leading: Icon(Icons.person_add_alt_1,
-                size: _drawerIconSize, color: Colors.red),
+                size: drawerIconSize, color: Colors.red),
             title: Text(
               'Create Account',
-              style: TextStyle(fontSize: _drawerFontSize, color: Colors.brown),
+              style: TextStyle(fontSize: drawerFontSize, color: Colors.brown),
             ),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return RegistrationPageUpdated();
+                return const RegistrationPageUpdated();
               }));
             },
           ),
 
-          Divider(
+          const Divider(
             color: Colors.grey,
             height: 1,
           ),
           ListTile(
             leading: Icon(
               Icons.local_post_office,
-              size: _drawerIconSize,
+              size: drawerIconSize,
               color: Colors.blue,
             ),
             title: Text(
               'Attendance(Server)',
               style: TextStyle(
-                  fontSize: _drawerFontSize,
+                  fontSize: drawerFontSize,
                   color: Get.isDarkMode ? Colors.white : Colors.brown),
             ),
             onTap: () {
@@ -201,65 +200,65 @@ Widget drawer3(
             },
           ),
 
-          Divider(
+          const Divider(
             color: Colors.grey,
             height: 1,
           ),
           ListTile(
             leading: Icon(
               Icons.password_rounded,
-              size: _drawerIconSize,
+              size: drawerIconSize,
               color: Colors.purple,
             ),
             title: Text(
               'Forgot Password',
-              style: TextStyle(fontSize: _drawerFontSize, color: Colors.brown),
+              style: TextStyle(fontSize: drawerFontSize, color: Colors.brown),
             ),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
               );
             },
           ),
 
-          Divider(
+          const Divider(
             color: Colors.grey,
             height: 1,
           ),
           ListTile(
             leading: Icon(
               Icons.report,
-              size: _drawerIconSize,
+              size: drawerIconSize,
               color: Colors.blue,
             ),
             title: Text(
               'Report',
-              style: TextStyle(fontSize: _drawerFontSize, color: Colors.brown),
+              style: TextStyle(fontSize: drawerFontSize, color: Colors.brown),
             ),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => UserQueryScreen()),
+                MaterialPageRoute(builder: (context) => const UserQueryScreen()),
               );
 
               //_showBottomSheet2(context);
             },
           ),
 
-          Divider(
+          const Divider(
             color: Colors.grey,
             height: 1,
           ),
           ListTile(
             leading: Icon(
               Icons.logout_rounded,
-              size: _drawerIconSize,
+              size: drawerIconSize,
               color: Colors.red,
             ),
             title: Text(
               'Logout',
-              style: TextStyle(fontSize: _drawerFontSize, color: Colors.brown),
+              style: TextStyle(fontSize: drawerFontSize, color: Colors.brown),
             ),
             onTap: () {
               _displayDialog(context);
@@ -281,8 +280,8 @@ _displayDialog(BuildContext context) async {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Do you want to Log-Out?'),
-          content: Text("Kindly Choose your Log-Out Option"
+          title: const Text('Do you want to Log-Out?'),
+          content: const Text("Kindly Choose your Log-Out Option"
               //controller: _textFieldController,
               //decoration: InputDecoration(hintText: "TextField in Dialog"),
               ),
@@ -310,8 +309,8 @@ _displayDialogForDiffAcount(BuildContext context) async {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Have you synced all attendance?'),
-          content: Text("Kindly Sync all data before switching account"
+          title: const Text('Have you synced all attendance?'),
+          content: const Text("Kindly Sync all data before switching account"
               //controller: _textFieldController,
               //decoration: InputDecoration(hintText: "TextField in Dialog"),
               ),
@@ -351,7 +350,7 @@ void _switchAccountValidation(BuildContext context) async {
   final attendanceNotSynced = await IsarService().getAttendanceForUnSynced();
   // SharedPreferences preferences = await SharedPreferences.getInstance();
 
-  if (attendanceNotSynced.length == 0) {
+  if (attendanceNotSynced.isEmpty) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) {
         return LoginPage(
@@ -445,7 +444,7 @@ _showBottomSheet2(BuildContext context) {
                 isClose: true,
                 context: context,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
             ],

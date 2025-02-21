@@ -29,7 +29,7 @@ class MyButton extends StatelessWidget {
         child: Center(
           child: Text(
             label,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
         ),

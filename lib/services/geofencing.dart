@@ -36,6 +36,7 @@ class _GeoFencingState extends State<GeoFencing> {
   // );
 
 
+  @override
   void initState() {
     super.initState();
     _startGeofencing();

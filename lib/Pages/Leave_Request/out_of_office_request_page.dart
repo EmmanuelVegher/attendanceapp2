@@ -9,7 +9,7 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:gps_connectivity/gps_connectivity.dart';
+//import 'package:gps_connectivity/gps_connectivity.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isar/isar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -63,16 +63,16 @@ class _LeaveRequestsPage1State extends State<LeaveRequestsPage1> with SingleTick
 
   late TabController _tabController; // Declare a TabController
 
-  RxInt _totalAnnualLeaves = 10.obs;
-  RxInt _totalPaternityLeaves = 6.obs;
-  RxInt _totalMaternityLeaves = 60.obs;
-  RxInt _totalHolidayLeaves = 0.obs;
-  RxInt _usedAnnualLeaves = 0.obs;
-  RxInt _usedPaternityLeaves = 0.obs;
-  RxInt _usedMaternityLeaves = 0.obs;
-  RxInt _remainingPaternityLeaveBalance = 0.obs;
-  RxInt _remainingMaternityLeaveBalance = 0.obs;
-  RxInt _remainingAnnualLeaveBalance = 0.obs;
+  final RxInt _totalAnnualLeaves = 10.obs;
+  final RxInt _totalPaternityLeaves = 6.obs;
+  final RxInt _totalMaternityLeaves = 60.obs;
+  final RxInt _totalHolidayLeaves = 0.obs;
+  final RxInt _usedAnnualLeaves = 0.obs;
+  final RxInt _usedPaternityLeaves = 0.obs;
+  final RxInt _usedMaternityLeaves = 0.obs;
+  final RxInt _remainingPaternityLeaveBalance = 0.obs;
+  final RxInt _remainingMaternityLeaveBalance = 0.obs;
+  final RxInt _remainingAnnualLeaveBalance = 0.obs;
 // Store the index of the currently expanded panel
   RxInt expandedPanelIndex = (-1).obs;
 
@@ -112,8 +112,8 @@ class _LeaveRequestsPage1State extends State<LeaveRequestsPage1> with SingleTick
   late Isar isar;
   final TextEditingController _reasonController = TextEditingController();
   PickerDateRange? _selectedDateRange;
-  List<LeaveRequestModel> _leaveRequests1 = [];
-  bool _isarInitialized1 = false;
+  final List<LeaveRequestModel> _leaveRequests1 = [];
+  final bool _isarInitialized1 = false;
   String? _selectedSupervisor;
   String? _selectedSupervisorEmail;
   BioModel? _bioInfo1;
@@ -219,20 +219,20 @@ class _LeaveRequestsPage1State extends State<LeaveRequestsPage1> with SingleTick
       });
 
       await checkInternetConnection();
-      subscription =
-          GpsConnectivity().onGpsConnectivityChanged.listen((bool isGpsEnabled) {
-
-            this.isGpsEnabled.value = isGpsEnabled;
-
-          });
-
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        GpsConnectivity().checkGpsConnectivity().then((bool isGpsEnabled) {
-
-          this.isGpsEnabled.value = isGpsEnabled;
-
-        });
-      });
+      // subscription =
+      //     GpsConnectivity().onGpsConnectivityChanged.listen((bool isGpsEnabled) {
+      //
+      //       this.isGpsEnabled.value = isGpsEnabled;
+      //
+      //     });
+      //
+      // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      //   GpsConnectivity().checkGpsConnectivity().then((bool isGpsEnabled) {
+      //
+      //     this.isGpsEnabled.value = isGpsEnabled;
+      //
+      //   });
+      // });
 
       // Initialize `isar` and fetch `_bioInfo`
       isar = await widget.service.openDB();
@@ -534,14 +534,14 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
   </tr>
   <tr>
     <td style="$tdStyle">Annual Leave</td>
-    <td style="$tdStyle">${_totalAnnualLeaves}</td>
+    <td style="$tdStyle">$_totalAnnualLeaves</td>
     <td style="$tdStyle">${_totalAnnualLeaves.value - (_remainingLeaves.value?.annualLeaveBalance ?? 0)}</td>
     <td style="$tdStyle">${_remainingLeaves.value?.annualLeaveBalance ?? 0}</td>
   </tr>
   ${_bioInfo.value?.maritalStatus == 'Married' && _bioInfo.value?.gender == 'Male' ? """
     <tr>
       <td style="$tdStyle">Paternity Leave</td>
-      <td style="$tdStyle">${_totalPaternityLeaves}</td>
+      <td style="$tdStyle">$_totalPaternityLeaves</td>
       <td style="$tdStyle">${_totalPaternityLeaves.value - (_remainingLeaves.value?.paternityLeaveBalance ?? 0)}</td>
       <td style="$tdStyle">${_remainingLeaves.value?.paternityLeaveBalance ?? 0}</td>
     </tr>
@@ -549,7 +549,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
   ${_bioInfo.value?.maritalStatus == 'Married' && _bioInfo.value?.gender == 'Female' ? """
     <tr>
       <td style="$tdStyle">Maternity Leave</td>
-      <td style="$tdStyle">${_totalMaternityLeaves}</td>
+      <td style="$tdStyle">$_totalMaternityLeaves</td>
       <td style="$tdStyle">${_totalMaternityLeaves.value - (_remainingLeaves.value?.maternityLeaveBalance ?? 0)}</td>
       <td style="$tdStyle">${_remainingLeaves.value?.maternityLeaveBalance ?? 0}</td>
     </tr>
@@ -674,7 +674,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
         }
 
         // Geofencing logic
-        if (administrativeArea.value != '' && administrativeArea.value != null) {
+        if (administrativeArea.value != '') {
           // Query Isar database for locations with the same administrative area
           List<LocationModel> isarLocations =
           await IsarService().getLocationsByState(administrativeArea.value);
@@ -688,7 +688,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
             radius: location.radius?.toDouble() ?? 0.0,
           )).toList();
 
-          print("Officessss == ${offices}");
+          print("Officessss == $offices");
 
           isInsideAnyGeofence.value = false;
           for (GeofenceModel office in offices) {
@@ -803,24 +803,11 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
 
       Position? position1 = await Geolocator.getLastKnownPosition();
 
-      if (position != null) {
-
-        lati.value = position.latitude;
-        longi.value = position.longitude;
-        print("locationData.latitude == ${position.latitude}");
-        _updateLocation();
-      } else if (position1 != null){
-        // Store the latitude and longitude (e.g., in shared preferences, database, etc.)
-        print('Cached Latitude: ${position.latitude}');
-        print('Cached Longitude: ${position.longitude}');
-        lati.value = position1.latitude;
-        longi.value = position1.longitude;
-        _updateLocation();
-      }
-      else {
-        print('No last known location available.');
-      }
-
+      lati.value = position.latitude;
+      longi.value = position.longitude;
+      print("locationData.latitude == ${position.latitude}");
+      _updateLocation();
+    
 
 
     }
@@ -854,7 +841,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
       }
 
       // Geofencing logic
-      if (administrativeArea.value != '' && administrativeArea.value != null) {
+      if (administrativeArea.value != '') {
         // Query Isar database for locations with the same administrative area
         List<LocationModel> isarLocations =
         await IsarService().getLocationsByState(administrativeArea.value);
@@ -868,7 +855,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
           radius: location.radius?.toDouble() ?? 0.0,
         )).toList();
 
-        print("Officessss == ${offices}");
+        print("Officessss == $offices");
 
         isInsideAnyGeofence.value = false;
         for (GeofenceModel office in offices) {
@@ -1506,9 +1493,9 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
             mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align items to edges
             children: [
 
-              Text("$leaveType Leave:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)), // Style adjustments
+              Text("$leaveType Leave:", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)), // Style adjustments
 
-              Text("$used Used, ${total - used} Remaining", style: TextStyle(fontSize: 14)), // Usage/Remaining info
+              Text("$used Used, ${total - used} Remaining", style: const TextStyle(fontSize: 14)), // Usage/Remaining info
             ],
           ),
           LinearPercentIndicator(
@@ -1531,8 +1518,8 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align items to edges
             children: [
-             Text("No of $leaveType(s) observed:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),// Style adjustments
-              Text("$used Observed", style: TextStyle(fontSize: 14))
+             Text("No of $leaveType(s) observed:", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),// Style adjustments
+              Text("$used Observed", style: const TextStyle(fontSize: 14))
             ],
           ),
           // LinearPercentIndicator(
@@ -1557,7 +1544,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
         return _buildMainScaffold(); // Call _buildMainScaffold when data is available
       }
       else {
-        return Scaffold(body: Center(child: Text('Error loading data'))); // Or other error handling
+        return const Scaffold(body: Center(child: Text('Error loading data'))); // Or other error handling
 
       }
     });
@@ -1647,7 +1634,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
                           color: Colors.blueGrey,
                         ),
                       ),
-                     SizedBox(height: 10),
+                     const SizedBox(height: 10),
 
                       IntrinsicWidth(child: Text(
                         "GPS is: ${isGpsEnabled.value ? 'On' : 'Off'}",
@@ -1662,7 +1649,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
                               .shortestSide < 600 ? 0.040 : 0.023),
                         ),
                       ),),
-                     SizedBox(height: 10),
+                     const SizedBox(height: 10),
 
                       IntrinsicWidth(child: Text(
                         "Current Latitude: ${lati.value.toStringAsFixed(
@@ -1678,7 +1665,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
                               .shortestSide < 600 ? 0.040 : 0.023),
                         ),
                       ),),
-                     SizedBox(height: 10), // Spacing between status and coordinates
+                     const SizedBox(height: 10), // Spacing between status and coordinates
 
                       IntrinsicWidth(child: Text(
                         "Coordinates Accuracy: ${accuracy.value}, Altitude: ${altitude.value} , Speed: ${speed.value}, Speed Accuracy: ${speedAccuracy.value}, Location Data Timestamp: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(time.value.toInt()))} , Is Location Mocked?: ${isMock.value}",
@@ -1687,7 +1674,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
                           fontSize: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.shortestSide < 600 ? 0.040 : 0.023),
                         ),
                       ),),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                       IntrinsicWidth(child:  Obx(() => Text(
                         "Current State: ${administrativeArea.value}",
                         style: TextStyle(
@@ -1701,7 +1688,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
                               .shortestSide < 600 ? 0.040 : 0.023),
                         ),
                       )),),
-                   SizedBox(height: 10),
+                   const SizedBox(height: 10),
 
 
                       IntrinsicWidth(child: Obx(() => Text(
@@ -1717,7 +1704,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
                               .shortestSide < 600 ? 0.040 : 0.023),
                         ),
                       ),),),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
 
                       IntrinsicWidth(child: Obx(() => Text(
                         "Current State: ${administrativeArea.value}",
@@ -1738,7 +1725,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
               ),
             ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             //
             // _buildCircularPercentIndicator(_totalAnnualLeaves.value - (_remainingLeaves.value?.annualLeaveBalance ?? 0), _totalAnnualLeaves.value,
             //     _totalPaternityLeaves.value - (_remainingLeaves.value?.paternityLeaveBalance ?? 0), _totalPaternityLeaves.value,
@@ -2007,7 +1994,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
 
 
 
-                    SizedBox(height: 16.0), // Add spacing between dropdown and buttons
+                    const SizedBox(height: 16.0), // Add spacing between dropdown and buttons
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Evenly space buttons
@@ -2016,7 +2003,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
                           onPressed: () {
                             _handleSaveAndSubmit(context, setState);
                           },
-                          child: Text("Save Request"),
+                          child: const Text("Save Request"),
                         ),
                       ],
                     ),
@@ -2142,7 +2129,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
               backgroundColor: Colors.grey,
               circularStrokeCap: CircularStrokeCap.round,
             )),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -2568,7 +2555,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
                               if (isHoliday && markedDateLabel == null && !isMarked) ...[
                                 FittedBox( // FittedBox for holidays too
                                   fit: BoxFit.scaleDown,
-                                  child: Text(holidayName!, style: const TextStyle(fontSize: 6)), // Smaller font size
+                                  child: Text(holidayName, style: const TextStyle(fontSize: 6)), // Smaller font size
                                 ),
                                 const SizedBox(height: 2),
                               ],
@@ -2628,7 +2615,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
 
 
 
-                    SizedBox(height: 16.0), // Add spacing between dropdown and buttons
+                    const SizedBox(height: 16.0), // Add spacing between dropdown and buttons
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Evenly space buttons
@@ -2637,7 +2624,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
                           onPressed: () async {
                             await _handleUpdateLeaveRequest(context, leaveRequest, setState); // Add setState here
                           },
-                          child: Text("Update"),
+                          child: const Text("Update"),
                         ),
                       ],
                     ),
