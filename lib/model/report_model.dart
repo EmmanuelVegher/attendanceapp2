@@ -9,6 +9,7 @@ class ReportEntry {
   String value;
   String? enteredBy; // Added enteredBy field
   String? editedBy;  // Added editedBy field
+  
 
   ReportEntry({this.key = "", this.value = "",this.enteredBy, this.editedBy}); // Updated constructor
 }
@@ -20,6 +21,9 @@ class Report {
   String? reportType;
   String? reportingWeek;
   String? reportingMonth;
+  String? reportStatus;
+  String? reportFeedbackComment;
+  bool? isSynced;
   List<ReportEntry>? reportEntries;
 
   Report({
@@ -28,6 +32,9 @@ class Report {
     this.reportType,
     this.reportingWeek,
     this.reportingMonth,
+    this.reportStatus,
+    this.reportFeedbackComment,
+    this.isSynced,
     this.reportEntries,
   });
 }

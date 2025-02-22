@@ -19,6 +19,7 @@ import '../Pages/Leave_Request/Pending_Approvals.dart';
 import '../Pages/Leave_Request/out_of_office_request_page.dart';
 import '../Pages/Timesheet/timesheet.dart';
 import '../Pages/activity_monitoring/activity_monitoring_page.dart';
+import '../Pages/activity_monitoring/daily_activity_monitoring_page.dart';
 import '../Pages/performance_metrics/best_player_page.dart';
 import '../Pages/performance_metrics/psychological_metrics_page.dart';
 import '../Pages/upload_signature.dart';
@@ -212,26 +213,26 @@ Widget drawer(
             },
           ),
 
-          const Divider(
-            color: Colors.grey,
-            height: 1,
-          ),
-          ListTile(
-            leading: Icon(Icons.task,
-                size: drawerIconSize, color: Colors.brown),
-            title: Text(
-              'Task Management',
-              style: TextStyle(
-                  fontSize: drawerFontSize,
-                  color: Get.isDarkMode ? Colors.white : Colors.brown),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const TaskManagerHomePage()),
-              );
-            },
-          ),
+          // const Divider(
+          //   color: Colors.grey,
+          //   height: 1,
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.task,
+          //       size: drawerIconSize, color: Colors.brown),
+          //   title: Text(
+          //     'Task Management',
+          //     style: TextStyle(
+          //         fontSize: drawerFontSize,
+          //         color: Get.isDarkMode ? Colors.white : Colors.brown),
+          //   ),
+          //   onTap: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (context) => const TaskManagerHomePage()),
+          //     );
+          //   },
+          // ),
           const Divider(
             color: Colors.grey,
             height: 1,
@@ -338,7 +339,8 @@ Widget drawer(
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ActivityMonitoringPage()),
+                    builder: (context) => DailyActivityMonitoringPage()),
+                  //builder: (context) => TaskManagerHomePage()),
               );
             },
           ),
