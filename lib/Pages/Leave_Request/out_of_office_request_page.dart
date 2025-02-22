@@ -768,7 +768,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
   Future<void> _getLocation2() async {
 
     // Check for internet connection
-    isInternetConnected.value = await InternetConnectionChecker().hasConnection;
+    isInternetConnected.value = await InternetConnectionChecker.instance.hasConnection;
     try{
       print("_getLocation2 hereeeee");
       locationService.onLocationChanged.listen((LocationData locationData) async {
@@ -1048,7 +1048,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
   }
 
   Future<void> checkInternetConnection() async {
-    isInternetConnected.value = await InternetConnectionChecker().hasConnection;
+    isInternetConnected.value = await InternetConnectionChecker.instance.hasConnection;
     if (!isInternetConnected.value) {
       Fluttertoast.showToast(
         msg:
@@ -1389,7 +1389,7 @@ ${leaveRequest.firstName} ${leaveRequest.lastName}.
     try {
 
       //Check network connectivity first
-      final isInternetConnected = await InternetConnectionChecker().hasConnection;
+      final isInternetConnected = await InternetConnectionChecker.instance.hasConnection;
       if(!isInternetConnected){
         print("No Internet Connection. Syncing aborted.");
         return;

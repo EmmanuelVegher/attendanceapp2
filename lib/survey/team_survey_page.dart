@@ -213,6 +213,8 @@ class _TeamSurveyPageState extends State<TeamSurveyPage> {
           Expanded(
             child: AnimatedReorderableListView(
               items: staffList,
+              // Compare items based on their unique identifier.
+              isSameItem: (oldItem, newItem) => oldItem.id == newItem.id,
               itemBuilder: (context, index) {
                 return _buildCard(index, staffList[index]);
               },
@@ -237,6 +239,7 @@ class _TeamSurveyPageState extends State<TeamSurveyPage> {
               },
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(

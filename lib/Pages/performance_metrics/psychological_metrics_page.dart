@@ -429,12 +429,14 @@ class _PsychologicalMetricsPageState extends State<PsychologicalMetricsPage> {
             children: [
               _isLoadingStaffList // Show loading indicator while fetching staff list
                   ? const Center(child: CircularProgressIndicator())
-                  : AnimatedReorderableListView( // Use AnimatedReorderableListView
+                  : AnimatedReorderableListView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 items: _staffList,
+                // Compare items based on their unique id.
+                isSameItem: (oldItem, newItem) => oldItem.id == newItem.id,
                 itemBuilder: (context, index) => _buildCard(index, _staffList[index]),
-                onReorder: (oldIndex, newIndex) {
+                onReorder: (int oldIndex, int newIndex) {
                   setState(() {
                     final staffMember = _staffList.removeAt(oldIndex);
                     _staffList.insert(newIndex, staffMember);

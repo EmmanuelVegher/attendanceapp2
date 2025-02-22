@@ -195,7 +195,7 @@ class _AttendanceClockState extends State<AttendanceClock> {
     print("_getLocation2 hereeeee");
     // Check for internet connection
     bool isInternetConnected;
-    isInternetConnected = await InternetConnectionChecker().hasConnection;
+    isInternetConnected = await InternetConnectionChecker.instance.hasConnection;
 
     if (!isInternetConnected) {
       // Use Geolocator and request location updates using GPS
