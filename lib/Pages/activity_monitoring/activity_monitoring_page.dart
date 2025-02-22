@@ -9,7 +9,8 @@ import '../../controllers/task_controller.dart';
 import '../../services/isar_service.dart';
 import '../../services/notification_services.dart';
 import '../../widgets/drawer.dart';
-import '../Attendance/button.dart'; // Import Firebase Firestore
+import '../Attendance/button.dart';
+import 'daily_activity_monitoring_page.dart'; // Import Firebase Firestore
 
 class ActivityMonitoringPage extends StatefulWidget {
   @override
@@ -449,38 +450,6 @@ class _ActivityMonitoringPageState extends State<ActivityMonitoringPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             _addActivityBar(),
-            SizedBox(height: 10),
-            Text('National Facility ART Monthly Summary Form', style: Theme.of(context).textTheme.titleLarge),
-            SizedBox(height: 10),
-            _buildNationalFacilityARTMonthlySummaryFormReport(),
-            SizedBox(height: 20),
-
-            // SizedBox(height: 20),
-            // Text('FY25 BI-WEEKLY DATA VALUE', style: Theme.of(context).textTheme.titleLarge),
-            // SizedBox(height: 10),
-            // _buildWeeklyDataValuesReport(),
-            //
-            // SizedBox(height: 20),
-            // Text('Daily Activities', style: Theme.of(context).textTheme.titleLarge),
-            // SizedBox(height: 10),
-            // _buildDailyActivitiesReport(),
-            //
-            // SizedBox(height: 20),
-            // Text('Performance Indicators', style: Theme.of(context).textTheme.titleLarge),
-            // SizedBox(height: 10),
-            // _buildPerformanceIndicatorsReport(),
-            //
-            // SizedBox(height: 20),
-            // Text('Indicator Achievement Summary', style: Theme.of(context).textTheme.titleLarge),
-            // SizedBox(height: 10),
-            // _buildIndicatorAchievementReport(),
-            //
-            //
-            //
-            // SizedBox(height: 20),
-            // Text('New HIV Positive Tracking', style: Theme.of(context).textTheme.titleLarge),
-            // SizedBox(height: 10),
-            // _buildNewHIVPositiveReport(),
 
             SizedBox(height: 20),
             Text('HTS Testing Report', style: Theme.of(context).textTheme.titleLarge),
@@ -2685,7 +2654,7 @@ class _ActivityMonitoringPageState extends State<ActivityMonitoringPage> {
             ),
           ),
           MyButton(label: "Go to Daily Activity",onTap: ()async{
-            await Get.to(()=>const TaskManagerHomePage());
+            await Get.to(()=>DailyActivityMonitoringPage());
 
           },
           )

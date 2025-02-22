@@ -115,6 +115,8 @@ Future<void> initializeService() async {
 }
 
 
+
+
 @pragma('vm:entry-point')
 Future<bool> onIosBackground(ServiceInstance service) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -132,6 +134,7 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
+
   SharedPreferences preferences = await SharedPreferences.getInstance();
   await preferences.setString("hello", "world");
 

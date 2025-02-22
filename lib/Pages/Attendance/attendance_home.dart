@@ -156,7 +156,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     subscription = Connectivity()
         .onConnectivityChanged
         .listen((List<ConnectivityResult> result) async {
-      isDeviceConnected = await InternetConnectionChecker().hasConnection;
+      isDeviceConnected = await InternetConnectionChecker.instance.hasConnection;
       log("Internet status ====== $isDeviceConnected");
     });
 
@@ -239,7 +239,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
     subscription = Connectivity()
         .onConnectivityChanged
         .listen((List<ConnectivityResult> result) async {
-      isDeviceConnected = await InternetConnectionChecker().hasConnection;
+      isDeviceConnected = await InternetConnectionChecker.instance.hasConnection;
       log("Internet status ====== $isDeviceConnected");
       if (!isDeviceConnected && isAlertSet == false) {
         showDialogBox();
@@ -1155,7 +1155,7 @@ class _AttendanceHomeScreenState extends State<AttendanceHomeScreen> {
                     isAlertSet = false;
                   });
                   isDeviceConnected =
-                      await InternetConnectionChecker().hasConnection;
+                      await InternetConnectionChecker.instance.hasConnection;
                   if (!isDeviceConnected) {
                     showDialogBox();
                     setState(() {
