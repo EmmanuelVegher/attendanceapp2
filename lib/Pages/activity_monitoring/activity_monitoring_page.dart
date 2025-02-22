@@ -295,7 +295,7 @@ class _ActivityMonitoringPageState extends State<ActivityMonitoringPage> {
 
 
   // --- Task Manager related variables and controllers ---
-  final TaskController _taskController = Get.put(TaskController()); // Get the task controller
+  //final TaskController _taskController = Get.put(TaskController()); // Get the task controller
   late NotifyHelper notifyHelper;
   double screenHeight = 0;
   double screenWidth = 0;
@@ -308,7 +308,7 @@ class _ActivityMonitoringPageState extends State<ActivityMonitoringPage> {
     notifyHelper = NotifyHelper();
     notifyHelper.initializeNotification();
     notifyHelper.requestIOSPermissions();
-    _taskController.getTasks(); // Load tasks from Isar on page load
+    //_taskController.getTasks(); // Load tasks from Isar on page load
 
     // Initialize TextEditingControllers for TB Report
     for (String indicator in tbReportIndicators) {

@@ -94,42 +94,42 @@ class NotifyHelper {
   // }
 
   // Schedules a notification based on the Task object
-  Future<void> scheduledNotification(int hour, int minute, Task task) async {
-    await _configureLocalTimezone(); // Ensure timezone is configured
-
-    try {
-      var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-          'your channel id', 'your channel name',
-          channelDescription: 'your channel description',
-          importance: Importance.max, priority: Priority.high, ticker: 'ticker');
-      var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
-
-      NotificationDetails platformChannelSpecifics = NotificationDetails(
-          android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
-
-
-      tz.TZDateTime scheduledDate = _calculateScheduledTime(hour, minute, task.repeat);
-
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        task.id!.toInt(),
-        task.title,
-        task.note,
-        scheduledDate,
-        platformChannelSpecifics,
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time, // Match only time components for daily repeats
-        payload: "${task.title}|${task.note}|", // Use task details as payload
-      );
-    } catch (e) {
-      print('Error scheduling notification: $e');
-    }
-
-
-
-
-  }
+  // Future<void> scheduledNotification(int hour, int minute, Task task) async {
+  //   await _configureLocalTimezone(); // Ensure timezone is configured
+  //
+  //   try {
+  //     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+  //         'your channel id', 'your channel name',
+  //         channelDescription: 'your channel description',
+  //         importance: Importance.max, priority: Priority.high, ticker: 'ticker');
+  //     var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
+  //
+  //     NotificationDetails platformChannelSpecifics = NotificationDetails(
+  //         android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
+  //
+  //
+  //     tz.TZDateTime scheduledDate = _calculateScheduledTime(hour, minute, task.repeat);
+  //
+  //     await flutterLocalNotificationsPlugin.zonedSchedule(
+  //       task.id!.toInt(),
+  //       task.title,
+  //       task.note,
+  //       scheduledDate,
+  //       platformChannelSpecifics,
+  //       androidAllowWhileIdle: true,
+  //       uiLocalNotificationDateInterpretation:
+  //       UILocalNotificationDateInterpretation.absoluteTime,
+  //       matchDateTimeComponents: DateTimeComponents.time, // Match only time components for daily repeats
+  //       payload: "${task.title}|${task.note}|", // Use task details as payload
+  //     );
+  //   } catch (e) {
+  //     print('Error scheduling notification: $e');
+  //   }
+  //
+  //
+  //
+  //
+  // }
 
   tz.TZDateTime _calculateScheduledTime(int hour, int minute, String repeat) {
     final now = DateTime.now();

@@ -32,25 +32,51 @@ import '../model/task.dart';
 import '../model/track_location_model.dart';
 
 class IsarService extends DatabaseAdapter {
+  // IsarService._privateConstructor();
+  // static final IsarService _instance = IsarService._privateConstructor();
+  // static IsarService get instance => _instance;
+  //
+  // late Future<Isar> db;
+  //
+  // IsarService() {
+  //   db = openDB();
+  // }
+
   IsarService._privateConstructor();
   static final IsarService _instance = IsarService._privateConstructor();
   static IsarService get instance => _instance;
 
-  late Future<Isar> db;
+  late Future<Isar> _dbFuture; // Changed to _dbFuture to be private
+  Isar? _isarInstance; // To hold the Isar instance
 
   IsarService() {
-    db = openDB();
+    _dbFuture = openDB().then((isarInstance) { // Open DB and store instance
+      _isarInstance = isarInstance;
+      return isarInstance;
+    });
   }
 
+  // Getter to access the Isar instance
+  Isar get isar {
+    print("IsarService: isar getter called"); // Logging in getter
+    if (_isarInstance == null) {
+      print("IsarService: _isarInstance is NULL when getter is called!"); // Logging if null
+      throw Exception("Isar instance not initialized yet.");
+    }
+    print("IsarService: isar getter returning instance: $_isarInstance"); // Logging instance
+    return _isarInstance!;
+  }
+
+
   Future<void> saveAttendance(AttendanceModel newattendance) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     //we return an int int thr writeTxnSync because we want to get the id of the saved attendance
     isar
         .writeTxnSync<int>(() => isar.attendanceModels.putSync(newattendance));
   }
 
   Future<void> saveFacilityStaffList(FacilityStaffModel newfacilityStaffList) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     //we return an int int thr writeTxnSync because we want to get the id of the saved attendance
     isar
         .writeTxnSync<int>(() => isar.facilityStaffModels.putSync(newfacilityStaffList));
@@ -72,7 +98,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveLocation(LocationModel newlocation) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try{
 
       isar
@@ -91,19 +117,19 @@ class IsarService extends DatabaseAdapter {
 
   /// Fetch all tasks from Isar
   Future<List<Task>> getAllTasks() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.tasks.where().findAll();
   }
 
 
   Stream<List<Task>> listenToTasks() async* {
-    final isar = await db;
+    final isar = await _dbFuture;
     yield* isar.tasks.where().watch(fireImmediately: true);
   }
 
   /// Get a single task by ID
   Future<Task?> getTaskById(int id) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.tasks.get(id);
   }
 
@@ -111,12 +137,12 @@ class IsarService extends DatabaseAdapter {
 
   /// Update an existing task in Isar
   Future<void> updateTask(Task task) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() async => isar.tasks.put(task));
   }
 
   Future<void>deleteAllTasks() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() async => isar.tasks.where().deleteAll());
   }
 
@@ -125,7 +151,7 @@ class IsarService extends DatabaseAdapter {
 
   Stream<List<AttendanceModel>> searchAttendanceByDateRange(
       DateTime startDate, DateTime endDate) async* {
-    final isar = await db;
+    final isar = await _dbFuture;
 
     final start = _formatDate(startDate); // Formatted start date
     final end = _formatDate(endDate);   // Formatted end date
@@ -145,7 +171,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveAllAttendance(List<AttendanceModel> attendances) async {
-    final isar = await db;
+    final isar = await _dbFuture;
 
     await isar
         .writeTxn(() => isar.attendanceModels.putAll(attendances));
@@ -155,7 +181,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveAllBioData(List<BioModel> bioInfoList) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar
         .writeTxn(() => isar.bioModels.putAll(bioInfoList));
     // await isar.writeTxn((isar) async {
@@ -165,7 +191,7 @@ class IsarService extends DatabaseAdapter {
 
 
   Future<void> saveState(StateModel newstate) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.stateModels.putSync(newstate));
     } catch (e) {
@@ -181,7 +207,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveSupervisor(SupervisorModel newsupervisor) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.supervisorModels.putSync(newsupervisor));
     } catch (e) {
@@ -197,7 +223,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveDepartment(DepartmentModel newdepartment) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.departmentModels.putSync(newdepartment));
     } catch (e) {
@@ -213,7 +239,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveDesignation(DesignationModel newdesignation) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.designationModels.putSync(newdesignation));
     } catch (e) {
@@ -231,7 +257,7 @@ class IsarService extends DatabaseAdapter {
 
 
   Future<void> saveProject(ProjectModel newproject) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.projectModels.putSync(newproject));
     } catch (e) {
@@ -247,7 +273,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveGender(GenderCategoryModel newgender) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.genderCategoryModels.putSync(newgender));
     } catch (e) {
@@ -265,7 +291,7 @@ class IsarService extends DatabaseAdapter {
 
 
   Future<void> saveMaritalStatus(MaritalStatusModel newmaritalstatus) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.maritalStatusModels.putSync(newmaritalstatus));
     } catch (e) {
@@ -281,7 +307,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveAppVersion(AppVersionModel newappversion) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.appVersionModels.putSync(newappversion));
     } catch (e) {
@@ -297,7 +323,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveLastUpdateDate(LastUpdateDateModel newlastupdatedate) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.lastUpdateDateModels.putSync(newlastupdatedate));
     } catch (e) {
@@ -313,7 +339,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveStaffCategory(StaffCategoryModel newstaffcategory) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.staffCategoryModels.putSync(newstaffcategory));
     } catch (e) {
@@ -329,7 +355,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveReasonForDaysOff(ReasonForDaysOffModel newreasonfordaysoff) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     try {
       isar.writeTxnSync<int>(() => isar.reasonForDaysOffModels.putSync(newreasonfordaysoff));
     } catch (e) {
@@ -345,12 +371,12 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveLocationData(TrackLocationModel newtracklocationdata) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     isar.writeTxnSync<int>(() => isar.trackLocationModels.putSync(newtracklocationdata));
   }
 
   Future<List<TrackLocationModel>> getAttendanceForEmptyLocationFor12() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.trackLocationModels
         .filter()
         .locationNameIsNull()
@@ -361,7 +387,7 @@ class IsarService extends DatabaseAdapter {
 
   Future<TrackLocationModel?> getLastLocationFor12() async {
     await Future.delayed(const Duration(seconds: 1));
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.trackLocationModels
         .where()
         .sortByTimestampDesc()
@@ -371,7 +397,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<List<TrackLocationModel>> getTracklocationForPartialUnSynced() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.trackLocationModels
         .filter()
         .isSynchedEqualTo(false)
@@ -383,7 +409,7 @@ class IsarService extends DatabaseAdapter {
       TrackLocationModel trackLocationModels,
       bool isSynched,
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final updateSyncStatus = await isar.trackLocationModels.get(id);
 
     updateSyncStatus!.isSynched = isSynched;
@@ -399,7 +425,7 @@ class IsarService extends DatabaseAdapter {
       DateTime checkDate,
       bool isLatestVersion
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final updateSyncStatus = await isar.appVersionModels.get(id);
 
     updateSyncStatus!..checkDate = checkDate
@@ -414,7 +440,7 @@ class IsarService extends DatabaseAdapter {
       int id,
       String reasonsForRejectedLeaves
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final reasonsForRejectedLeave = await isar.leaveRequestModels.get(id);
 
     reasonsForRejectedLeave!.reasonsForRejectedLeave = reasonsForRejectedLeaves;
@@ -434,7 +460,7 @@ class IsarService extends DatabaseAdapter {
       DateTime checkDate,
       bool isLatestVersion
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final updateSyncStatus = await isar.appVersionModels.get(id);
 
     updateSyncStatus!..checkDate = checkDate
@@ -452,7 +478,7 @@ class IsarService extends DatabaseAdapter {
       DateTime checkDate,
       bool isLatestVersion
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final updateSyncStatus = await isar.appVersionModels.get(id);
 
     updateSyncStatus!..checkDate = checkDate
@@ -468,7 +494,7 @@ class IsarService extends DatabaseAdapter {
       TrackLocationModel trackLocationModels,
       String locationName,
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final emptyLocationUpdate = await isar.trackLocationModels.get(id);
 
     emptyLocationUpdate!
@@ -480,109 +506,109 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> saveBioData(BioModel newbiodata) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     isar.writeTxnSync<int>(() => isar.bioModels.putSync(newbiodata));
   }
 
   Future<void> saveAppVersionData(AppVersionModel newappversiondata) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     isar.writeTxnSync<int>(() => isar.appVersionModels.putSync(newappversiondata));
   }
 
   Future<void> saveUserFace(UserFace newbiodata) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     isar.writeTxnSync<int>(() => isar.userFaces.putSync(newbiodata));
   }
 
   Future<List<UserFace>> getAllUserFace() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.userFaces.where().findAll();
   }
 
   // Future<void> saveDaysOff(DaysOffModel newdaysoff) async {
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   //we return an int int thr writeTxnSync because we want to get the id of the saved attendance
   //   await isar.writeTxnSync<int>(() => isar.daysOffModels.putSync(newdaysoff));
   // }
 
   Future<List<AttendanceModel>> getAllAttendance() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels.where().findAll();
   }
 
   Future<List<Task>> getAllTask() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.tasks.where().findAll();
   }
 
   Future<BioModel?> getBioData() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.bioModels.filter().idEqualTo(2).findFirst();
   }
 
 
 
   Future<List<LocationModel>> getAllLocation() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.locationModels.where().findAll();
   }
 
   Future<List<String?>> getStatesFromIsar(String state) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final stateModels = await isar.stateModels.where().stateNameNotEqualTo(state).findAll();
     return stateModels.map((model) => model.stateName).toList();
   }
 
   Future<List<String?>> getStatesFromIsarForFCT(String state) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final stateModels = await isar.stateModels.where().stateNameEqualTo(state).findAll();
     return stateModels.map((model) => model.stateName).toList();
   }
 
   Future<List<String?>> getLocationsFromIsar(String state, String category) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final locationModels = await isar.locationModels.filter().stateEqualTo(state).categoryEqualTo(category).findAll();
     return locationModels.map((model) => model.locationName).toList();
   }
   Future<List<String?>> getDepartmentsFromIsar() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final departmentModels = await isar.departmentModels.where().findAll();
     return departmentModels.map((model) => model.departmentName).toList();
   }
 
   Future<List<String?>> getStaffCategoryFromIsar() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final staffCategoryModels = await isar.staffCategoryModels.where().findAll();
     return staffCategoryModels.map((model) => model.staffCategory).toList();
   }
 
 
   Future<List<String?>> getGenderFromIsar() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final genderCategoryModels = await isar.genderCategoryModels.where().findAll();
     return genderCategoryModels.map((model) => model.gender).toList();
   }
 
   Future<List<String?>> getMaritalStatusFromIsar() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final maritalStatusModels = await isar.maritalStatusModels.where().findAll();
     return maritalStatusModels.map((model) => model.maritalStatus).toList();
   }
 
 
   Future<List<String?>> getDesignationsFromIsar(String? department,String? category) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final designationModels = await isar.designationModels.filter().departmentNameEqualTo(department).categoryEqualTo(category).findAll();
     return designationModels.map((model) => model.designationName).toList();
   }
 
   Future<List<String?>> getSupervisorsFromIsar(String? department, String? state) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final supervisorModels = await isar.supervisorModels.filter().departmentEqualTo(department).stateEqualTo(state).findAll();
     return supervisorModels.map((model) => model.supervisor).toList();
   }
   Future<List<String?>> getSupervisorEmailFromIsar(String? department,String? nameofsupervisor) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final supervisorModels = await isar.supervisorModels.filter().departmentEqualTo(department).supervisorEqualTo(nameofsupervisor).findAll();
     return supervisorModels.map((model) => model.email).toList();
   }
@@ -603,25 +629,25 @@ class IsarService extends DatabaseAdapter {
 
 
   Future<List<String?>> getReasonsForDaysOffFromIsar() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final reasonForDaysOffModels = await isar.reasonForDaysOffModels.where().findAll();
     return reasonForDaysOffModels.map((model) => model.reasonForDaysOff).toList();
   }
 
   Future<List<String?>> getProjectFromIsar() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final projectModels = await isar.projectModels.where().findAll();
     return projectModels.map((model) => model.project).toList();
   }
 
   Future<List<String?>> getAllStatesFromIsar() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final stateModels = await isar.stateModels.where().findAll();
     return stateModels.map((model) => model.stateName).toList();
   }
 
   Future<List<String?>> getAllStatesFromIsarForFCT() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final stateModels = await isar.stateModels.filter().stateNameEqualTo("Federal Capital Territory").findAll();
     return stateModels.map((model) => model.stateName).toList();
   }
@@ -630,17 +656,17 @@ class IsarService extends DatabaseAdapter {
 
 
   Future<List<LocationModel>> getLocationsByState(String? state) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.locationModels.filter().stateEqualTo(state).findAll();
   }
 
   Future<List<LocationModel>> getAllLocations() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.locationModels.where().findAll();
   }
 
   Future<List<AttendanceModel>> getAttendanceFor1990() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .where()
         .filter()
@@ -649,7 +675,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   // Future<String> getAllAttendance2(AESEncryption encryption) async {
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   final attend = await isar.attendanceModels.where().findAll();
   //   String attend2 = attend.toString();
   //   var encrypted = encryption.encryptMsg(attend2.toString()).base16;
@@ -662,7 +688,7 @@ class IsarService extends DatabaseAdapter {
   // }
 
   Future<void> importAllAttendance(AttendanceModel rest) async {
-    final isar = await db;
+    final isar = await _dbFuture;
 
     // await isar.writeTxnSync(() => isar.attendanceModels
     //     .importJson(rest));
@@ -671,7 +697,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   exportAllAttendance() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final attend = await isar.attendanceModels.where().findAll();
 
     List<Map<String, dynamic>>? listAttendance =
@@ -682,7 +708,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   exportAllBioInfo() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bio = await isar.bioModels.where().findAll();
 
     List<Map<String, dynamic>>? listBioInfo =
@@ -693,7 +719,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Stream<List<AttendanceModel>> listenToAttendance() async* {
-    final isar = await db;
+    final isar = await _dbFuture;
     //yield* returns everything in your db via the stream function
     yield* isar.attendanceModels.where().watch();
   }
@@ -702,7 +728,7 @@ class IsarService extends DatabaseAdapter {
 
   Stream<List<BioModel>> watchBioInfoWithFirebaseAuth() async*  {
     // ... (implementation to watch BioInfo changes in Isar)
-    final isar = await db;
+    final isar = await _dbFuture;
     //yield* isar.bioModels.where().watch();
     final query = isar.bioModels.where().filter().firebaseAuthIdIsNotNull().build();
 
@@ -716,7 +742,7 @@ class IsarService extends DatabaseAdapter {
 
 
   Stream<AttendanceModel?> watchLastAttendance(String month) async* {
-    final isar = await db; // Assuming 'db' is a Future<Isar>
+    final isar = await _dbFuture; // Assuming 'db' is a Future<Isar>
 
     await for (final attendance in isar.attendanceModels.where()
         .filter()
@@ -728,7 +754,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Stream<List<AttendanceModel>> getHourWorkedForMonth(String month) async* {
-    final isar = await db;
+    final isar = await _dbFuture;
     final query = isar.attendanceModels
         .where()
         .filter()
@@ -785,88 +811,88 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> cleanDB() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.clear());
   }
 
 
 
   Future<void> cleanLocationCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.locationModels.clear()); // Truncate collection
   }
 
   Future<void> PsychologicalMetricsCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.psychologicalMetricsModels.clear()); // Truncate collection
   }
 
   Future<void> cleanStateCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.stateModels.clear()); // Truncate collection
   }
 
   Future<void> cleanDepartmentCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.departmentModels.clear()); // Truncate collection
   }
   Future<void> cleanSupervisorCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.supervisorModels.clear()); // Truncate collection
   }
 
   Future<void> cleanFacilityStaffListCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.facilityStaffModels.clear()); // Truncate collection
   }
 
   Future<void> cleanMaritalStatusCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.maritalStatusModels.clear()); // Truncate collection
   }
 
   Future<void> cleanGenderCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.genderCategoryModels.clear()); // Truncate collection
   }
 
   Future<void> cleanAttendanceCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.attendanceModels.clear()); // Truncate collection
   }
 
   Future<void> cleanDesignationCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.designationModels.clear()); // Truncate collection
   }
 
   Future<void> cleanAppVersionCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.appVersionModels.clear()); // Truncate collection
   }
 
   Future<void> cleanReasonsForDayOffCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.reasonForDaysOffModels.clear()); // Truncate collection
   }
 
   Future<void> cleanStaffCategoryCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.staffCategoryModels.clear()); // Truncate collection
   }
 
   Future<void> cleanBioCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.bioModels.clear()); // Truncate collection
   }
 
   Future<void> cleanLastUpdateDateCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.lastUpdateDateModels.clear()); // Truncate collection
   }
 
   Future<void> cleanProjectCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.projectModels.clear()); // Truncate collection
   }
 
@@ -874,7 +900,7 @@ class IsarService extends DatabaseAdapter {
 
   Future<List<AttendanceModel>> getAttendanceFor(
       AttendanceModel attendanceModel) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .idEqualTo(attendanceModel.id)
@@ -884,7 +910,7 @@ class IsarService extends DatabaseAdapter {
 
   Future<List<LeaveRequestModel>> getFilteredLeaves(
       LeaveRequestModel leaveRequestModels,String firebaseAuthId ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.leaveRequestModels
         .filter()
         .staffIdEqualTo(firebaseAuthId) // Correct filter method
@@ -893,7 +919,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<List<AttendanceModel>> getAttendanceForDate(String? date) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels.filter().dateEqualTo(date).findAll();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
   }
@@ -901,7 +927,7 @@ class IsarService extends DatabaseAdapter {
 
 
   Stream<List<AttendanceModel>> getDaysOffForMonth(String month) async* {
-    final isar = await db;
+    final isar = await _dbFuture;
     final query = isar.attendanceModels
         .where()
         .filter()
@@ -921,7 +947,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Stream<List<AttendanceModel?>> listenToLastAttendance(String month) async* {
-    final isar = await db;
+    final isar = await _dbFuture;
 
     final query = isar.attendanceModels
         .where()
@@ -938,14 +964,14 @@ class IsarService extends DatabaseAdapter {
   }
 
   // Future<List<AttendanceModel>> getAttendanceForLast() async {
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   return await isar.attendanceModels.where().sortByDateDesc().findAll();
   //   // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
   // }
 
   Future<AttendanceModel?> getLastAttendance(String month) async {
     await Future.delayed(const Duration(seconds: 1));
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .monthEqualTo(month)
@@ -959,7 +985,7 @@ class IsarService extends DatabaseAdapter {
 
   Future<AttendanceModel?> getLastAttendanceFordate(String date) async {
     await Future.delayed(const Duration(seconds: 1));
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .dateEqualTo(date)
@@ -969,7 +995,7 @@ class IsarService extends DatabaseAdapter {
 
   Future<UserFace?> getLastUserFace() async {
     //await Future.delayed(const Duration(seconds: 1));
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.userFaces.filter().arrayIsNotEmpty().findFirst();
     //where().sortByDateDesc().findFirst();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
@@ -977,25 +1003,25 @@ class IsarService extends DatabaseAdapter {
 
   Future<List<AttendanceModel>> getAttendanceForSpecificDate(
       String date) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels.filter().dateEqualTo(date).findAll();
   }
 
   Future<List<FacilityStaffModel>> getFacilityListForSpecificFacility1(
       String state,String facilityName) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.facilityStaffModels.filter().stateEqualTo(state).facilityNameEqualTo(facilityName).findAll();
   }
 
 
 
   Future<List<SurveyResultModel>> getUnsyncedSurveyResults() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.surveyResultModels.filter().isSyncedEqualTo(false).findAll();
   }
 
   Future<List<FacilityStaffModel>> getFacilityListForSpecificFacility() async {
-    final isar = await db;
+    final isar = await _dbFuture;
 
     try {
       final bioData = await isar.bioModels.filter().firebaseAuthIdIsNotNull().findAll();
@@ -1021,7 +1047,7 @@ class IsarService extends DatabaseAdapter {
 
 
   Future<List<AttendanceModel>> getAttendanceForUnSynced() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .isSyncedEqualTo(false)
@@ -1031,13 +1057,13 @@ class IsarService extends DatabaseAdapter {
 
   Future<List<AttendanceModel>> getAttendanceForSpecificMonth(
       String month) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels.filter().monthEqualTo(month).findAll();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
   }
 
   Future<int> getCountForClockIn() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .clockInIsNotNull()
@@ -1050,7 +1076,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<int> getCountForClockOut() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .clockOutIsNotNull()
@@ -1063,7 +1089,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<int> getCountForoffDay(String month) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .monthEqualTo(month)
@@ -1074,7 +1100,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<List<AttendanceModel>> getAttendanceForPartialUnSynced() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .isSyncedEqualTo(false)
@@ -1086,7 +1112,7 @@ class IsarService extends DatabaseAdapter {
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
   }
   Future<List<AttendanceModel>> getAttendanceForId(int id) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .idEqualTo(id)
@@ -1096,7 +1122,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<List<BioModel>> getBioForId() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.bioModels
         .filter()
         .idEqualTo(2)
@@ -1107,7 +1133,7 @@ class IsarService extends DatabaseAdapter {
 
 
   getUnsyncedData() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     IsarCollection<AttendanceModel> attendanceModelCollection =
     isar.collection<AttendanceModel>();
     List<AttendanceModel?> attendanceModel = await attendanceModelCollection
@@ -1118,7 +1144,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<List<AttendanceModel>> getAttendanceForEmptyClockInLocation() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .clockInLocationIsNull()
@@ -1133,7 +1159,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<List<AttendanceModel>> getAttendanceForEmptyClockOutLocation() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels
         .filter()
         .clockOutLocationIsNull()
@@ -1151,7 +1177,7 @@ class IsarService extends DatabaseAdapter {
   //     int id,
   //     AppVersionModel appVersionModels,
   //     DateTime appVersionDate) async {
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   final appVersionUpdate = await isar.appVersionModels.get(id);
   //
   //   appVersionUpdate!
@@ -1174,7 +1200,7 @@ class IsarService extends DatabaseAdapter {
       bool isUpdated,
       String durationWorked,
       double noOfHours) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final attendanceUpdate = await isar.attendanceModels.get(id);
 
     attendanceUpdate!
@@ -1197,7 +1223,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String location,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioLocationUpdate = await isar.bioModels.get(id);
 
     bioLocationUpdate!
@@ -1214,7 +1240,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String staffCategory,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioLocationUpdate = await isar.bioModels.get(id);
 
     bioLocationUpdate!
@@ -1231,7 +1257,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String designation,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioUpdate = await isar.bioModels.get(id);
 
     bioUpdate!
@@ -1244,7 +1270,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<void> updateBioSignatureLinktoNull() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioUpdate = await isar.bioModels.get(2);
 
     bioUpdate!
@@ -1260,7 +1286,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String project,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioUpdate = await isar.bioModels.get(id);
 
     bioUpdate!
@@ -1280,7 +1306,7 @@ class IsarService extends DatabaseAdapter {
       String supervisor,
       String supervisorEmail,
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioUpdate = await isar.bioModels.get(id);
 
     bioUpdate!
@@ -1299,7 +1325,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String state,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioUpdate = await isar.bioModels.get(id);
 
     bioUpdate!
@@ -1316,7 +1342,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String supervisor,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioUpdate = await isar.bioModels.get(id);
 
     bioUpdate!
@@ -1333,7 +1359,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String supervisorEmail,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioUpdate = await isar.bioModels.get(id);
 
     bioUpdate!
@@ -1350,7 +1376,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String emailAddress,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioEmailUpdate = await isar.bioModels.get(id);
 
     bioEmailUpdate!
@@ -1367,7 +1393,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String mobile,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioModelUpdate = await isar.bioModels.get(id);
 
     bioModelUpdate!
@@ -1385,7 +1411,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       String department,
       bool isSynced) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final bioModelUpdate = await isar.bioModels.get(id);
 
     bioModelUpdate!
@@ -1402,7 +1428,7 @@ class IsarService extends DatabaseAdapter {
       int id,
       AttendanceModel attendanceModels,
       String comments) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final attendanceUpdate = await isar.attendanceModels.get(id);
 
     attendanceUpdate!
@@ -1414,12 +1440,12 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<AttendanceModel?> getSpecificAttendance(int id) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels.filter().idEqualTo(id).findFirst();
   }
 
   Future<List<AttendanceModel?>> getListSpecificAttendance(int id) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.attendanceModels.filter().idEqualTo(id).findAll();
   }
 
@@ -1429,7 +1455,7 @@ class IsarService extends DatabaseAdapter {
       bool isSynced,
       bool voided,
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final voidAttendance = await isar.attendanceModels.get(id);
 
     voidAttendance!
@@ -1446,7 +1472,7 @@ class IsarService extends DatabaseAdapter {
       AttendanceModel attendanceModels,
       String clockInLocation,
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final emptyclockInLocationUpdate = await isar.attendanceModels.get(id);
 
     emptyclockInLocationUpdate!
@@ -1463,7 +1489,7 @@ class IsarService extends DatabaseAdapter {
       AttendanceModel attendanceModels,
       String clockOutLocation,
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final emptyclockOutLocationUpdate = await isar.attendanceModels.get(id);
 
     emptyclockOutLocationUpdate!
@@ -1484,7 +1510,7 @@ class IsarService extends DatabaseAdapter {
       double clockOutLongitude,
       String durationWorked,
       double noOfHours) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final emptyclockOut = await isar.attendanceModels.get(id);
 
     emptyclockOut!
@@ -1505,7 +1531,7 @@ class IsarService extends DatabaseAdapter {
 
   Stream<List<AttendanceModel>> searchAllAttendance({String? search}) async* {
     print(search);
-    final isar = await db;
+    final isar = await _dbFuture;
     final query = isar.attendanceModels
         .where()
         .filter()
@@ -1526,7 +1552,7 @@ class IsarService extends DatabaseAdapter {
     final controller = StreamController<List<LeaveRequestModel>>();
 
     Future<void> fetchAndEmitResults() async {
-      final isar = await db; // Get your Isar instance
+      final isar = await _dbFuture; // Get your Isar instance
 
       final results = await isar.leaveRequestModels
           .filter()
@@ -1537,7 +1563,7 @@ class IsarService extends DatabaseAdapter {
 
     fetchAndEmitResults(); // Emit initial results
 
-    db.then((isar) {
+    _dbFuture.then((isar) {
       final query = isar.leaveRequestModels
           .filter()
           .staffIdEqualTo(staffId)
@@ -1554,7 +1580,7 @@ class IsarService extends DatabaseAdapter {
 
   // Stream<List<AttendanceModel>> searchAllAttendance1({String? search}) async* {
   //   print(search);
-  //   final isar = await db; // Assuming 'db' is a Future<Isar> instance
+  //   final isar = await _dbFuture; // Assuming 'db' is a Future<Isar> instance
   //   final query = isar.attendanceModels
   //       .where()
   //       .filter() // This filter is currently empty. Add filtering logic if needed.
@@ -1572,7 +1598,7 @@ class IsarService extends DatabaseAdapter {
 
   Stream<List<BioModel>> listenToBiometric1({String? search}) async* {
 
-    final isar = await db;
+    final isar = await _dbFuture;
     final query = isar.bioModels
         .where()
         .filter()
@@ -1589,7 +1615,7 @@ class IsarService extends DatabaseAdapter {
 
 // In your IsarService class:
   Stream<BioModel?> listenToBiometric() async* {
-    final isar = await db;
+    final isar = await _dbFuture;
     await for (final changes in isar.bioModels.watchLazy()) {
       // Get the first result asynchronously
       final bioModel = await isar.bioModels.filter().idEqualTo(2).findFirst();
@@ -1602,7 +1628,7 @@ class IsarService extends DatabaseAdapter {
 
   // Stream<List<DaysOffModel>> searchAllDaysOff({String? search}) async* {
   //   print(search);
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   final query = isar.daysOffModels
   //       .where()
   //       .filter()
@@ -1619,49 +1645,49 @@ class IsarService extends DatabaseAdapter {
   // }
 
   // removeAttendance(AttendanceModel attendanceModel,int id) async {
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   await isar.writeTxn(() async {
   //     await isar.attendanceModels.delete(attendanceModel.id);
   //   });
   // }
 
   removeTask(int id) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() async {
       await isar.tasks.delete(id);
     });
   }
 
   removeAttendance(int id) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() async {
       await isar.attendanceModels.delete(id);
     });
   }
 
   removeAllTask(AttendanceModel attendanceModel) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() async {
       await isar.tasks.filter().idGreaterThan(0).deleteAll();
     });
   }
 
   removeAllAttendance(AttendanceModel attendanceModel) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() async {
       await isar.attendanceModels.filter().idGreaterThan(0).deleteAll();
     });
   }
 
   removeAllLocation(LocationModel locationModel) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() async {
       await isar.locationModels.filter().idGreaterThan(0).deleteAll();
     });
   }
 
   void updateSync(AttendanceModel attendanceModel) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     attendanceModel.isSynced = true;
     await isar.writeTxn(() async {
       await isar.attendanceModels.put(attendanceModel);
@@ -1674,7 +1700,7 @@ class IsarService extends DatabaseAdapter {
       AttendanceModel attendanceModels,
       bool isSynced,
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final updateSyncStatus = await isar.attendanceModels.get(id);
 
     updateSyncStatus!.isSynced = isSynced;
@@ -1689,7 +1715,7 @@ class IsarService extends DatabaseAdapter {
       BioModel bioModels,
       bool isSynced,
       ) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     final updateSyncStatus = await isar.bioModels.get(id);
 
     updateSyncStatus!.isSynced = isSynced;
@@ -1702,7 +1728,7 @@ class IsarService extends DatabaseAdapter {
   @override
   Future<void> storeImage(Uint8List imageBytes) async {
     // TODO: implement storeImage
-    final isar = await db;
+    final isar = await _dbFuture;
 
     throw UnimplementedError();
   }
@@ -1716,7 +1742,7 @@ class IsarService extends DatabaseAdapter {
   Future<AppUsageModel?> getLastUsedDate() async {
     // Retrieve the last used date from Isar (implementation depends on your Isar setup)
     // Example: using a dedicated Isar object called 'AppUsage'
-    final isar = await db;
+    final isar = await _dbFuture;
     //return await isar.appUsageModels.where().findFirst();
     final appUsage = isar.appUsageModels.where().findFirst();
     return appUsage;
@@ -1725,31 +1751,31 @@ class IsarService extends DatabaseAdapter {
   // Future<LastUpdateDateModel?> getLastUpdateDate() async {
   //   // Retrieve the last used date from Isar (implementation depends on your Isar setup)
   //   // Example: using a dedicated Isar object called 'AppUsage'
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   //return await isar.appUsageModels.where().findFirst();
   //   final lastUpdateDate = isar.lastUpdateDateModels.where().findFirst();
   //   return lastUpdateDate;
   // }
 
   // Future<List<AppVersionModel>> getAppVersionInfo() async {
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   return await isar.appVersionModels.where().findAll();
   // }
 
   Future<void> saveTask(Task newtask) async {
     // Save the current date in Isar (implementation depends on your Isar setup)
-    final isar = await db;
+    final isar = await _dbFuture;
     isar.writeTxnSync<int>(() => isar.tasks.putSync(newtask));
   }
 
   Future<void> saveLastUsedDate(AppUsageModel newappusagemodel) async {
     // Save the current date in Isar (implementation depends on your Isar setup)
-    final isar = await db;
+    final isar = await _dbFuture;
     isar.writeTxnSync<int>(() => isar.appUsageModels.putSync(newappusagemodel));
   }
 
   Future<void> saveLeaveRequest(LeaveRequestModel leaveRequest) async {
-    final isar = await db;// Get the Isar instance
+    final isar = await _dbFuture;// Get the Isar instance
     await isar.writeTxn(() async {
       await isar.leaveRequestModels.put(leaveRequest); // Save the LeaveRequestModel
     });
@@ -1757,7 +1783,7 @@ class IsarService extends DatabaseAdapter {
 
 
   // Future<void> saveLastUsedDate() async {
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   final appUsage = await isar.appUsageModels.where().findFirst() ??
   //       AppUsageModel(lastUsedDate: DateTime.now()); // Create a new AppUsageModel if not found
   //   appUsage.lastUsedDate = DateTime.now(); // Update the lastUsedDate
@@ -1765,13 +1791,13 @@ class IsarService extends DatabaseAdapter {
   // }
 
   // Future<AppUsageModel?> getLastUsedDate() async {
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   final appUsage = await isar.appUsageModels.where().findFirst();
   //   return appUsage;
   // }
   //
   // Future<void> saveLastUsedDate() async {
-  //   final isar = await db;
+  //   final isar = await _dbFuture;
   //   final appUsage = await isar.appUsageModels.where().findFirst() ??
   //       AppUsageModel(lastUsedDate: DateTime.now());
   //   appUsage.lastUsedDate = DateTime.now();
@@ -1780,12 +1806,12 @@ class IsarService extends DatabaseAdapter {
 
 
   Future<List<BioModel>> getBioInfo() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.bioModels.where().findAll();
   }
 
   Future<List<BioModel>> getBioInfoForSuperUser() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.bioModels
         .where()
         .filter()
@@ -1794,7 +1820,7 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<List<BioModel>> getBioInfoForUser() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.bioModels
         .where()
         .filter()
@@ -1805,61 +1831,61 @@ class IsarService extends DatabaseAdapter {
 
 
   Future<List<LastUpdateDateModel>> getUpdateDateInfo() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.lastUpdateDateModels.where().findAll();
   }
 
   Future<List<AppVersionModel>> getAppVersionInfo() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.appVersionModels.where().findAll();
   }
 
   Future<AppVersionModel?> getAppVersionInfo2() async {
     // Retrieve the last used date from Isar (implementation depends on your Isar setup)
     // Example: using a dedicated Isar object called 'AppUsage'
-    final isar = await db;
+    final isar = await _dbFuture;
     //return await isar.appUsageModels.where().findFirst();
     final appVersion = isar.appVersionModels.where().findFirst();
     return appVersion;
   }
 
   Future<List<BioModel>> getBioInfoWithUserBio() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.bioModels.where().filter().firebaseAuthIdIsNotNull().findAll();
   }
 
   Future<List<AppVersionModel>> getAppVersion() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.appVersionModels.where().filter().appVersionIsNotNull().findAll();
   }
 
   Future<List<BioModel>> getisSyncedForBio() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.bioModels.where().filter().isSyncedIsNull().idEqualTo(2).findAll();
   }
 
   Future<List<LastUpdateDateModel>> getLastUpdateDate() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.lastUpdateDateModels.where().filter().lastUpdateDateIsNotNull().findAll();
   }
 
   Future<LocationModel?> getLocationByName(var locationName) async {
     //await Future.delayed(const Duration(seconds: 1));
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.locationModels.filter().locationNameEqualTo(locationName).findFirst();
 
   }
 
   Future<BioModel?> getBioInfoWithFirebaseAuth() async {
     //await Future.delayed(const Duration(seconds: 1));
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.bioModels.filter().firebaseAuthIdIsNotNull().findFirst();
     //where().sortByDateDesc().findFirst();
     // .AttendanceModel((q) => q.idEqualto(attendanceModel.id)).findAll();
   }
 
   Future<List<LeaveRequestModel>> getLeaveRequestModel() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.leaveRequestModels
         .filter()
         .isSyncedEqualTo(false)
@@ -1871,28 +1897,28 @@ class IsarService extends DatabaseAdapter {
   // --- Report Collection Queries ---
 
   Future<void> saveReport(Report newReport) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     isar.writeTxnSync<int>(() => isar.reports.putSync(newReport));
   }
 
   Future<Report?> getReportById(int id) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.reports.get(id);
   }
 
   Future<List<Report>> getReportsByType(String reportType) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.reports.filter().reportTypeEqualTo(reportType).findAll();
   }
 
   Stream<List<Report>> watchReportsByType(String reportType) async* {
-    final isar = await db;
+    final isar = await _dbFuture;
     yield* isar.reports.filter().reportTypeEqualTo(reportType).watch(fireImmediately: true);
   }
 
 
   Future<List<Report>> getReportsByDateRange(DateTime startDate, DateTime endDate) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     print("startDate ==$startDate");
     print("endDate ==$endDate");
     return await isar.reports
@@ -1903,10 +1929,34 @@ class IsarService extends DatabaseAdapter {
   }
 
 
+  // New function to query reports for a specific date
+  Future<List<Task>> getTasksByDate(DateTime startDate) async {
+    final isar = await _dbFuture;
+    print("Querying for startDate ==$startDate (Date-only)");
+
+    // To query for records with the exact date, regardless of time, we need to define a range
+    // that covers the entire day of the startDate.
+    // We'll create a start of day and end of day DateTime for the startDate.
+
+    final startOfDay = DateTime(startDate.year, startDate.month, startDate.day, 0, 0, 0); // Start of the day (00:00:00)
+    final endOfDay = DateTime(startDate.year, startDate.month, startDate.day, 23, 59, 59, 999); // End of the day (23:59:59.999 - milliseconds)
+
+    print("Querying date range: $startOfDay to $endOfDay");
+
+    return await isar.tasks
+        .where()
+        .filter()
+        .dateBetween(startOfDay, endOfDay, includeLower: true, includeUpper: true)
+        .findAll();
+  }
+
+
+
+
 
 // New function to query reports for a specific date
   Future<List<Report>> getReportsByDate(DateTime startDate) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     print("Querying for startDate ==$startDate (Date-only)");
 
     // To query for records with the exact date, regardless of time, we need to define a range
@@ -1927,14 +1977,14 @@ class IsarService extends DatabaseAdapter {
 
 
   Stream<List<Report>> reportStream() async* {
-    final isar = await db;
+    final isar = await _dbFuture;
     yield* isar.reports.where().watch(fireImmediately: true);
   }
 
 
 
   Future<List<Report>> getReportsByWeekAndMonth(String reportingWeek, String reportingMonth) async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.reports
         .filter()
         .reportingWeekEqualTo(reportingWeek)
@@ -1944,12 +1994,12 @@ class IsarService extends DatabaseAdapter {
   }
 
   Future<List<Report>> getAllReports() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     return await isar.reports.where().findAll();
   }
 
   Future<void> cleanReportCollection() async {
-    final isar = await db;
+    final isar = await _dbFuture;
     await isar.writeTxn(() => isar.reports.clear());
   }
 

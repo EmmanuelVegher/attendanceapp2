@@ -1,18 +1,25 @@
 import 'package:isar/isar.dart';
 
-part 'task.g.dart';
+part 'task.g.dart'; // Ensure to run `flutter pub run build_runner build` after creating this file
 
 @collection
 class Task {
-  Id? id; // Automatically set as the primary key
+  Id? id; // Isar auto-incrementing id
 
-  late String title;
-  String? note;
-  late String date;
-  late String startTime;
-  late String endTime;
-  late int remind;
-  late String repeat;
-  late int color;
-  late bool isCompleted;
+  DateTime? date;
+
+  String? taskTitle;
+  String? taskStatus;
+  String? taskDescription;
+  String? taskFeedbackComment;
+  bool? isSynced; // Default value for isSynced is false
+
+  Task({
+    this.date,
+    this.taskTitle,
+    this.taskStatus,
+    this.taskDescription,
+    this.taskFeedbackComment,
+    this.isSynced,
+  });
 }
